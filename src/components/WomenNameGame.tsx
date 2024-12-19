@@ -230,6 +230,73 @@ export function WomenNameGame() {
         'women politicians',
         'women political leaders',
         'female political leaders',
+        
+        // General female descriptors
+        'female',
+        'woman',
+        'women',
+        'actress',
+        'actresses',
+        'businesswoman',
+        'businesswomen',
+        'spokeswoman',
+        'spokeswomen',
+        'congresswoman',
+        'congresswomen',
+        'assemblywoman',
+        'assemblywomen',
+        'chairwoman',
+        'chairwomen',
+        'councilwoman',
+        'councilwomen',
+        'alderwoman',
+        'alderwomen',
+        'servicewoman',
+        'servicewomen',
+        'stateswoman',
+        'stateswomen',
+        
+        // Family and title variations
+        'mother of',
+        'daughter of',
+        'sister of',
+        'wife of',
+        'queen',
+        'princess',
+        'duchess',
+        'countess',
+        'baroness',
+        'lady',
+        'dame',
+        'madame',
+        
+        // Professional variations
+        'female executive',
+        'woman executive',
+        'female ceo',
+        'woman ceo',
+        'female founder',
+        'woman founder',
+        'female entrepreneur',
+        'woman entrepreneur',
+        
+        // Achievement categories
+        'female recipient',
+        'woman recipient',
+        'female honoree',
+        'woman honoree',
+        'female laureate',
+        'woman laureate',
+        
+        // Historical and cultural
+        'female pioneer',
+        'woman pioneer',
+        'female leader',
+        'woman leader',
+        'female revolutionary',
+        'woman revolutionary',
+        'female activist',
+        'woman activist',
       ];
 
       // Check if any of the page's categories match our female categories
