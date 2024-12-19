@@ -4,31 +4,26 @@ import { Rules } from './components/Rules';
 
 function App() {
   return (
-    <div className="min-h-screen bg-white text-black">
-      <header className="text-center p-4 bg-gray-100 border-b border-gray-300">
-        <h1 className="text-4xl font-bold">👩 The Women Name Game</h1>
-        <p>Test your knowledge: Can you name 100 women?</p>
+    <div className="min-h-screen w-full bg-white text-black">
+      <header className="w-full text-center p-4 bg-gray-100 border-b border-gray-300">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-2xl md:text-4xl font-bold">👩 The Women Name Game</h1>
+          <p className="text-sm md:text-base">Test your knowledge: Can you name 100 women?</p>
+        </div>
       </header>
-
-      <main className="container mx-auto p-4">
-        <div className="grid grid-cols-[250px_1fr_250px] gap-4">
-          <div className="p-4">
-            <Leaderboard />
+      <main className="container">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
+            <Rules />
           </div>
-          
-          <div>
+          <div className="lg:col-span-1">
             <WomenNameGame />
           </div>
-          
-          <div className="p-4">
-            <Rules />
+          <div className="lg:col-span-1">
+            <Leaderboard />
           </div>
         </div>
       </main>
-
-      <footer className="text-center p-4 bg-gray-100 border-t border-gray-300 mt-8">
-        <p>© 2024 Women Name Game - A fun way to celebrate women's achievements</p>
-      </footer>
     </div>
   );
 }

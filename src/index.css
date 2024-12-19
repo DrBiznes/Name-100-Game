@@ -28,14 +28,20 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
   font-family: "Courier New", Courier, monospace;
   line-height: 1.6;
   background: #fff;
   color: #000;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  body {
+    place-items: center;
+  }
 }
 
 h1, h2, h3 {

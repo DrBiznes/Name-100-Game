@@ -1,176 +1,248 @@
-import { useState, useEffect, useRef } from 'react';
-import { Timer, Check } from 'lucide-react';
-import { Input } from './ui/input';
-import { Button } from './ui/button';
-import { Progress } from './ui/progress';
+import { useRef, useState, useEffect } from 'react';
 import { Card } from './ui/card';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Progress } from './ui/progress';
+import { GameTimer } from './GameTimer';
+import { Check, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-interface NameEntry {
-  name: string;
-  verified: boolean;
+interface InputState {
+  index: number;
+  value: string;
+  status: 'idle' | 'valid' | 'invalid';
 }
-
-interface WikipediaResponse {
-  description?: string;
-  extract?: string;
-}
-
-// Constants
-const FEMALE_INDICATORS = [
-  'woman',
-  'female',
-  'she',
-  'her',
-  'actress',
-  'spokeswoman',
-  'businesswoman',
-  'grandmother',
-  'mother',
-  'daughter',
-  'sister',
-  'queen'
-];
-
-// Wikipedia API functions
-const fetchWikipediaData = async (name: string): Promise<WikipediaResponse> => {
-  const response = await fetch(
-    `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`
-  );
-  if (!response.ok) {
-    throw new Error(`Wikipedia API error: ${response.statusText}`);
-  }
-  return response.json();
-};
-
-const checkIfFemale = (data: WikipediaResponse): boolean => {
-  const textToSearch = `${data.description || ''} ${data.extract || ''}`.toLowerCase();
-  console.log('Searching text:', textToSearch); // Debug log
-  const foundIndicator = FEMALE_INDICATORS.find(term => textToSearch.includes(term));
-  console.log('Found indicator:', foundIndicator); // Debug log
-  return Boolean(foundIndicator);
-};
-
-// Game logic components
-const GameTimer = ({ elapsedTime }: { elapsedTime: number }) => {
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  return (
-    <div className="flex items-center gap-2">
-      <Timer className="w-6 h-6" />
-      <span className="text-xl">{formatTime(elapsedTime)}</span>
-    </div>
-  );
-};
-
-const NamesList = ({ names }: { names: NameEntry[] }) => (
-  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-    {names.map((entry, index) => (
-      <div key={index} className="flex items-center gap-2">
-        <Check className="w-4 h-4 text-green-500" />
-        <span>{entry.name}</span>
-      </div>
-    ))}
-  </div>
-);
 
 export function WomenNameGame() {
-  const [names, setNames] = useState<NameEntry[]>([]);
-  const [currentInput, setCurrentInput] = useState('');
-  const [elapsedTime, setElapsedTime] = useState(0);
   const [isGameActive, setIsGameActive] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [names, setNames] = useState<Array<{ index: number; name: string }>>([]);
+  const [inputs, setInputs] = useState<InputState[]>(
+    Array.from({ length: 100 }, (_, i) => ({ 
+      index: i, 
+      value: '', 
+      status: 'idle' 
+    }))
+  );
+  
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const timerRef = useRef<number>();
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (isGameActive && names.length < 100) {
-      timer = setInterval(() => {
-        setElapsedTime(prev => prev + 1);
+    if (isGameActive) {
+      timerRef.current = window.setInterval(() => {
+        setElapsedTime((prev) => prev + 1);
       }, 1000);
     }
-    return () => clearInterval(timer);
-  }, [isGameActive, names.length]);
-
-  const checkWikipedia = async (name: string): Promise<boolean> => {
-    try {
-      console.log('Checking Wikipedia for:', name); // Debug log
-      const data = await fetchWikipediaData(name);
-      return checkIfFemale(data);
-    } catch (error) {
-      console.error('Wikipedia check error:', error); // Debug log
-      return false;
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentInput.trim() || isLoading) return;
-
-    setIsLoading(true);
-    try {
-      const isValid = await checkWikipedia(currentInput);
-      console.log('Is valid?', isValid); // Debug log
-      
-      if (isValid && !names.some(n => n.name.toLowerCase() === currentInput.toLowerCase())) {
-        const newNames = [...names, { name: currentInput, verified: true }];
-        setNames(newNames);
-        setCurrentInput('');
-        
-        if (newNames.length === 100) {
-          setIsGameActive(false);
-        }
-      }
-    } catch (error) {
-      console.error('Submit error:', error); // Debug log
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isGameActive]);
 
   const startGame = () => {
     setIsGameActive(true);
     setElapsedTime(0);
     setNames([]);
-    setCurrentInput('');
-    inputRef.current?.focus();
+    setInputs(Array.from({ length: 100 }, (_, i) => ({ 
+      index: i, 
+      value: '', 
+      status: 'idle' 
+    })));
+    inputRefs.current[0]?.focus();
+  };
+
+  const checkWikipedia = async (name: string): Promise<boolean> => {
+    try {
+      // First, search for the page
+      const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(name)}&format=json&origin=*`;
+      const searchResponse = await fetch(searchUrl);
+      const searchData = await searchResponse.json();
+
+      if (searchData.query.search.length === 0) {
+        return false;
+      }
+
+      // Get the first result's page content
+      const pageId = searchData.query.search[0].pageid;
+      const contentUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&pageids=${pageId}&format=json&origin=*`;
+      const contentResponse = await fetch(contentUrl);
+      const contentData = await contentResponse.json();
+
+      const extract = contentData.query.pages[pageId].extract.toLowerCase();
+
+      // Check for female-indicating terms in the first paragraph
+      const femaleTerms = [
+        'actress',
+        'she',
+        'her',
+        'woman',
+        'female',
+        'women',
+        'businesswoman',
+        'spokeswoman',
+        'chairwoman',
+        'congresswoman',
+        'servicewoman',
+        'mother',
+        'sister',
+        'daughter',
+        'queen',
+        'princess',
+        'duchess'
+      ];
+
+      return femaleTerms.some(term => extract.includes(term));
+    } catch (error) {
+      console.error('Error checking Wikipedia:', error);
+      return false;
+    }
+  };
+
+  const checkName = async (name: string, index: number) => {
+    if (!name.trim()) return false;
+    
+    if (names.some(entry => entry.name.toLowerCase() === name.toLowerCase())) {
+      setInputs(prev => 
+        prev.map(input => 
+          input.index === index 
+            ? { ...input, status: 'invalid' } 
+            : input
+        )
+      );
+      return false;
+    }
+
+    setIsLoading(true);
+    try {
+      const isValidWoman = await checkWikipedia(name);
+      setIsLoading(false);
+      
+      setInputs(prev => 
+        prev.map(input => 
+          input.index === index 
+            ? { ...input, status: isValidWoman ? 'valid' : 'invalid' } 
+            : input
+        )
+      );
+      
+      return isValidWoman;
+    } catch (error) {
+      console.error('Error checking name:', error);
+      setIsLoading(false);
+      setInputs(prev => 
+        prev.map(input => 
+          input.index === index 
+            ? { ...input, status: 'invalid' } 
+            : input
+        )
+      );
+      return false;
+    }
+  };
+
+  const handleInputChange = (index: number, value: string) => {
+    setInputs(prev => 
+      prev.map(input => 
+        input.index === index 
+          ? { ...input, value, status: 'idle' } 
+          : input
+      )
+    );
+  };
+
+  const handleInputKeyDown = async (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    if (e.key === 'Tab' && !e.shiftKey) {
+      e.preventDefault();
+      const currentValue = inputs[index].value.trim();
+      
+      if (currentValue) {
+        const isValid = await checkName(currentValue, index);
+        if (isValid) {
+          // Add to names list
+          setNames(prev => [...prev, { index, name: currentValue }]);
+          
+          // Update input status to valid and keep the value
+          setInputs(prev => 
+            prev.map(input => 
+              input.index === index 
+                ? { ...input, status: 'valid' } 
+                : input
+            )
+          );
+          
+          // Move to next input
+          const nextIndex = index + 1;
+          if (nextIndex < 100) {
+            inputRefs.current[nextIndex]?.focus();
+          }
+        }
+        // Invalid case is handled in checkName function
+      }
+    }
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <Card className="p-6">
-        <h1 className="text-2xl font-bold mb-4">Name 100 Women</h1>
+    <Card className="p-4 md:p-6 h-full overflow-auto">
+      <div className="flex flex-col gap-4 mb-4">
+        <h1 className="text-xl md:text-2xl font-bold">Name 100 Women</h1>
         
-        <div className="flex items-center gap-4 mb-4">
+        <div className="flex items-center gap-4">
           <GameTimer elapsedTime={elapsedTime} />
           <Progress value={(names.length / 100) * 100} className="w-full" />
           <span>{names.length}/100</span>
         </div>
 
-        <form onSubmit={handleSubmit} className="mb-4">
-          <div className="flex gap-2">
-            <Input
-              ref={inputRef}
-              value={currentInput}
-              onChange={(e) => setCurrentInput(e.target.value)}
-              placeholder="Enter a woman's name..."
-              disabled={!isGameActive}
-            />
-            <Button 
-              type={isGameActive ? "submit" : "button"}
-              onClick={() => !isGameActive && startGame()}
-              disabled={isLoading}
-            >
-              {isGameActive ? (isLoading ? "Checking..." : "Submit") : "Start Game"}
-            </Button>
-          </div>
-        </form>
+        <Button 
+          onClick={startGame}
+          disabled={isLoading || isGameActive}
+          className="w-full md:w-auto"
+        >
+          Start Game
+        </Button>
+      </div>
 
-        <NamesList names={names} />
-      </Card>
-    </div>
+      <div className="grid grid-cols-3 gap-4">
+        {Array.from({ length: 34 }).map((_, groupIndex) => (
+          <div key={groupIndex} className="flex flex-col gap-2">
+            {Array.from({ length: 3 }).map((_, offset) => {
+              const index = groupIndex * 3 + offset;
+              if (index >= 100) return null;
+              const input = inputs[index];
+              
+              return (
+                <div key={index} className="flex items-center gap-2">
+                  <span className="w-6 flex justify-end items-center">
+                    {input.status === 'valid' ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : input.status === 'invalid' ? (
+                      <X className="h-4 w-4 text-red-500" />
+                    ) : (
+                      <span className="text-sm text-gray-500">{index + 1}.</span>
+                    )}
+                  </span>
+                  <Input
+                    ref={el => inputRefs.current[index] = el}
+                    value={input.value}
+                    onChange={e => handleInputChange(index, e.target.value)}
+                    onKeyDown={e => handleInputKeyDown(e, index)}
+                    disabled={!isGameActive || input.status === 'valid'}
+                    className={cn(
+                      "w-full",
+                      input.status === 'valid' && "bg-green-50",
+                      input.status === 'invalid' && "bg-red-50"
+                    )}
+                    size="sm"
+                  />
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </Card>
   );
 } 
