@@ -1,11 +1,11 @@
-import { ScrollText } from 'lucide-react';
+import '../App.css';
 
 export function Rules() {
   return (
-    <div className="text-lg">
-      <h2 className="flex items-center gap-2 text-2xl font-bold mb-4">
-        <ScrollText className="w-6 h-6" />
-        Game Rules
+    <div className="text-lg pt-6 font-comic">
+      <h2 className="flex items-center gap-2 text-2xl font-bold mb-4 font-comic">
+        <span className="material-icons">description</span>
+        Rules
       </h2>
       <ol>
         <li>Name as many women as you can</li>
@@ -16,7 +16,7 @@ export function Rules() {
         <li>Faster times get higher rankings</li>
       </ol>
       
-      <h3 className="text-xl font-bold mt-6 mb-4">Tips:</h3>
+      <h3 className="text-xl font-bold mt-6 mb-4 font-comic">Tips:</h3>
       <ul>
         <li>Think of historical figures</li>
         <li>Include actresses and artists</li>

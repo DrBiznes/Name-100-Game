@@ -4,7 +4,6 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Progress } from './ui/progress';
 import { GameTimer } from '@/components/GameTimer';
-import { Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Select,
@@ -226,7 +225,7 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
   return (
     <Card className="p-4 md:p-6 h-full overflow-auto border-0 shadow-none bg-transparent">
       <div className="flex flex-col gap-4 mb-4">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 justify-center">
           <span className="text-xl md:text-2xl font-bold">I Can Name</span>
           <Select
             defaultValue="100"
@@ -272,9 +271,9 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
             <div key={index} className="flex items-center gap-2">
               <span className="w-6 flex justify-end items-center">
                 {input.status === 'valid' ? (
-                  <Check className="h-4 w-4 text-green-500" />
+                  <span className="material-icons text-green-500" style={{ fontSize: '16px' }}>check</span>
                 ) : input.status === 'invalid' ? (
-                  <X className="h-4 w-4 text-red-500" />
+                  <span className="material-icons text-red-500" style={{ fontSize: '16px' }}>close</span>
                 ) : (
                   <span className="text-sm text-gray-500">{index + 1}.</span>
                 )}

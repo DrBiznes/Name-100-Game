@@ -169,3 +169,22 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+
+footer a {
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+footer a:hover {
+  color: var(--primary);
+}
+
+@media (max-width: 768px) {
+  footer {
+    text-align: center;
+  }
+  
+  footer .grid {
+    gap: 2rem;
+  }
+}

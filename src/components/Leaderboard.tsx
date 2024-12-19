@@ -10,9 +10,9 @@ export function Leaderboard() {
   ];
 
   return (
-    <div className="text-lg">
+    <div className="text-lg pt-6">
       <h2 className="flex items-center gap-2 text-2xl font-bold mb-4">
-        <Trophy className="w-6 h-6" />
+        <span className="material-icons">emoji_events</span>
         Leaderboard
       </h2>
       <table cellPadding="5">
