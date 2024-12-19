@@ -7,7 +7,7 @@ function App() {
     <div className="min-h-screen w-full bg-white text-black">
       <header className="w-full text-center p-4 bg-gray-100 border-b border-gray-300">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-2xl md:text-4xl font-bold">👩 The Women Name Game</h1>
+          <h1 className="text-2xl md:text-4xl font-bold">NAME 100 WOMEN</h1>
           <p className="text-sm md:text-base">Test your knowledge: Can you name 100 women?</p>
         </div>
       </header>

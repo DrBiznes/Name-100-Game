@@ -3,7 +3,7 @@ import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Progress } from './ui/progress';
-import { GameTimer } from './GameTimer';
+import { GameTimer } from '@/components/GameTimer';
 import { Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -49,13 +49,15 @@ export function WomenNameGame() {
       value: '', 
       status: 'idle' 
     })));
-    inputRefs.current[0]?.focus();
+    setTimeout(() => {
+      inputRefs.current[0]?.focus();
+    }, 0);
   };
 
   const checkWikipedia = async (name: string): Promise<boolean> => {
     try {
       // First, search for the page
-      const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(name)}&format=json&origin=*`;
+      const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch="${encodeURIComponent(name)}"&format=json&origin=*`;
       const searchResponse = await fetch(searchUrl);
       const searchData = await searchResponse.json();
 
@@ -63,36 +65,180 @@ export function WomenNameGame() {
         return false;
       }
 
-      // Get the first result's page content
+      // Get the first result's page content and categories
       const pageId = searchData.query.search[0].pageid;
-      const contentUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&pageids=${pageId}&format=json&origin=*`;
+      const contentUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=categories|pageprops&pageids=${pageId}&format=json&origin=*`;
       const contentResponse = await fetch(contentUrl);
       const contentData = await contentResponse.json();
 
-      const extract = contentData.query.pages[pageId].extract.toLowerCase();
+      const page = contentData.query.pages[pageId];
+      const categories = page.categories?.map((cat: { title: string }) => cat.title.toLowerCase()) || [];
 
-      // Check for female-indicating terms in the first paragraph
-      const femaleTerms = [
-        'actress',
-        'she',
-        'her',
-        'woman',
-        'female',
-        'women',
-        'businesswoman',
-        'spokeswoman',
-        'chairwoman',
-        'congresswoman',
-        'servicewoman',
-        'mother',
-        'sister',
-        'daughter',
-        'queen',
-        'princess',
-        'duchess'
+      // Definitive female categories that are commonly used on Wikipedia
+      const femaleCategories = [
+        'category:women ',
+        'category:female ',
+        'actresses',
+        'category:women artists',
+        'category:women writers',
+        'category:women musicians',
+        'category:women politicians',
+        'category:queens',
+        'category:feminists',
+        'category:women activists',
+        'category:women scientists',
+        'category:women academics',
+        'category:women athletes',
+        'category:female singers',
+        'category:female models',
+        'category:women business executives',
+        'category:women journalists',
+        'category:first ladies',
+        'category:princesses',
+        'category:female dancers',
+        'category:women directors',
+        'category:female composers',
+        'category:women entrepreneurs',
+        'category:women inventors',
+        'category:women philosophers',
+        'category:women mathematicians',
+        'category:women engineers',
+        'category:female athletes',
+        'category:women olympians',
+        'category:women religious leaders',
+        'category:women heads of state',
+        'category:women heads of government',
+        'category:women nobel laureates',
+        'category:women television personalities',
+        'category:female broadcasters',
+        'category:women comedians',
+        'category:women painters',
+        'category:women sculptors',
+        'category:women photographers',
+        'category:women fashion designers',
+        'category:women chefs',
+        'category:women lawyers',
+        'category:women judges',
+        'category:women physicians',
+        'category:women nurses',
+        'category:women social workers',
+        'category:women activists',
+        
+        // Political Leaders
+        'category:women prime ministers',
+        'category:female heads of government',
+        'category:women presidents',
+        'category:women vice presidents',
+        'category:women governors',
+        'category:women senators',
+        'category:women members of parliament',
+        'category:women diplomats',
+        'category:women ambassadors',
+        'category:women cabinet ministers',
+        
+        // Regional Political Categories
+        'category:women politicians of the united kingdom',
+        'category:women politicians of india',
+        'category:women politicians of australia',
+        'category:women politicians of canada',
+        'category:women politicians of new zealand',
+        'category:women politicians of germany',
+        'category:women politicians of france',
+        'category:women politicians of japan',
+        'category:women politicians of brazil',
+        'category:women politicians of south africa',
+        
+        // Royalty and Nobility
+        'category:queens regnant',
+        'category:queens consort',
+        'category:women monarchs',
+        'category:duchesses',
+        'category:countesses',
+        'category:baronesses',
+        
+        // Additional Professional Categories
+        'category:women archaeologists',
+        'category:women anthropologists',
+        'category:women sociologists',
+        'category:women psychologists',
+        'category:women economists',
+        'category:women historians',
+        'category:women professors',
+        'category:women researchers',
+        'category:women chief executives',
+        'category:women business owners',
+        'category:women philanthropists',
+        
+        // Arts and Culture
+        'category:women poets',
+        'category:women novelists',
+        'category:women playwrights',
+        'category:women screenwriters',
+        'category:women film producers',
+        'category:women choreographers',
+        'category:women conductors (music)',
+        'category:women opera singers',
+        'category:women pop singers',
+        'category:women rock singers',
+        'category:women jazz musicians',
+        
+        // Sports
+        'category:women footballers',
+        'category:women tennis players',
+        'category:women basketball players',
+        'category:women swimmers',
+        'category:women gymnasts',
+        'category:women runners',
+        'category:women boxers',
+        'category:women martial artists',
+        
+        // STEM
+        'category:women computer scientists',
+        'category:women biologists',
+        'category:women chemists',
+        'category:women physicists',
+        'category:women astronomers',
+        'category:women neuroscientists',
+        'category:women medical researchers',
+        'category:women aerospace engineers',
+        
+        // More flexible category patterns
+        'women prime minister',
+        'female prime minister',
+        'woman prime minister',
+        'women chancellor',
+        'female chancellor',
+        'woman chancellor',
+        
+        // Regional categories without strict formatting
+        'women in european politics',
+        'european women politicians',
+        'female politicians in europe',
+        'women political leaders in europe',
+        
+        // Country leadership variations
+        'women heads of state',
+        'female heads of state',
+        'women heads of government',
+        'female heads of government',
+        'women national leaders',
+        'female national leaders',
+        
+        // More flexible political categories
+        'women in politics',
+        'female politicians',
+        'women politicians',
+        'women political leaders',
+        'female political leaders',
       ];
 
-      return femaleTerms.some(term => extract.includes(term));
+      // Check if any of the page's categories match our female categories
+      return categories.some((category: string) => 
+        femaleCategories.some(femaleCategory => 
+          category.includes(femaleCategory)
+        )
+      );
+
     } catch (error) {
       console.error('Error checking Wikipedia:', error);
       return false;
@@ -162,31 +308,33 @@ export function WomenNameGame() {
       if (currentValue) {
         const isValid = await checkName(currentValue, index);
         if (isValid) {
-          // Add to names list
           setNames(prev => [...prev, { index, name: currentValue }]);
-          
-          // Update input status to valid and keep the value
+          // First update the status to valid
           setInputs(prev => 
             prev.map(input => 
               input.index === index 
-                ? { ...input, status: 'valid' } 
+                ? { ...input, value: currentValue, status: 'valid' } 
                 : input
             )
           );
-          
-          // Move to next input
-          const nextIndex = index + 1;
-          if (nextIndex < 100) {
-            inputRefs.current[nextIndex]?.focus();
-          }
+          // Then clear and move to next input
+          setTimeout(() => {
+            const nextIndex = index + 1;
+            if (nextIndex < 100) {
+              handleInputChange(nextIndex, '');
+              inputRefs.current[nextIndex]?.focus();
+            }
+          }, 100);
+        } else {
+          // Stay on current input if name is invalid
+          inputRefs.current[index]?.focus();
         }
-        // Invalid case is handled in checkName function
       }
     }
   };
 
   return (
-    <Card className="p-4 md:p-6 h-full overflow-auto">
+    <Card className="p-4 md:p-6 h-full overflow-auto border-0 shadow-none bg-transparent">
       <div className="flex flex-col gap-4 mb-4">
         <h1 className="text-xl md:text-2xl font-bold">Name 100 Women</h1>
         
@@ -205,43 +353,35 @@ export function WomenNameGame() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        {Array.from({ length: 34 }).map((_, groupIndex) => (
-          <div key={groupIndex} className="flex flex-col gap-2">
-            {Array.from({ length: 3 }).map((_, offset) => {
-              const index = groupIndex * 3 + offset;
-              if (index >= 100) return null;
-              const input = inputs[index];
-              
-              return (
-                <div key={index} className="flex items-center gap-2">
-                  <span className="w-6 flex justify-end items-center">
-                    {input.status === 'valid' ? (
-                      <Check className="h-4 w-4 text-green-500" />
-                    ) : input.status === 'invalid' ? (
-                      <X className="h-4 w-4 text-red-500" />
-                    ) : (
-                      <span className="text-sm text-gray-500">{index + 1}.</span>
-                    )}
-                  </span>
-                  <Input
-                    ref={el => inputRefs.current[index] = el}
-                    value={input.value}
-                    onChange={e => handleInputChange(index, e.target.value)}
-                    onKeyDown={e => handleInputKeyDown(e, index)}
-                    disabled={!isGameActive || input.status === 'valid'}
-                    className={cn(
-                      "w-full",
-                      input.status === 'valid' && "bg-green-50",
-                      input.status === 'invalid' && "bg-red-50"
-                    )}
-                    size="sm"
-                  />
-                </div>
-              );
-            })}
-          </div>
-        ))}
+      <div className="grid grid-cols-2 gap-4">
+        {Array.from({ length: 100 }).map((_, index) => {
+          const input = inputs[index];
+          return (
+            <div key={index} className="flex items-center gap-2">
+              <span className="w-6 flex justify-end items-center">
+                {input.status === 'valid' ? (
+                  <Check className="h-4 w-4 text-green-500" />
+                ) : input.status === 'invalid' ? (
+                  <X className="h-4 w-4 text-red-500" />
+                ) : (
+                  <span className="text-sm text-gray-500">{index + 1}.</span>
+                )}
+              </span>
+              <Input
+                ref={el => inputRefs.current[index] = el}
+                value={input.value}
+                onChange={e => handleInputChange(index, e.target.value)}
+                onKeyDown={e => handleInputKeyDown(e, index)}
+                disabled={!isGameActive || input.status === 'valid'}
+                className={cn(
+                  "w-full",
+                  input.status === 'valid' && "bg-green-50",
+                  input.status === 'invalid' && "bg-red-50"
+                )}
+              />
+            </div>
+          );
+        })}
       </div>
     </Card>
   );
