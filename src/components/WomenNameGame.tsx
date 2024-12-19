@@ -6,6 +6,13 @@ import { Progress } from './ui/progress';
 import { GameTimer } from '@/components/GameTimer';
 import { Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 interface InputState {
   index: number;
@@ -18,13 +25,17 @@ interface WomenNameGameProps {
   timerRef: React.RefObject<HTMLElement>;
 }
 
+const GAME_COUNTS = [20, 50, 100] as const;
+type GameCount = typeof GAME_COUNTS[number];
+
 export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProps) {
   const [isGameActive, setIsGameActive] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [targetCount, setTargetCount] = useState<GameCount>(100);
   const [names, setNames] = useState<Array<{ index: number; name: string }>>([]);
   const [inputs, setInputs] = useState<InputState[]>(
-    Array.from({ length: 100 }, (_, i) => ({ 
+    Array.from({ length: targetCount }, (_, i) => ({ 
       index: i, 
       value: '', 
       status: 'idle' 
@@ -53,7 +64,7 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
     setIsGameActive(true);
     setElapsedTime(0);
     setNames([]);
-    setInputs(Array.from({ length: 100 }, (_, i) => ({ 
+    setInputs(Array.from({ length: targetCount }, (_, i) => ({ 
       index: i, 
       value: '', 
       status: 'idle' 
@@ -166,7 +177,8 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
     e: React.KeyboardEvent<HTMLInputElement>,
     index: number
   ) => {
-    if (e.key === 'Tab' && !e.shiftKey) {
+    // Check for either Tab (without shift) or Enter key
+    if ((e.key === 'Tab' && !e.shiftKey) || e.key === 'Enter') {
       e.preventDefault();
       const currentValue = inputs[index].value.trim();
       
@@ -201,7 +213,7 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
           // Then clear and move to next input
           setTimeout(() => {
             const nextIndex = index + 1;
-            if (nextIndex < 100) {
+            if (nextIndex < targetCount) {
               handleInputChange(nextIndex, '');
               inputRefs.current[nextIndex]?.focus();
             }
@@ -214,12 +226,34 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
   return (
     <Card className="p-4 md:p-6 h-full overflow-auto border-0 shadow-none bg-transparent">
       <div className="flex flex-col gap-4 mb-4">
-        <h1 className="text-xl md:text-2xl font-bold">Name 100 Women</h1>
+        <div className="flex items-center gap-2">
+          <span className="text-xl md:text-2xl font-bold">I Can Name</span>
+          <Select
+            defaultValue="100"
+            onValueChange={(value) => setTargetCount(Number(value) as GameCount)}
+            disabled={isGameActive}
+          >
+            <SelectTrigger className="w-[110px]">
+              <SelectValue placeholder="100" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="header" disabled>
+                How Many?
+              </SelectItem>
+              {GAME_COUNTS.map((count) => (
+                <SelectItem key={count} value={count.toString()}>
+                  {count}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <span className="text-xl md:text-2xl font-bold">Women</span>
+        </div>
         
         <div className="flex items-center gap-4" ref={timerRef}>
           <GameTimer elapsedTime={elapsedTime} />
-          <Progress value={(names.length / 100) * 100} className="w-full" />
-          <span>{names.length}/100</span>
+          <Progress value={(names.length / targetCount) * 100} className="w-full" />
+          <span>{names.length}/{targetCount}</span>
         </div>
 
         <Button 
@@ -232,7 +266,7 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        {Array.from({ length: 100 }).map((_, index) => {
+        {Array.from({ length: targetCount }).map((_, index) => {
           const input = inputs[index];
           return (
             <div key={index} className="flex items-center gap-2">
