@@ -65,246 +65,35 @@ export function WomenNameGame() {
         return false;
       }
 
-      // Get the first result's page content and categories
-      const pageId = searchData.query.search[0].pageid;
-      const contentUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=categories|pageprops&pageids=${pageId}&format=json&origin=*`;
+      // Check if the first search result's title matches our search term (case-insensitive)
+      const firstResult = searchData.query.search[0];
+      if (!firstResult.title.toLowerCase().includes(name.toLowerCase())) {
+        return false;
+      }
+
+      // Get the page content
+      const pageId = firstResult.pageid;
+      const contentUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&pageids=${pageId}&format=json&origin=*`;
       const contentResponse = await fetch(contentUrl);
       const contentData = await contentResponse.json();
 
       const page = contentData.query.pages[pageId];
-      const categories = page.categories?.map((cat: { title: string }) => cat.title.toLowerCase()) || [];
+      const intro = page.extract || '';
 
-      // Definitive female categories that are commonly used on Wikipedia
-      const femaleCategories = [
-        'category:women ',
-        'category:female ',
-        'actresses',
-        'category:women artists',
-        'category:women writers',
-        'category:women musicians',
-        'category:women politicians',
-        'category:queens',
-        'category:feminists',
-        'category:women activists',
-        'category:women scientists',
-        'category:women academics',
-        'category:women athletes',
-        'category:female singers',
-        'category:female models',
-        'category:women business executives',
-        'category:women journalists',
-        'category:first ladies',
-        'category:princesses',
-        'category:female dancers',
-        'category:women directors',
-        'category:female composers',
-        'category:women entrepreneurs',
-        'category:women inventors',
-        'category:women philosophers',
-        'category:women mathematicians',
-        'category:women engineers',
-        'category:female athletes',
-        'category:women olympians',
-        'category:women religious leaders',
-        'category:women heads of state',
-        'category:women heads of government',
-        'category:women nobel laureates',
-        'category:women television personalities',
-        'category:female broadcasters',
-        'category:women comedians',
-        'category:women painters',
-        'category:women sculptors',
-        'category:women photographers',
-        'category:women fashion designers',
-        'category:women chefs',
-        'category:women lawyers',
-        'category:women judges',
-        'category:women physicians',
-        'category:women nurses',
-        'category:women social workers',
-        'category:women activists',
-        
-        // Political Leaders
-        'category:women prime ministers',
-        'category:female heads of government',
-        'category:women presidents',
-        'category:women vice presidents',
-        'category:women governors',
-        'category:women senators',
-        'category:women members of parliament',
-        'category:women diplomats',
-        'category:women ambassadors',
-        'category:women cabinet ministers',
-        
-        // Regional Political Categories
-        'category:women politicians of the united kingdom',
-        'category:women politicians of india',
-        'category:women politicians of australia',
-        'category:women politicians of canada',
-        'category:women politicians of new zealand',
-        'category:women politicians of germany',
-        'category:women politicians of france',
-        'category:women politicians of japan',
-        'category:women politicians of brazil',
-        'category:women politicians of south africa',
-        
-        // Royalty and Nobility
-        'category:queens regnant',
-        'category:queens consort',
-        'category:women monarchs',
-        'category:duchesses',
-        'category:countesses',
-        'category:baronesses',
-        
-        // Additional Professional Categories
-        'category:women archaeologists',
-        'category:women anthropologists',
-        'category:women sociologists',
-        'category:women psychologists',
-        'category:women economists',
-        'category:women historians',
-        'category:women professors',
-        'category:women researchers',
-        'category:women chief executives',
-        'category:women business owners',
-        'category:women philanthropists',
-        
-        // Arts and Culture
-        'category:women poets',
-        'category:women novelists',
-        'category:women playwrights',
-        'category:women screenwriters',
-        'category:women film producers',
-        'category:women choreographers',
-        'category:women conductors (music)',
-        'category:women opera singers',
-        'category:women pop singers',
-        'category:women rock singers',
-        'category:women jazz musicians',
-        
-        // Sports
-        'category:women footballers',
-        'category:women tennis players',
-        'category:women basketball players',
-        'category:women swimmers',
-        'category:women gymnasts',
-        'category:women runners',
-        'category:women boxers',
-        'category:women martial artists',
-        
-        // STEM
-        'category:women computer scientists',
-        'category:women biologists',
-        'category:women chemists',
-        'category:women physicists',
-        'category:women astronomers',
-        'category:women neuroscientists',
-        'category:women medical researchers',
-        'category:women aerospace engineers',
-        
-        // More flexible category patterns
-        'women prime minister',
-        'female prime minister',
-        'woman prime minister',
-        'women chancellor',
-        'female chancellor',
-        'woman chancellor',
-        
-        // Regional categories without strict formatting
-        'women in european politics',
-        'european women politicians',
-        'female politicians in europe',
-        'women political leaders in europe',
-        
-        // Country leadership variations
-        'women heads of state',
-        'female heads of state',
-        'women heads of government',
-        'female heads of government',
-        'women national leaders',
-        'female national leaders',
-        
-        // More flexible political categories
-        'women in politics',
-        'female politicians',
-        'women politicians',
-        'women political leaders',
-        'female political leaders',
-        
-        // General female descriptors
-        'female',
-        'woman',
-        'women',
-        'actress',
-        'actresses',
-        'businesswoman',
-        'businesswomen',
-        'spokeswoman',
-        'spokeswomen',
-        'congresswoman',
-        'congresswomen',
-        'assemblywoman',
-        'assemblywomen',
-        'chairwoman',
-        'chairwomen',
-        'councilwoman',
-        'councilwomen',
-        'alderwoman',
-        'alderwomen',
-        'servicewoman',
-        'servicewomen',
-        'stateswoman',
-        'stateswomen',
-        
-        // Family and title variations
-        'mother of',
-        'daughter of',
-        'sister of',
-        'wife of',
-        'queen',
-        'princess',
-        'duchess',
-        'countess',
-        'baroness',
-        'lady',
-        'dame',
-        'madame',
-        
-        // Professional variations
-        'female executive',
-        'woman executive',
-        'female ceo',
-        'woman ceo',
-        'female founder',
-        'woman founder',
-        'female entrepreneur',
-        'woman entrepreneur',
-        
-        // Achievement categories
-        'female recipient',
-        'woman recipient',
-        'female honoree',
-        'woman honoree',
-        'female laureate',
-        'woman laureate',
-        
-        // Historical and cultural
-        'female pioneer',
-        'woman pioneer',
-        'female leader',
-        'woman leader',
-        'female revolutionary',
-        'woman revolutionary',
-        'female activist',
-        'woman activist',
-      ];
+      // Remove HTML tags and convert to plain text
+      const plainText = intro.replace(/<[^>]*>/g, '');
 
-      // Check if any of the page's categories match our female categories
-      return categories.some((category: string) => 
-        femaleCategories.some(femaleCategory => 
-          category.includes(femaleCategory)
-        )
-      );
+      // Look for female indicators
+      const femaleIndicators = ['she', 'her', 'hers', 'woman', 'female'];
+      
+      // Convert to lowercase and split into words
+      const words = plainText.toLowerCase().split(/\s+/);
+      
+      // Find the first female indicator
+      const firstFemaleIndicator = words.find((word: string) => femaleIndicators.includes(word));
+
+      // Return true if we found a female indicator
+      return !!firstFemaleIndicator;
 
     } catch (error) {
       console.error('Error checking Wikipedia:', error);
@@ -373,7 +162,23 @@ export function WomenNameGame() {
       const currentValue = inputs[index].value.trim();
       
       if (currentValue) {
+        // First check for duplicates - show immediate feedback
+        if (names.some(entry => entry.name.toLowerCase() === currentValue.toLowerCase())) {
+          setInputs(prev => 
+            prev.map(input => 
+              input.index === index 
+                ? { ...input, status: 'invalid' } 
+                : input
+            )
+          );
+          return; // Stop here if it's a duplicate
+        }
+
+        // Show loading state while checking Wikipedia
+        setIsLoading(true);
         const isValid = await checkName(currentValue, index);
+        setIsLoading(false);
+
         if (isValid) {
           setNames(prev => [...prev, { index, name: currentValue }]);
           // First update the status to valid
@@ -392,9 +197,6 @@ export function WomenNameGame() {
               inputRefs.current[nextIndex]?.focus();
             }
           }, 100);
-        } else {
-          // Stay on current input if name is invalid
-          inputRefs.current[index]?.focus();
         }
       }
     }
