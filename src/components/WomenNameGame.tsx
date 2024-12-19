@@ -13,7 +13,12 @@ interface InputState {
   status: 'idle' | 'valid' | 'invalid';
 }
 
-export function WomenNameGame() {
+interface WomenNameGameProps {
+  onGameStateChange: (state: { isActive: boolean; elapsedTime: number }) => void;
+  timerRef: React.RefObject<HTMLElement>;
+}
+
+export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProps) {
   const [isGameActive, setIsGameActive] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -27,18 +32,22 @@ export function WomenNameGame() {
   );
   
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const timerRef = useRef<number>();
+  const intervalRef = useRef<number>();
 
   useEffect(() => {
     if (isGameActive) {
-      timerRef.current = window.setInterval(() => {
-        setElapsedTime((prev) => prev + 1);
+      intervalRef.current = window.setInterval(() => {
+        setElapsedTime((prev) => {
+          const newTime = prev + 1;
+          onGameStateChange({ isActive: true, elapsedTime: newTime });
+          return newTime;
+        });
       }, 1000);
     }
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [isGameActive]);
+  }, [isGameActive, onGameStateChange]);
 
   const startGame = () => {
     setIsGameActive(true);
@@ -207,7 +216,7 @@ export function WomenNameGame() {
       <div className="flex flex-col gap-4 mb-4">
         <h1 className="text-xl md:text-2xl font-bold">Name 100 Women</h1>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4" ref={timerRef}>
           <GameTimer elapsedTime={elapsedTime} />
           <Progress value={(names.length / 100) * 100} className="w-full" />
           <span>{names.length}/100</span>
