@@ -44,6 +44,14 @@ export function useGameState({ targetCount, onGameStateChange }: UseGameStatePro
     };
   }, [isGameActive, onGameStateChange]);
 
+  useEffect(() => {
+    if (isGameActive && names.length === targetCount) {
+      setIsGameActive(false);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      onGameStateChange({ isActive: false, elapsedTime });
+    }
+  }, [names.length, targetCount, isGameActive, elapsedTime, onGameStateChange]);
+
   const startGame = () => {
     setIsGameActive(true);
     setElapsedTime(0);
