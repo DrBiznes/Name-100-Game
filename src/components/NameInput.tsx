@@ -22,6 +22,7 @@ export function NameInput({
   onKeyDown
 }: NameInputProps) {
   const [showCard, setShowCard] = useState(false);
+  const inputContainerRef = useRef<HTMLDivElement>(null);
 
   const handleInputClick = () => {
     if (!isGameActive) return;
@@ -36,7 +37,7 @@ export function NameInput({
   };
 
   return (
-    <div className="flex items-center gap-2 relative">
+    <div ref={inputContainerRef} className="flex items-center gap-2 relative">
       <span className="w-6 flex justify-end items-center">
         {input.status === 'valid' ? (
           <span className="material-icons text-green-500" style={{ fontSize: '16px' }}>check</span>
@@ -67,6 +68,7 @@ export function NameInput({
         name={input.value}
         isOpen={showCard}
         onClose={handleCardClose}
+        triggerRef={inputContainerRef}
       />
     </div>
   );

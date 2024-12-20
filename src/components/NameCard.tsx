@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { fetchWikipediaData, WikiPageData } from '@/services/wikipediaService';
 
 interface NameCardProps {
   name: string;
   isOpen: boolean;
   onClose: () => void;
+  triggerRef: React.RefObject<HTMLElement>;
 }
 
-export function NameCard({ name, isOpen, onClose }: NameCardProps) {
+export function NameCard({ name, isOpen, onClose, triggerRef }: NameCardProps) {
   const [wikiData, setWikiData] = useState<WikiPageData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -25,6 +27,17 @@ export function NameCard({ name, isOpen, onClose }: NameCardProps) {
     }
   }, [isOpen, name]);
 
+  useEffect(() => {
+    if (isOpen && cardRef.current && triggerRef.current) {
+      const trigger = triggerRef.current.getBoundingClientRect();
+      const card = cardRef.current;
+      
+      card.style.position = 'fixed';
+      card.style.top = `${trigger.bottom + window.scrollY + 8}px`;
+      card.style.left = `${trigger.left + window.scrollX}px`;
+    }
+  }, [isOpen]);
+
   const handleClickOutside = (event: MouseEvent) => {
     if (cardRef.current && !cardRef.current.contains(event.target as Node)) {
       onClose();
@@ -38,10 +51,10 @@ export function NameCard({ name, isOpen, onClose }: NameCardProps) {
     };
   }, []);
 
-  return isOpen ? (
+  return isOpen ? createPortal(
     <div
       ref={cardRef}
-      className="absolute z-10 w-80 max-w-md rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none top-full mt-2"
+      className="fixed z-50 w-80 max-w-md rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none"
     >
       {isLoading ? (
         <div className="flex items-center gap-2">
@@ -79,6 +92,7 @@ export function NameCard({ name, isOpen, onClose }: NameCardProps) {
       ) : (
         <p>No Wikipedia data found.</p>
       )}
-    </div>
+    </div>,
+    document.body
   ) : null;
 } 
