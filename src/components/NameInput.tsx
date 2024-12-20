@@ -51,13 +51,14 @@ export function NameInput({
       <Input
         ref={inputRef}
         value={input.value}
+        readOnly={input.status === 'valid'}
         disabled={!isGameActive}
         onClick={handleInputClick}
         onChange={e => isGameActive && onInputChange(index, e.target.value)}
         onKeyDown={e => onKeyDown(e, index)}
         className={cn(
           "w-full",
-          input.status === 'valid' && "bg-green-50 cursor-pointer",
+          input.status === 'valid' && "bg-green-50 cursor-pointer hover:bg-green-100",
           input.status === 'invalid' && "bg-red-50",
           input.status === 'pending' && "bg-yellow-50",
         )}
