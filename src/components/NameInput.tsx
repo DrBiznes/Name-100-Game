@@ -1,6 +1,8 @@
 import { Input } from './ui/input';
 import { cn } from '@/lib/utils';
 import { InputState } from '../hooks/useGameState';
+import { useState, useRef, useEffect } from 'react';
+import { NameCard } from './NameCard';
 
 interface NameInputProps {
   input: InputState;
@@ -19,8 +21,20 @@ export function NameInput({
   onInputChange,
   onKeyDown
 }: NameInputProps) {
+  const [showCard, setShowCard] = useState(false);
+
+  const handleInputClick = () => {
+    if (input.status === 'valid') {
+      setShowCard(!showCard);
+    }
+  };
+
+  const handleCardClose = () => {
+    setShowCard(false);
+  };
+
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 relative">
       <span className="w-6 flex justify-end items-center">
         {input.status === 'valid' ? (
           <span className="material-icons text-green-500" style={{ fontSize: '16px' }}>check</span>
@@ -35,15 +49,20 @@ export function NameInput({
       <Input
         ref={inputRef}
         value={input.value}
+        onClick={handleInputClick}
         onChange={e => onInputChange(index, e.target.value)}
         onKeyDown={e => onKeyDown(e, index)}
-        disabled={!isGameActive || input.status === 'valid' || input.status === 'pending'}
         className={cn(
           "w-full",
-          input.status === 'valid' && "bg-green-50",
+          input.status === 'valid' && "bg-green-50 cursor-pointer",
           input.status === 'invalid' && "bg-red-50",
           input.status === 'pending' && "bg-yellow-50"
         )}
+      />
+      <NameCard
+        name={input.value}
+        isOpen={showCard}
+        onClose={handleCardClose}
       />
     </div>
   );
