@@ -1,5 +1,8 @@
 export async function checkWikipedia(name: string): Promise<boolean> {
   try {
+    // Normalize the input name for comparison
+    const normalizedName = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, ' ');
+
     // First, search for the page
     const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch="${encodeURIComponent(name)}"&format=json&origin=*`;
     const searchResponse = await fetch(searchUrl);
@@ -9,9 +12,10 @@ export async function checkWikipedia(name: string): Promise<boolean> {
       return false;
     }
 
-    // Check if the first search result's title matches our search term (case-insensitive)
+    // Check if the first search result's title matches our search term (case-insensitive, hyphen and accent insensitive)
     const firstResult = searchData.query.search[0];
-    if (!firstResult.title.toLowerCase().includes(name.toLowerCase())) {
+    const normalizedTitle = firstResult.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, ' ');
+    if (!normalizedTitle.includes(normalizedName)) {
       return false;
     }
 
