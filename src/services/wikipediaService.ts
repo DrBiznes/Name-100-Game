@@ -7,8 +7,11 @@ export interface WikiPageData {
 
 export async function fetchWikipediaData(name: string): Promise<WikiPageData | null> {
   try {
+    // Normalize the input name for comparison
+    const normalizedName = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, ' ');
+
     // Search for the page
-    const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch="${encodeURIComponent(name)}"&format=json&origin=*`;
+    const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch="${encodeURIComponent(name)}"&&srlimit=5&format=json&origin=*`;
     const searchResponse = await fetch(searchUrl);
     const searchData = await searchResponse.json();
 
@@ -16,24 +19,51 @@ export async function fetchWikipediaData(name: string): Promise<WikiPageData | n
       return null;
     }
 
-    // Get the page ID and title
-    const firstResult = searchData.query.search[0];
-    const pageId = firstResult.pageid;
-    const title = firstResult.title;
+    // Iterate through search results and check if any result is a person
+    for (let result of searchData.query.search) {
+      const normalizedTitle = result.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, ' ');
 
-    // Get the page content and thumbnail, limiting to 2 sentences
-    const contentUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts|pageimages&exintro&explaintext&exsentences=2&piprop=thumbnail&pithumbsize=200&pageids=${pageId}&format=json&origin=*`;
-    const contentResponse = await fetch(contentUrl);
-    const contentData = await contentResponse.json();
+      // Skip to next result if title doesn't match
+      if (!normalizedTitle.includes(normalizedName)) {
+        continue;
+      }
 
-    const page = contentData.query.pages[pageId];
-    const extract = page.extract;
-    const thumbnail = page.thumbnail?.source;
+      // Get the page ID and title
+      const pageId = result.pageid;
+      const title = result.title;
 
-    // Construct the page URL
-    const pageUrl = `https://en.wikipedia.org/wiki/${encodeURIComponent(title)}`;
+      // Get the page content, limiting to 2 sentences
+      const contentUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts|pageimages&exintro&explaintext&exsentences=2&piprop=thumbnail&pithumbsize=200&pageids=${pageId}&format=json&origin=*`;
+      const contentResponse = await fetch(contentUrl);
+      const contentData = await contentResponse.json();
 
-    return { title, extract, thumbnail, pageUrl };
+      const page = contentData.query.pages[pageId];
+
+      // If page data is missing, skip to the next result
+      if (!page || !page.extract) {
+        continue;
+      }
+
+      const extract = page.extract;
+      const thumbnail = page.thumbnail?.source;
+
+      // Construct the page URL
+      const pageUrl = `https://en.wikipedia.org/wiki/${encodeURIComponent(title)}`;
+
+      // Check for female indicators to confirm it's a person
+      const plainText = extract.replace(/<[^>]*>/g, '');
+      const femaleIndicators = ['she', 'her', 'hers', 'woman', 'female'];
+      const words = plainText.toLowerCase().split(/\s+/);
+      const firstFemaleIndicator = words.find((word: string) => femaleIndicators.includes(word));
+
+      if (!!firstFemaleIndicator) {
+        return { title, extract, thumbnail, pageUrl };
+      }
+    }
+
+    // If we reach this point, no matching pages about a person were found
+    return null;
+
   } catch (error) {
     console.error('Error fetching Wikipedia data:', error);
     return null;
