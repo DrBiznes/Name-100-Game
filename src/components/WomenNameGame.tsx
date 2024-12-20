@@ -38,6 +38,23 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
     setNames
   } = useGameState({ targetCount, onGameStateChange });
 
+  const findNextEmptyInput = (currentIndex: number): number => {
+    // Look for the next empty input after the current index
+    for (let i = currentIndex + 1; i < targetCount; i++) {
+      if (inputs[i].status === 'idle' && !inputs[i].value) {
+        return i;
+      }
+    }
+    // If none found after current index, look from beginning
+    for (let i = 0; i < currentIndex; i++) {
+      if (inputs[i].status === 'idle' && !inputs[i].value) {
+        return i;
+      }
+    }
+    // If no empty inputs found, return current index
+    return currentIndex;
+  };
+
   const handleInputKeyDown = async (
     e: React.KeyboardEvent<HTMLInputElement>,
     index: number
@@ -51,9 +68,8 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
 
         if (isValid) {
           setTimeout(() => {
-            const nextIndex = index + 1;
+            const nextIndex = findNextEmptyInput(index);
             if (nextIndex < targetCount) {
-              handleInputChange(nextIndex, '');
               inputRefs.current[nextIndex]?.focus();
             }
           }, 100);

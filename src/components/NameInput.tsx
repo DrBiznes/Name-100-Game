@@ -57,6 +57,8 @@ export function NameInput({
         onClick={handleInputClick}
         onChange={e => isGameActive && onInputChange(index, e.target.value)}
         onKeyDown={e => onKeyDown(e, index)}
+        spellCheck={true}
+        lang="en"
         className={cn(
           "w-full",
           input.status === 'valid' && "bg-green-50 cursor-pointer hover:bg-green-100",
