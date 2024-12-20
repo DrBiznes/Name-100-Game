@@ -7,6 +7,7 @@ function normalizeNameForComparison(name: string): string {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")  // Remove diacritics
     .replace(/-/g, ' ')               // Replace hyphens with spaces
+    .replace(/\./g, '')              // Remove periods
     .trim();                          // Remove leading/trailing whitespace
 }
 
@@ -28,7 +29,7 @@ function isValidSingleName(name: string): boolean {
   }
 
   // Common name prefixes that might indicate a stage name
-  const artistPrefixes = ['dj', 'mc', 'dr'];
+  const artistPrefixes = ['dj', 'mc', 'dr', 'h.e.r'];
   const normalizedName = normalizeNameForComparison(name);
   
   // If the name has any of these prefixes, it's likely a stage name
