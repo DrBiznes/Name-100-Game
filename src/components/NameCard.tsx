@@ -27,16 +27,52 @@ export function NameCard({ name, isOpen, onClose, triggerRef }: NameCardProps) {
     }
   }, [isOpen, name]);
 
-  useEffect(() => {
-    if (isOpen && cardRef.current && triggerRef.current) {
+  const updatePosition = () => {
+    if (cardRef.current && triggerRef.current) {
       const trigger = triggerRef.current.getBoundingClientRect();
       const card = cardRef.current;
+      const viewportHeight = window.innerHeight;
       
-      card.style.position = 'fixed';
-      card.style.top = `${trigger.bottom + window.scrollY + 8}px`;
-      card.style.left = `${trigger.left + window.scrollX}px`;
+      // Calculate if there's room below the trigger
+      const spaceBelow = viewportHeight - trigger.bottom;
+      const cardHeight = card.offsetHeight;
+      
+      // Position horizontally
+      let left = trigger.left + window.scrollX;
+      
+      // Position vertically - if not enough space below, show above
+      let top;
+      if (spaceBelow >= cardHeight || spaceBelow >= 200) { // 200px as minimum space
+        top = trigger.bottom + window.scrollY + 8;
+      } else {
+        top = trigger.top + window.scrollY - cardHeight - 8;
+      }
+      
+      // Prevent card from going off-screen horizontally
+      const rightEdge = left + card.offsetWidth;
+      if (rightEdge > window.innerWidth) {
+        left = window.innerWidth - card.offsetWidth - 16;
+      }
+      
+      card.style.position = 'absolute';
+      card.style.top = `${top}px`;
+      card.style.left = `${left}px`;
     }
-  }, [isOpen]);
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      updatePosition();
+      // Add scroll and resize listeners
+      window.addEventListener('scroll', updatePosition);
+      window.addEventListener('resize', updatePosition);
+      
+      return () => {
+        window.removeEventListener('scroll', updatePosition);
+        window.removeEventListener('resize', updatePosition);
+      };
+    }
+  }, [isOpen, wikiData]); // Include wikiData to reposition after content loads
 
   const handleClickOutside = (event: MouseEvent) => {
     if (cardRef.current && !cardRef.current.contains(event.target as Node)) {
@@ -55,6 +91,7 @@ export function NameCard({ name, isOpen, onClose, triggerRef }: NameCardProps) {
     <div
       ref={cardRef}
       className="fixed z-50 w-80 max-w-md rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none"
+      style={{ position: 'absolute' }}
     >
       {isLoading ? (
         <div className="flex items-center gap-2">
