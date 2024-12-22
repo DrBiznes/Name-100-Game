@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { GameCompletionDialog } from './GameCompletionDialog';
 
 const GAME_COUNTS = [20, 50, 100] as const;
 type GameCount = typeof GAME_COUNTS[number];
@@ -23,6 +24,7 @@ interface WomenNameGameProps {
 
 export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProps) {
   const [targetCount, setTargetCount] = useState<GameCount>(100);
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false);
   
   const {
     isGameActive,
@@ -37,6 +39,12 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
     setInputs,
     setNames
   } = useGameState({ targetCount, onGameStateChange });
+
+  useEffect(() => {
+    if (names.length === targetCount && !showCompletionDialog) {
+      setShowCompletionDialog(true);
+    }
+  }, [names.length, targetCount]);
 
   const findNextEmptyInput = (currentIndex: number): number => {
     // Look for the next empty input after the current index
@@ -76,6 +84,16 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
         }
       }
     }
+  };
+
+  const handleSubmitScore = async (username: string) => {
+    // This will be implemented later when we have the backend
+    console.log('Submitting score:', {
+      username,
+      names,
+      elapsedTime,
+      timestamp: new Date().toISOString(),
+    });
   };
 
   return (
@@ -135,6 +153,14 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
           />
         ))}
       </div>
+
+      <GameCompletionDialog
+        isOpen={showCompletionDialog}
+        onClose={() => setShowCompletionDialog(false)}
+        elapsedTime={elapsedTime}
+        names={names}
+        onSubmitScore={handleSubmitScore}
+      />
     </Card>
   );
 } 
