@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { GameCompletionDialog } from './GameCompletionDialog';
+import ConfettiExplosion from 'react-confetti-explosion';
 
 const GAME_COUNTS = [20, 50, 100] as const;
 type GameCount = typeof GAME_COUNTS[number];
@@ -25,6 +26,7 @@ interface WomenNameGameProps {
 export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProps) {
   const [targetCount, setTargetCount] = useState<GameCount>(100);
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   
   const {
     isGameActive,
@@ -40,9 +42,18 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
     setNames
   } = useGameState({ targetCount, onGameStateChange });
 
+  const confettiProps = {
+    force: 0.8,
+    duration: 3000,
+    particleCount: 250,
+    width: 1600,
+  };
+
   useEffect(() => {
-    if (names.length === targetCount && !showCompletionDialog) {
-      setShowCompletionDialog(true);
+    if (names.length === targetCount) {
+      setShowConfetti(true);
+      const timer = setTimeout(() => setShowConfetti(false), 3000);
+      return () => clearTimeout(timer);
     }
   }, [names.length, targetCount]);
 
@@ -98,6 +109,14 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
 
   return (
     <Card className="p-4 md:p-6 h-full overflow-auto border-0 shadow-none bg-transparent">
+      {showConfetti && (
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <ConfettiExplosion {...confettiProps} />
+          </div>
+        </div>
+      )}
+      
       {/* Game Header */}
       <div className="flex flex-col gap-4 mb-4">
         <div className="flex items-center gap-2 justify-center">
@@ -153,6 +172,17 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
           />
         ))}
       </div>
+
+      {names.length === targetCount && !showCompletionDialog && (
+        <div className="mt-4 flex justify-center">
+          <Button 
+            onClick={() => setShowCompletionDialog(true)}
+            className="w-full md:w-auto"
+          >
+            Upload Score
+          </Button>
+        </div>
+      )}
 
       <GameCompletionDialog
         isOpen={showCompletionDialog}

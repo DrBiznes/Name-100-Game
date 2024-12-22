@@ -1,0 +1,340 @@
+{
+    "mononyms": [
+      {
+        "name": "Aaliyah",
+        "wikipedia": "/wiki/Aaliyah"
+      },
+      {
+        "name": "Adele",
+        "wikipedia": "/wiki/Adele"
+      },
+      {
+        "name": "Alanis",
+        "wikipedia": "/wiki/Alanis_Morissette"
+      },
+      {
+        "name": "Amaranthe",
+        "wikipedia": "/wiki/Amaranthe"
+      },
+      {
+        "name": "Aphrodite",
+        "wikipedia": "/wiki/Aphrodite"
+      },
+      {
+        "name": "Artemis",
+        "wikipedia": "/wiki/Artemis"
+      },
+      {
+        "name": "Athena",
+        "wikipedia": "/wiki/Athena"
+      },
+      {
+        "name": "Aurora",
+        "wikipedia": "/wiki/Aurora_(singer)"
+      },
+      {
+        "name": "Banks",
+        "wikipedia": "/wiki/Banks_(singer)"
+      },
+      {
+        "name": "Björk",
+        "wikipedia": "/wiki/Björk"
+      },
+      {
+        "name": "Boudica",
+        "wikipedia": "/wiki/Boudica"
+      },
+      {
+        "name": "Calypso",
+        "wikipedia": "/wiki/Calypso_(mythology)"
+      },
+      {
+        "name": "Capucine",
+        "wikipedia": "/wiki/Capucine"
+      },
+      {
+        "name": "Cher",
+        "wikipedia": "/wiki/Cher"
+      },
+      {
+        "name": "Ciara",
+        "wikipedia": "/wiki/Ciara"
+      },
+      {
+        "name": "Circe",
+        "wikipedia": "/wiki/Circe"
+      },
+      {
+        "name": "Cleopatra",
+        "wikipedia": "/wiki/Cleopatra"
+      },
+      {
+        "name": "Colette",
+        "wikipedia": "/wiki/Colette"
+      },
+      {
+        "name": "Delain",
+        "wikipedia": "/wiki/Delain"
+      },
+      {
+        "name": "Demeter",
+        "wikipedia": "/wiki/Demeter"
+      },
+      {
+        "name": "Dido",
+        "wikipedia": "/wiki/Dido_(singer)"
+      },
+      {
+        "name": "Dorothy",
+        "wikipedia": "/wiki/Dorothy_(band)"
+      },
+      {
+        "name": "Duffy",
+        "wikipedia": "/wiki/Duffy_(singer)"
+      },
+      {
+        "name": "Durga",
+        "wikipedia": "/wiki/Durga"
+      },
+      {
+        "name": "Epica",
+        "wikipedia": "/wiki/Epica_(band)"
+      },
+      {
+        "name": "Evangelista",
+        "wikipedia": "/wiki/Linda_Evangelista"
+      },
+      {
+        "name": "Feist",
+        "wikipedia": "/wiki/Feist_(singer)"
+      },
+      {
+        "name": "Fergie",
+        "wikipedia": "/wiki/Fergie_(singer)"
+      },
+      {
+        "name": "Freya",
+        "wikipedia": "/wiki/Freyja"
+      },
+      {
+        "name": "Garbage",
+        "wikipedia": "/wiki/Garbage_(band)"
+      },
+      {
+        "name": "GloRilla",
+        "wikipedia": "/wiki/GloRilla"
+      },
+      {
+        "name": "Grimes",
+        "wikipedia": "/wiki/Grimes"
+      },
+      {
+        "name": "Halsey",
+        "wikipedia": "/wiki/Halsey_(singer)"
+      },
+      {
+        "name": "Hera",
+        "wikipedia": "/wiki/Hera"
+      },
+      {
+        "name": "Hestia",
+        "wikipedia": "/wiki/Hestia"
+      },
+      {
+        "name": "Hypatia",
+        "wikipedia": "/wiki/Hypatia"
+      },
+      {
+        "name": "Iman",
+        "wikipedia": "/wiki/Iman_(model)"
+      },
+      {
+        "name": "Isis",
+        "wikipedia": "/wiki/Isis"
+      },
+      {
+        "name": "Jewel",
+        "wikipedia": "/wiki/Jewel_(singer)"
+      },
+      {
+        "name": "Jinjer",
+        "wikipedia": "/wiki/Jinjer"
+      },
+      {
+        "name": "Kali",
+        "wikipedia": "/wiki/Kali"
+      },
+      {
+        "name": "Kesha",
+        "wikipedia": "/wiki/Kesha"
+      },
+      {
+        "name": "Lakshmi",
+        "wikipedia": "/wiki/Lakshmi"
+      },
+      {
+        "name": "Laleh",
+        "wikipedia": "/wiki/Laleh_(singer)"
+      },
+      {
+        "name": "Lorde",
+        "wikipedia": "/wiki/Lorde"
+      },
+      {
+        "name": "LP",
+        "wikipedia": "/wiki/LP_(singer)"
+      },
+      {
+        "name": "MIA",
+        "wikipedia": "/wiki/M.I.A._(rapper)"
+      },
+      {
+        "name": "Madonna",
+        "wikipedia": "/wiki/Madonna"
+      },
+      {
+        "name": "Malala",
+        "wikipedia": "/wiki/Malala_Yousafzai"
+      },
+      {
+        "name": "Marina",
+        "wikipedia": "/wiki/Marina_Diamandis"
+      },
+      {
+        "name": "Medea",
+        "wikipedia": "/wiki/Medea"
+      },
+      {
+        "name": "Medusa",
+        "wikipedia": "/wiki/Medusa"
+      },
+      {
+        "name": "MØ",
+        "wikipedia": "/wiki/MØ"
+      },
+      {
+        "name": "Mulan",
+        "wikipedia": "/wiki/Hua_Mulan"
+      },
+      {
+        "name": "Mýa",
+        "wikipedia": "/wiki/Mýa"
+      },
+      {
+        "name": "Nike",
+        "wikipedia": "/wiki/Nike_(mythology)"
+      },
+      {
+        "name": "Nightwish",
+        "wikipedia": "/wiki/Nightwish"
+      },
+      {
+        "name": "Nimue",
+        "wikipedia": "/wiki/Lady_of_the_Lake"
+      },
+      {
+        "name": "Normani",
+        "wikipedia": "/wiki/Normani"
+      },
+      {
+        "name": "Odetta",
+        "wikipedia": "/wiki/Odetta"
+      },
+      {
+        "name": "Parvati",
+        "wikipedia": "/wiki/Parvati"
+      },
+      {
+        "name": "Pele",
+        "wikipedia": "/wiki/Pele_(deity)"
+      },
+      {
+        "name": "Persephone",
+        "wikipedia": "/wiki/Persephone"
+      },
+      {
+        "name": "Pink",
+        "wikipedia": "/wiki/Pink_(singer)"
+      },
+      {
+        "name": "Rekha",
+        "wikipedia": "/wiki/Rekha"
+      },
+      {
+        "name": "Robyn",
+        "wikipedia": "/wiki/Robyn"
+      },
+      {
+        "name": "Sade",
+        "wikipedia": "/wiki/Sade_(singer)"
+      },
+      {
+        "name": "Santigold",
+        "wikipedia": "/wiki/Santigold"
+      },
+      {
+        "name": "Saraswati",
+        "wikipedia": "/wiki/Saraswati"
+      },
+      {
+        "name": "Saweetie",
+        "wikipedia": "/wiki/Saweetie"
+      },
+      {
+        "name": "Scathach",
+        "wikipedia": "/wiki/Scáthach"
+      },
+      {
+        "name": "Selena",
+        "wikipedia": "/wiki/Selena"
+      },
+      {
+        "name": "Sia",
+        "wikipedia": "/wiki/Sia_(musician)"
+      },
+      {
+        "name": "Skin",
+        "wikipedia": "/wiki/Skin_(musician)"
+      },
+      {
+        "name": "SOPHIE",
+        "wikipedia": "/wiki/Sophie_(musician)"
+      },
+      {
+        "name": "Sridevi",
+        "wikipedia": "/wiki/Sridevi"
+      },
+      {
+        "name": "Sukihana",
+        "wikipedia": "/wiki/Sukihana"
+      },
+      {
+        "name": "SZA",
+        "wikipedia": "/wiki/SZA"
+      },
+      {
+        "name": "Tinashe",
+        "wikipedia": "/wiki/Tinashe"
+      },
+      {
+        "name": "Twiggy",
+        "wikipedia": "/wiki/Twiggy"
+      },
+      {
+        "name": "Veruschka",
+        "wikipedia": "/wiki/Veruschka_von_Lehndorff"
+      },
+      {
+        "name": "Viviane",
+        "wikipedia": "/wiki/Lady_of_the_Lake"
+      },
+      {
+        "name": "Xuxa",
+        "wikipedia": "/wiki/Xuxa"
+      },
+      {
+        "name": "Yola",
+        "wikipedia": "/wiki/Yola_(singer)"
+      }
+    ]
+  }

@@ -10,7 +10,6 @@ import {
 import { Button } from "./ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "./ui/input-otp";
 import { formatTime } from "@/lib/utils";
-import ConfettiExplosion from 'react-confetti-explosion';
 
 interface GameCompletionDialogProps {
   isOpen: boolean;
@@ -28,22 +27,6 @@ export function GameCompletionDialog({
   onSubmitScore,
 }: GameCompletionDialogProps) {
   const [username, setUsername] = React.useState("");
-  const [showConfetti, setShowConfetti] = React.useState(false);
-
-  React.useEffect(() => {
-    if (isOpen) {
-      setShowConfetti(true);
-      const timer = setTimeout(() => setShowConfetti(false), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen]);
-
-  const confettiProps = {
-    force: 0.8,
-    duration: 3000,
-    particleCount: 250,
-    width: 1600,
-  };
 
   const handleSubmit = () => {
     if (username.length === 3 && onSubmitScore) {
@@ -55,13 +38,6 @@ export function GameCompletionDialog({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] overflow-visible">
-        {showConfetti && (
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <ConfettiExplosion {...confettiProps} />
-            </div>
-          </div>
-        )}
         <DialogHeader>
           <DialogTitle className="text-xl">🎉 Congratulations!</DialogTitle>
           <DialogDescription className="text-base pt-2">

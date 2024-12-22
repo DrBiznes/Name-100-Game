@@ -1,4 +1,5 @@
 import { names } from '../lib/womendatabase.json';
+import { mononyms } from '../lib/mononyms.json';
 
 export interface WikiPageData {
   title: string;
@@ -23,13 +24,42 @@ function checkLocalDatabase(name: string): boolean {
   return names.some(dbName => normalizeNameForComparison(dbName) === normalizedInputName);
 }
 
+// Check if name is a mononym and get Wikipedia path
+function checkMononymDatabase(name: string): string | null {
+  const normalizedInputName = normalizeNameForComparison(name);
+  const mononym = mononyms.find(m => normalizeNameForComparison(m.name) === normalizedInputName);
+  return mononym ? mononym.wikipedia : null;
+}
+
 export async function fetchWikipediaData(name: string): Promise<WikiPageData | null> {
   try {
-    // First check if the name is in our database
+    // First check if the name is a mononym
+    const mononymPath = checkMononymDatabase(name);
+    
+    if (mononymPath) {
+      // If it's a mononym, fetch the exact Wikipedia page
+      const pageTitle = mononymPath.split('/wiki/')[1];
+      const contentUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts|pageimages&exintro&explaintext&exsentences=2&piprop=thumbnail&pithumbsize=200&titles=${encodeURIComponent(pageTitle)}&format=json&origin=*`;
+      const contentResponse = await fetch(contentUrl);
+      const contentData = await contentResponse.json();
+      
+      const page = Object.values(contentData.query.pages)[0] as any;
+      
+      if (page && page.extract) {
+        return {
+          title: page.title,
+          extract: page.extract,
+          thumbnail: page.thumbnail?.source,
+          pageUrl: `https://en.wikipedia.org${mononymPath}`
+        };
+      }
+    }
+
+    // If not a mononym, check if the name is in our database
     const isInDatabase = checkLocalDatabase(name);
     
     // Normalize the input name for comparison
-    const normalizedName = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, ' ');
+    const normalizedName = normalizeNameForComparison(name);
 
     // Search for the page
     const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch="${encodeURIComponent(name)}"&&srlimit=5&format=json&origin=*`;
@@ -42,7 +72,7 @@ export async function fetchWikipediaData(name: string): Promise<WikiPageData | n
 
     // Iterate through search results and check if any result is a person
     for (let result of searchData.query.search) {
-      const normalizedTitle = result.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, ' ');
+      const normalizedTitle = normalizeNameForComparison(result.title);
 
       // Skip to next result if title doesn't match
       if (!normalizedTitle.includes(normalizedName)) {
