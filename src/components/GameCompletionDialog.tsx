@@ -11,23 +11,18 @@ import { Button } from "./ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "./ui/input-otp";
 import { formatTime } from "@/lib/utils";
 import { toast } from "sonner";
-import { submitScore } from "@/services/leaderboardService";
 
 interface GameCompletionDialogProps {
   isOpen: boolean;
   onClose: () => void;
   elapsedTime: number;
-  names: Array<{ index: number; name: string }>;
-  gameMode: string;
-  onSubmitScore?: (username: string) => Promise<void>;
+  onSubmitScore: (username: string) => Promise<void>;
 }
 
 export function GameCompletionDialog({
   isOpen,
   onClose,
   elapsedTime,
-  names,
-  gameMode,
   onSubmitScore,
 }: GameCompletionDialogProps) {
   const [username, setUsername] = React.useState("");
@@ -38,13 +33,7 @@ export function GameCompletionDialog({
     
     setIsSubmitting(true);
     try {
-      await submitScore({
-        username: username.toUpperCase(),
-        completion_time: elapsedTime,
-        completed_names: names.map(n => n.name),
-        game_mode: gameMode,
-      });
-      
+      await onSubmitScore(username);
       toast.success("Score submitted successfully!");
       onClose();
     } catch (error) {

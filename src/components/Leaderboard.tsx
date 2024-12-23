@@ -26,22 +26,8 @@ import {
   SelectValue,
 } from "./ui/select";
 import { formatTime } from '@/lib/utils';
-import { API_URL } from '@/config';
-
-interface LeaderboardEntry {
-  id: string;
-  username: string;
-  color: string;
-  completion_time: number;
-  submitted_at: string;
-}
-
-interface LeaderboardResponse {
-  success: boolean;
-  leaderboard: LeaderboardEntry[];
-  cacheTimestamp: string;
-  cacheExpiresIn: number;
-}
+import { leaderboardApi, LeaderboardEntry } from '@/services/api';
+import { toast } from "sonner";
 
 const ITEMS_PER_PAGE = 10;
 const CACHE_PREFIX = 'leaderboard_cache_';
@@ -72,24 +58,25 @@ export function Leaderboard() {
     setError(null);
 
     try {
-      const response = await fetch(`${API_URL}/leaderboard/${gameMode}`);
-      if (!response.ok) throw new Error('Failed to fetch leaderboard');
+      const data = await leaderboardApi.getLeaderboard(gameMode);
       
-      const data: LeaderboardResponse = await response.json();
+      // Sort by completion time
+      const sortedData = [...data].sort((a, b) => a.completion_time - b.completion_time);
+      setLeaderboardData(sortedData);
       
-      if (data.success) {
-        setLeaderboardData(data.leaderboard);
-        
-        // Cache the response
-        localStorage.setItem(cacheKey, JSON.stringify({
-          data: data.leaderboard,
-          timestamp: now
-        }));
-      } else {
-        throw new Error(data.error || 'Failed to fetch leaderboard');
-      }
+      // Cache the response
+      localStorage.setItem(cacheKey, JSON.stringify({
+        data: sortedData,
+        timestamp: now
+      }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('Leaderboard fetch error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch leaderboard';
+      setError(errorMessage);
+      toast.error("Failed to load leaderboard", {
+        description: "Please check your connection and try again.",
+        duration: 5000,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -238,14 +225,16 @@ export function Leaderboard() {
                   <PaginationItem>
                     <PaginationPrevious
                       onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
+                      className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
                     />
                   </PaginationItem>
+                  
                   {renderPaginationItems()}
+                  
                   <PaginationItem>
                     <PaginationNext
                       onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
+                      className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
                     />
                   </PaginationItem>
                 </PaginationContent>

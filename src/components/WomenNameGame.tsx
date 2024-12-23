@@ -15,7 +15,7 @@ import {
 import { GameCompletionDialog } from './GameCompletionDialog';
 import ConfettiExplosion from 'react-confetti-explosion';
 import { toast } from "sonner";
-import { submitScore } from "@/services/leaderboardService";
+import { leaderboardApi } from '@/services/api';
 
 const GAME_COUNTS = [20, 50, 100] as const;
 type GameCount = typeof GAME_COUNTS[number];
@@ -40,8 +40,6 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
     startGame,
     checkName,
     handleInputChange,
-    setInputs,
-    setNames
   } = useGameState({ targetCount, onGameStateChange });
 
   const confettiProps = {
@@ -101,17 +99,34 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
 
   const handleSubmitScore = async (username: string) => {
     try {
-      await submitScore({
+      // Debug log
+      console.log({
+        username,
+        completion_time: elapsedTime,
+        completed_names: names.map(n => n.name),
+        game_mode: targetCount.toString()
+      });
+
+      if (username.length !== 3) {
+        toast.error("Username must be exactly 3 letters");
+        return;
+      }
+
+      await leaderboardApi.submitScore({
         username: username.toUpperCase(),
         completion_time: elapsedTime,
         completed_names: names.map(n => n.name),
         game_mode: targetCount.toString(),
       });
       
-      toast.success("Score submitted successfully!");
+      toast.success("Score submitted successfully! 🎉");
       setShowCompletionDialog(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to submit score");
+      const errorMessage = error instanceof Error ? error.message : "Failed to submit score";
+      toast.error(errorMessage, {
+        description: "Please try again or contact support if the problem persists."
+      });
+      console.error('Score submission error:', error);
     }
   };
 
@@ -196,8 +211,6 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
         isOpen={showCompletionDialog}
         onClose={() => setShowCompletionDialog(false)}
         elapsedTime={elapsedTime}
-        names={names}
-        gameMode={targetCount.toString()}
         onSubmitScore={handleSubmitScore}
       />
     </Card>

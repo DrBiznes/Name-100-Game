@@ -1,7 +1,7 @@
 import { Input } from './ui/input';
 import { cn } from '@/lib/utils';
 import { InputState } from '../hooks/useGameState';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { NameCard } from './NameCard';
 
 interface NameInputProps {
