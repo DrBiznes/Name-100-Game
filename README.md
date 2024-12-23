@@ -1,4 +1,4 @@
-# 100 Women Name Challenge
+# Name 100 Women Challenge
 
 The 100 Women Name Challenge is an interactive web game that tests players' knowledge of influential women throughout history. Players race against time to name women from various fields including history, entertainment, science, politics, and more. The game offers multiple difficulty levels where players can attempt to name 20, 50, or 100 women.
 
