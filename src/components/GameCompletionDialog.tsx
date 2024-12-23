@@ -10,13 +10,16 @@ import {
 import { Button } from "./ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "./ui/input-otp";
 import { formatTime } from "@/lib/utils";
+import { toast } from "sonner";
+import { submitScore } from "@/services/leaderboardService";
 
 interface GameCompletionDialogProps {
   isOpen: boolean;
   onClose: () => void;
   elapsedTime: number;
   names: Array<{ index: number; name: string }>;
-  onSubmitScore?: (username: string) => void;
+  gameMode: string;
+  onSubmitScore?: (username: string) => Promise<void>;
 }
 
 export function GameCompletionDialog({
@@ -24,14 +27,30 @@ export function GameCompletionDialog({
   onClose,
   elapsedTime,
   names,
+  gameMode,
   onSubmitScore,
 }: GameCompletionDialogProps) {
   const [username, setUsername] = React.useState("");
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const handleSubmit = () => {
-    if (username.length === 3 && onSubmitScore) {
-      onSubmitScore(username);
+  const handleSubmit = async () => {
+    if (username.length !== 3) return;
+    
+    setIsSubmitting(true);
+    try {
+      await submitScore({
+        username: username.toUpperCase(),
+        completion_time: elapsedTime,
+        completed_names: names.map(n => n.name),
+        game_mode: gameMode,
+      });
+      
+      toast.success("Score submitted successfully!");
       onClose();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to submit score");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -73,9 +92,9 @@ export function GameCompletionDialog({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={username.length !== 3}
+            disabled={username.length !== 3 || isSubmitting}
           >
-            Submit Score
+            {isSubmitting ? "Submitting..." : "Submit Score"}
           </Button>
         </DialogFooter>
       </DialogContent>

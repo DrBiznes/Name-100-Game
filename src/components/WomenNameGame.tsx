@@ -14,6 +14,8 @@ import {
 } from "./ui/select";
 import { GameCompletionDialog } from './GameCompletionDialog';
 import ConfettiExplosion from 'react-confetti-explosion';
+import { toast } from "sonner";
+import { submitScore } from "@/services/leaderboardService";
 
 const GAME_COUNTS = [20, 50, 100] as const;
 type GameCount = typeof GAME_COUNTS[number];
@@ -98,13 +100,19 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
   };
 
   const handleSubmitScore = async (username: string) => {
-    // This will be implemented later when we have the backend
-    console.log('Submitting score:', {
-      username,
-      names,
-      elapsedTime,
-      timestamp: new Date().toISOString(),
-    });
+    try {
+      await submitScore({
+        username: username.toUpperCase(),
+        completion_time: elapsedTime,
+        completed_names: names.map(n => n.name),
+        game_mode: targetCount.toString(),
+      });
+      
+      toast.success("Score submitted successfully!");
+      setShowCompletionDialog(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to submit score");
+    }
   };
 
   return (
@@ -189,6 +197,7 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
         onClose={() => setShowCompletionDialog(false)}
         elapsedTime={elapsedTime}
         names={names}
+        gameMode={targetCount.toString()}
         onSubmitScore={handleSubmitScore}
       />
     </Card>
