@@ -3,9 +3,10 @@ import { API_URL } from '@/config';
 export interface LeaderboardEntry {
   id: string;
   username: string;
-  color: string;
-  completion_time: number;
-  submitted_at: string;
+  username_color: string;
+  score: number;
+  submission_date: string;
+  name_count: number;
 }
 
 export interface ScoreSubmission {

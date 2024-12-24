@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { formatTime } from '@/lib/utils';
+import { formatTime, formatSubmissionDate } from '@/lib/utils';
 import { leaderboardApi, LeaderboardEntry } from '@/services/api';
 import { toast } from "sonner";
 
@@ -60,8 +60,8 @@ export function Leaderboard() {
     try {
       const data = await leaderboardApi.getLeaderboard(gameMode);
       
-      // Sort by completion time
-      const sortedData = [...data].sort((a, b) => a.completion_time - b.completion_time);
+      // Sort by score (lower is better)
+      const sortedData = [...data].sort((a, b) => a.score - b.score);
       setLeaderboardData(sortedData);
       
       // Cache the response
@@ -207,13 +207,15 @@ export function Leaderboard() {
                         {(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
                       </TableCell>
                       <TableCell>
-                        <span style={{ color: entry.color }}>
+                        <span style={{ color: entry.username_color }}>
                           {entry.username}
                         </span>
                       </TableCell>
-                      <TableCell>{formatTime(entry.completion_time)}</TableCell>
+                      <TableCell>
+                        {formatTime(Number(entry.score))}
+                      </TableCell>
                       <TableCell className="text-right">
-                        {new Date(entry.submitted_at).toLocaleDateString()}
+                        {formatSubmissionDate(entry.submission_date)}
                       </TableCell>
                     </TableRow>
                   ))}
