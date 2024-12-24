@@ -31,6 +31,12 @@ export function GameCompletionDialog({
   const handleSubmit = async () => {
     if (username.length !== 3) return;
     
+    const allowedChars = /^[a-zA-Z!$?&()#@+=\/]+$/;
+    if (!username.match(allowedChars)) {
+      toast.error("Username can only contain letters and special characters: !$?&()#@+=/");
+      return;
+    }
+    
     setIsSubmitting(true);
     try {
       await onSubmitScore(username);
@@ -57,6 +63,9 @@ export function GameCompletionDialog({
           <div className="flex flex-col gap-4 items-center">
             <p className="text-sm text-muted-foreground">
               Enter a 3-letter username to submit your score to the leaderboard:
+            </p>
+            <p className="text-xs text-muted-foreground text-center">
+              Use letters and special characters (!$?&()#@+=/)
             </p>
             <InputOTP
               maxLength={3}
