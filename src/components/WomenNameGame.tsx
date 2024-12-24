@@ -97,7 +97,7 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
     }
   };
 
-  const handleSubmitScore = async (username: string) => {
+  const handleSubmitScore = async (username: string, token: string) => {
     try {
       // Debug log
       console.log({
@@ -117,6 +117,7 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
         completion_time: elapsedTime,
         completed_names: names.map(n => n.name),
         game_mode: targetCount.toString(),
+        cf_turnstile_response: token
       });
       
       toast.success("Score submitted successfully! 🎉");

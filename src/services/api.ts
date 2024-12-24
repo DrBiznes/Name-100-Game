@@ -14,6 +14,7 @@ export interface ScoreSubmission {
   completion_time: number;
   completed_names: string[];
   game_mode: string;
+  cf_turnstile_response: string;
 }
 
 const defaultHeaders = {
