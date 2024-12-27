@@ -1,9 +1,10 @@
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Card } from './ui/card';
 import { formatTime, formatSubmissionDate } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { QUERY_KEYS, leaderboardApi, LeaderboardEntry } from '@/services/api';
+import { User } from 'lucide-react';
 
 interface ScoreHistoryEntry {
   id: number;
@@ -123,6 +124,10 @@ export function UserHistory() {
     <Card className="p-4 md:p-6">
       {userData?.score && (
         <div className="mb-8">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+            <User className="h-4 w-4" />
+            <span>Submitted by</span>
+          </div>
           <h2 className="text-3xl font-bold mb-2">
             <span style={{ color: userData.score.username_color }}>
               {userData.score.username}
@@ -168,7 +173,11 @@ export function UserHistory() {
             )}.
             {Object.entries(stats.percentiles).map(([mode, percentile]) => (
               <span key={mode}>
-                {' '}Their best Name {mode} time ranks in the top {100 - percentile}% of all players.
+                {' '}Their best Name {mode} time ranks in the{' '}
+                <span className="font-bold text-foreground">
+                  top {100 - percentile}%
+                </span>{' '}
+                of all players.
               </span>
             ))}
             <br />
@@ -187,20 +196,23 @@ export function UserHistory() {
       <div className="space-y-4">
         <h3 className="text-xl font-semibold">Recent Games</h3>
         {userData?.history.map((entry) => (
-          <div 
+          <Link 
             key={entry.id}
-            className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+            to={`/scores/${entry.id}`}
+            className="block hover:bg-muted transition-colors"
           >
-            <div className="flex flex-col">
-              <span className="font-medium">Name {entry.name_count}</span>
-              <span className="text-sm text-muted-foreground">
-                {formatSubmissionDate(entry.submission_date)}
+            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+              <div className="flex flex-col">
+                <span className="font-medium">Name {entry.name_count}</span>
+                <span className="text-sm text-muted-foreground">
+                  {formatSubmissionDate(entry.submission_date)}
+                </span>
+              </div>
+              <span className="font-mono text-lg font-bold">
+                {formatTime(entry.score)}
               </span>
             </div>
-            <span className="font-mono text-lg font-bold">
-              {formatTime(entry.score)}
-            </span>
-          </div>
+          </Link>
         ))}
       </div>
     </Card>

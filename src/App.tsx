@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import { WomenNameGame } from './components/WomenNameGame';
 import { Leaderboard } from './components/Leaderboard';
 import { Rules } from './components/Rules';
@@ -26,7 +26,7 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <HashRouter>
         <Toaster richColors position="top-center" />
         <div className="min-h-screen w-full bg-white text-black flex flex-col">
           <header className="w-full text-center p-4">
@@ -132,7 +132,7 @@ function App() {
             timerRef={timerRef}
           />
         </div>
-      </BrowserRouter>
+      </HashRouter>
     </QueryClientProvider>
   );
 }
