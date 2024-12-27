@@ -1,9 +1,12 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { WomenNameGame } from './components/WomenNameGame';
 import { Leaderboard } from './components/Leaderboard';
 import { Rules } from './components/Rules';
 import { FloatingTimer } from './components/FloatingTimer';
 import { useRef, useState } from 'react';
 import { Toaster } from "sonner";
+import { UserHistory } from './components/UserHistory';
+import { ScoreView } from './components/ScoreView';
 
 function App() {
   const [gameState, setGameState] = useState({
@@ -13,7 +16,7 @@ function App() {
   const timerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <>
+    <BrowserRouter>
       <Toaster richColors position="top-center" />
       <div className="min-h-screen w-full bg-white text-black flex flex-col">
         <header className="w-full text-center p-4">
@@ -24,15 +27,31 @@ function App() {
         </header>
         <main className="container flex-grow">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1">
-              <Rules />
-            </div>
-            <div className="lg:col-span-1">
-              <WomenNameGame 
-                onGameStateChange={setGameState} 
-                timerRef={timerRef}
-              />
-            </div>
+            <Routes>
+              <Route path="/" element={
+                <>
+                  <div className="lg:col-span-1">
+                    <Rules />
+                  </div>
+                  <div className="lg:col-span-1">
+                    <WomenNameGame 
+                      onGameStateChange={setGameState} 
+                      timerRef={timerRef}
+                    />
+                  </div>
+                </>
+              } />
+              <Route path="/scores/:id" element={
+                <>
+                  <div className="lg:col-span-1">
+                    <UserHistory />
+                  </div>
+                  <div className="lg:col-span-1">
+                    <ScoreView />
+                  </div>
+                </>
+              } />
+            </Routes>
             <div className="lg:col-span-1">
               <Leaderboard />
             </div>
@@ -103,7 +122,7 @@ function App() {
           timerRef={timerRef}
         />
       </div>
-    </>
+    </BrowserRouter>
   );
 }
 

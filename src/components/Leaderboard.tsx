@@ -28,6 +28,7 @@ import {
 import { formatTime, formatSubmissionDate } from '@/lib/utils';
 import { leaderboardApi, LeaderboardEntry } from '@/services/api';
 import { toast } from "sonner";
+import { Link } from 'react-router-dom';
 
 const ITEMS_PER_PAGE = 10;
 const CACHE_PREFIX = 'leaderboard_cache_';
@@ -195,6 +196,7 @@ export function Leaderboard() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-16">Rank</TableHead>
+                    <TableHead>ID</TableHead>
                     <TableHead>Username</TableHead>
                     <TableHead>Time</TableHead>
                     <TableHead className="text-right">Date</TableHead>
@@ -205,6 +207,14 @@ export function Leaderboard() {
                     <TableRow key={entry.id}>
                       <TableCell className="font-medium">
                         {(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
+                      </TableCell>
+                      <TableCell>
+                        <Link 
+                          to={`/scores/${entry.id}`}
+                          className="text-blue-600 hover:text-blue-800 hover:underline"
+                        >
+                          #{entry.id}
+                        </Link>
                       </TableCell>
                       <TableCell>
                         <span style={{ color: entry.username_color }}>
