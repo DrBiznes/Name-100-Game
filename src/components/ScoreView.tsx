@@ -18,6 +18,9 @@ export function ScoreView() {
   if (error) return <div>Error: {error instanceof Error ? error.message : 'Failed to load score'}</div>;
   if (!userData?.score) return <div>Score not found</div>;
 
+  const handleInputChange = () => {};
+  const handleKeyDown = () => {};
+
   return (
     <Card className="p-4 md:p-6 h-full overflow-auto border-0 shadow-none bg-transparent">
       <div className="flex flex-col gap-4 mb-6">
@@ -39,8 +42,8 @@ export function ScoreView() {
             index={index}
             isGameActive={false}
             inputRef={() => {}}
-            onInputChange={() => {}}
-            onKeyDown={() => {}}
+            onInputChange={handleInputChange}
+            onKeyDown={handleKeyDown}
           />
         ))}
       </div>

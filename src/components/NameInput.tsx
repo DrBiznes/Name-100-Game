@@ -25,8 +25,6 @@ export function NameInput({
   const inputContainerRef = useRef<HTMLDivElement>(null);
 
   const handleInputClick = () => {
-    if (!isGameActive) return;
-
     if (input.status === 'valid') {
       setShowCard(!showCard);
     }
@@ -52,18 +50,19 @@ export function NameInput({
       <Input
         ref={inputRef}
         value={input.value}
-        readOnly={input.status === 'valid'}
-        disabled={!isGameActive}
+        readOnly={input.status === 'valid' || input.status === 'pending'}
+        disabled={!isGameActive && input.status !== 'valid'}
         onClick={handleInputClick}
-        onChange={e => isGameActive && onInputChange(index, e.target.value)}
-        onKeyDown={e => onKeyDown(e, index)}
+        onChange={e => isGameActive && input.status !== 'pending' && onInputChange(index, e.target.value)}
+        onKeyDown={e => input.status !== 'pending' && onKeyDown(e, index)}
         spellCheck={true}
         lang="en"
         className={cn(
           "w-full",
-          input.status === 'valid' && "bg-green-50 cursor-pointer hover:bg-green-100",
+          input.status === 'valid' && "bg-green-50 hover:bg-green-100 cursor-pointer",
           input.status === 'invalid' && "bg-red-50",
           input.status === 'pending' && "bg-yellow-50",
+          input.status === 'pending' && "cursor-wait",
         )}
       />
       <NameCard
