@@ -31,6 +31,10 @@ function checkMononymDatabase(name: string): string | null {
   return mononym ? mononym.wikipedia : null;
 }
 
+export const QUERY_KEYS = {
+  wikiData: (name: string) => ['wikiData', name],
+};
+
 export async function fetchWikipediaData(name: string): Promise<WikiPageData | null> {
   try {
     // First check if the name is a mononym

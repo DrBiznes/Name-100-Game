@@ -17,7 +17,7 @@ interface GameCompletionDialogProps {
   isOpen: boolean;
   onClose: () => void;
   elapsedTime: number;
-  onSubmitScore: (username: string, token: string) => Promise<void>;
+  onSubmitScore: (username: string, token: string) => void;
 }
 
 export function GameCompletionDialog({
@@ -27,10 +27,9 @@ export function GameCompletionDialog({
   onSubmitScore,
 }: GameCompletionDialogProps) {
   const [username, setUsername] = React.useState("");
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [token, setToken] = React.useState<string | null>(null);
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (username.length !== 3 || !token) {
       toast.error("Please complete the verification");
       return;
@@ -42,16 +41,7 @@ export function GameCompletionDialog({
       return;
     }
     
-    setIsSubmitting(true);
-    try {
-      await onSubmitScore(username, token);
-      toast.success("Score submitted successfully!");
-      onClose();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to submit score");
-    } finally {
-      setIsSubmitting(false);
-    }
+    onSubmitScore(username, token);
   };
 
   return (
@@ -106,9 +96,9 @@ export function GameCompletionDialog({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={username.length !== 3 || !token || isSubmitting}
+            disabled={username.length !== 3 || !token}
           >
-            {isSubmitting ? "Submitting..." : "Submit Score"}
+            Submit Score
           </Button>
         </DialogFooter>
       </DialogContent>

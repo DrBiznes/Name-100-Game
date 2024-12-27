@@ -16,6 +16,7 @@ import { GameCompletionDialog } from './GameCompletionDialog';
 import ConfettiExplosion from 'react-confetti-explosion';
 import { toast } from "sonner";
 import { leaderboardApi } from '@/services/api';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const GAME_COUNTS = [20, 50, 100] as const;
 type GameCount = typeof GAME_COUNTS[number];
@@ -41,6 +42,25 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
     checkName,
     handleInputChange,
   } = useGameState({ targetCount, onGameStateChange });
+
+  const queryClient = useQueryClient();
+  
+  // Add mutation for score submission
+  const submitScoreMutation = useMutation({
+    mutationFn: leaderboardApi.submitScore,
+    onSuccess: () => {
+      // Invalidate relevant queries
+      queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
+      toast.success("Score submitted successfully! 🎉");
+      setShowCompletionDialog(false);
+    },
+    onError: (error) => {
+      const errorMessage = error instanceof Error ? error.message : "Failed to submit score";
+      toast.error(errorMessage, {
+        description: "Please try again or contact support if the problem persists."
+      });
+    }
+  });
 
   const confettiProps = {
     force: 0.8,
@@ -98,37 +118,18 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
   };
 
   const handleSubmitScore = async (username: string, token: string) => {
-    try {
-      // Debug log
-      console.log({
-        username,
-        completion_time: elapsedTime,
-        completed_names: names.map(n => n.name),
-        game_mode: targetCount.toString()
-      });
-
-      if (username.length !== 3) {
-        toast.error("Username must be exactly 3 letters");
-        return;
-      }
-
-      await leaderboardApi.submitScore({
-        username: username.toUpperCase(),
-        completion_time: elapsedTime,
-        completed_names: names.map(n => n.name),
-        game_mode: targetCount.toString(),
-        cf_turnstile_response: token
-      });
-      
-      toast.success("Score submitted successfully! 🎉");
-      setShowCompletionDialog(false);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to submit score";
-      toast.error(errorMessage, {
-        description: "Please try again or contact support if the problem persists."
-      });
-      console.error('Score submission error:', error);
+    if (username.length !== 3) {
+      toast.error("Username must be exactly 3 letters");
+      return;
     }
+
+    submitScoreMutation.mutate({
+      username: username.toUpperCase(),
+      completion_time: elapsedTime,
+      completed_names: names.map(n => n.name),
+      game_mode: targetCount.toString(),
+      cf_turnstile_response: token
+    });
   };
 
   return (

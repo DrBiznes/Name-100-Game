@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { fetchWikipediaData, WikiPageData } from '@/services/wikipediaService';
+import { fetchWikipediaData, QUERY_KEYS } from '@/services/wikipediaService';
+import { useQuery } from '@tanstack/react-query';
 
 interface NameCardProps {
   name: string;
@@ -10,22 +11,14 @@ interface NameCardProps {
 }
 
 export function NameCard({ name, isOpen, onClose, triggerRef }: NameCardProps) {
-  const [wikiData, setWikiData] = useState<WikiPageData | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      const data = await fetchWikipediaData(name);
-      setWikiData(data);
-      setIsLoading(false);
-    };
-
-    if (isOpen) {
-      fetchData();
-    }
-  }, [isOpen, name]);
+  const { data: wikiData, isLoading } = useQuery({
+    queryKey: QUERY_KEYS.wikiData(name),
+    queryFn: () => fetchWikipediaData(name),
+    enabled: isOpen, // Only fetch when card is open
+    staleTime: 24 * 60 * 60 * 1000, // Cache for 24 hours
+  });
 
   const updatePosition = () => {
     if (cardRef.current && triggerRef.current) {
@@ -63,7 +56,6 @@ export function NameCard({ name, isOpen, onClose, triggerRef }: NameCardProps) {
   useEffect(() => {
     if (isOpen) {
       updatePosition();
-      // Add scroll and resize listeners
       window.addEventListener('scroll', updatePosition);
       window.addEventListener('resize', updatePosition);
       
@@ -72,7 +64,7 @@ export function NameCard({ name, isOpen, onClose, triggerRef }: NameCardProps) {
         window.removeEventListener('resize', updatePosition);
       };
     }
-  }, [isOpen, wikiData]); // Include wikiData to reposition after content loads
+  }, [isOpen, wikiData]);
 
   const handleClickOutside = (event: MouseEvent) => {
     if (cardRef.current && !cardRef.current.contains(event.target as Node)) {

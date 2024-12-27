@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Trophy } from 'lucide-react';
 import { Button } from './ui/button';
 import {
@@ -26,77 +26,53 @@ import {
   SelectValue,
 } from "./ui/select";
 import { formatTime, formatSubmissionDate } from '@/lib/utils';
-import { leaderboardApi, LeaderboardEntry } from '@/services/api';
-import { toast } from "sonner";
+import { QUERY_KEYS, leaderboardApi, LeaderboardEntry } from '@/services/api';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { toast } from "sonner";
 
 const ITEMS_PER_PAGE = 10;
-const CACHE_PREFIX = 'leaderboard_cache_';
-const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
+
+interface LeaderboardResponse {
+  data: LeaderboardEntry[];
+  totalPages: number;
+}
 
 export function Leaderboard() {
   const [selectedMode, setSelectedMode] = useState<'20' | '50' | '100' | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const fetchLeaderboard = async (gameMode: string) => {
-    const cacheKey = `${CACHE_PREFIX}${gameMode}`;
-    const now = Date.now();
-    
-    // Check cache first
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      const { data, timestamp } = JSON.parse(cached);
-      if (now - timestamp < CACHE_DURATION) {
-        setLeaderboardData(data);
-        return;
+  const { data: leaderboardData, isLoading, error } = useQuery({
+    queryKey: [...QUERY_KEYS.leaderboard(selectedMode || ''), currentPage],
+    queryFn: async (): Promise<LeaderboardResponse> => {
+      if (!selectedMode) return { data: [], totalPages: 0 };
+      
+      try {
+        const response = await leaderboardApi.getLeaderboard(selectedMode);
+        const sortedData = [...response].sort((a, b) => a.score - b.score);
+        const totalPages = Math.ceil(sortedData.length / ITEMS_PER_PAGE);
+        const paginatedData = sortedData.slice(
+          (currentPage - 1) * ITEMS_PER_PAGE,
+          currentPage * ITEMS_PER_PAGE
+        );
+        
+        return { 
+          data: paginatedData, 
+          totalPages 
+        };
+      } catch (err) {
+        toast.error("Failed to load leaderboard");
+        throw err;
       }
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const data = await leaderboardApi.getLeaderboard(gameMode);
-      
-      // Sort by score (lower is better)
-      const sortedData = [...data].sort((a, b) => a.score - b.score);
-      setLeaderboardData(sortedData);
-      
-      // Cache the response
-      localStorage.setItem(cacheKey, JSON.stringify({
-        data: sortedData,
-        timestamp: now
-      }));
-    } catch (err) {
-      console.error('Leaderboard fetch error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch leaderboard';
-      setError(errorMessage);
-      toast.error("Failed to load leaderboard", {
-        description: "Please check your connection and try again.",
-        duration: 5000,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (selectedMode) {
-      fetchLeaderboard(selectedMode);
-    }
-  }, [selectedMode]);
-
-  const totalPages = Math.ceil(leaderboardData.length / ITEMS_PER_PAGE);
-  const paginatedData = leaderboardData.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+    },
+    enabled: !!selectedMode,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
 
   const renderPaginationItems = () => {
     const items = [];
+    const totalPages = leaderboardData?.totalPages || 0;
+    
     for (let i = 1; i <= totalPages; i++) {
       if (
         i === 1 ||
@@ -189,7 +165,9 @@ export function Leaderboard() {
           {isLoading ? (
             <div className="text-center py-8">Loading...</div>
           ) : error ? (
-            <div className="text-center text-red-500 py-8">{error}</div>
+            <div className="text-center text-red-500 py-8">
+              {error instanceof Error ? error.message : 'An error occurred'}
+            </div>
           ) : (
             <>
               <Table>
@@ -203,7 +181,7 @@ export function Leaderboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedData.map((entry, index) => (
+                  {leaderboardData?.data.map((entry, index) => (
                     <TableRow key={entry.id}>
                       <TableCell className="font-medium">
                         {(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
@@ -245,8 +223,8 @@ export function Leaderboard() {
                   
                   <PaginationItem>
                     <PaginationNext
-                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                      className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                      onClick={() => setCurrentPage(p => Math.min(leaderboardData?.totalPages || 0, p + 1))}
+                      className={currentPage === leaderboardData?.totalPages ? 'pointer-events-none opacity-50' : ''}
                     />
                   </PaginationItem>
                 </PaginationContent>

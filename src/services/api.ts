@@ -17,9 +17,33 @@ export interface ScoreSubmission {
   cf_turnstile_response: string;
 }
 
+export interface ScoreHistoryEntry {
+  id: number;
+  username: string;
+  score: number;
+  submission_date: string;
+  name_count: number;
+  username_color: string;
+}
+
+export interface ScoreData {
+  id: string;
+  username: string;
+  username_color: string;
+  score: number;
+  submission_date: string;
+  name_count: number;
+  completed_names: string[];
+}
+
 const defaultHeaders = {
   'Content-Type': 'application/json',
   'Accept': 'application/json',
+};
+
+export const QUERY_KEYS = {
+  leaderboard: (gameMode: string) => ['leaderboard', gameMode],
+  userHistory: (id: string) => ['userHistory', id],
 };
 
 export const leaderboardApi = {
@@ -47,6 +71,25 @@ export const leaderboardApi = {
       }
       throw new Error('Network error occurred while fetching leaderboard');
     }
+  },
+
+  async getUserHistory(id: string): Promise<{
+    history: ScoreHistoryEntry[];
+    score: ScoreData;
+  }> {
+    const response = await fetch(
+      `${API_URL}/scores/${id}?include_history=true&history_limit=10`
+    );
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to fetch history');
+    }
+
+    return {
+      history: data.history,
+      score: data.score,
+    };
   },
 
   async submitScore(score: ScoreSubmission): Promise<void> {

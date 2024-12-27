@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { checkWikipedia } from '../services/nameValidationService';
+import { useMutation } from '@tanstack/react-query';
 
 export interface InputState {
   index: number;
@@ -15,7 +16,6 @@ interface UseGameStateProps {
 export function useGameState({ targetCount, onGameStateChange }: UseGameStateProps) {
   const [isGameActive, setIsGameActive] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
   const [names, setNames] = useState<Array<{ index: number; name: string }>>([]);
   const [inputs, setInputs] = useState<InputState[]>(
     Array.from({ length: targetCount }, (_, i) => ({ 
@@ -28,6 +28,56 @@ export function useGameState({ targetCount, onGameStateChange }: UseGameStatePro
 
   const intervalRef = useRef<number>();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const nameValidationMutation = useMutation<boolean, Error, { name: string; index: number }>({
+    mutationFn: ({ name }) => checkWikipedia(name),
+    onSuccess: (isValidWoman, variables) => {
+      const { index, name } = variables;
+      setPendingValidations(prev => {
+        const next = new Set(prev);
+        next.delete(index);
+        return next;
+      });
+      
+      setInputs(prev => 
+        prev.map(input => 
+          input.index === index 
+            ? { ...input, status: isValidWoman ? 'valid' : 'invalid' } 
+            : input
+        )
+      );
+      
+      if (isValidWoman) {
+        setNames(prev => [...prev, { index, name }]);
+      } else {
+        setTimeout(() => {
+          inputRefs.current[index]?.focus();
+          inputRefs.current[index]?.select();
+        }, 0);
+      }
+    },
+    onError: (_, variables) => {
+      const { index } = variables;
+      setPendingValidations(prev => {
+        const next = new Set(prev);
+        next.delete(index);
+        return next;
+      });
+      
+      setInputs(prev => 
+        prev.map(input => 
+          input.index === index 
+            ? { ...input, status: 'invalid' } 
+            : input
+        )
+      );
+      
+      setTimeout(() => {
+        inputRefs.current[index]?.focus();
+        inputRefs.current[index]?.select();
+      }, 0);
+    }
+  });
 
   useEffect(() => {
     if (isGameActive) {
@@ -96,60 +146,7 @@ export function useGameState({ targetCount, onGameStateChange }: UseGameStatePro
       )
     );
     
-    setIsLoading(true);
-    try {
-      const isValidWoman = await checkWikipedia(name);
-      setIsLoading(false);
-      
-      setPendingValidations(prev => {
-        const next = new Set(prev);
-        next.delete(index);
-        return next;
-      });
-      
-      setInputs(prev => 
-        prev.map(input => 
-          input.index === index 
-            ? { ...input, status: isValidWoman ? 'valid' : 'invalid' } 
-            : input
-        )
-      );
-      
-      if (isValidWoman) {
-        setNames(prev => [...prev, { index, name }]);
-      } else {
-        setTimeout(() => {
-          inputRefs.current[index]?.focus();
-          inputRefs.current[index]?.select();
-        }, 0);
-      }
-      
-      return isValidWoman;
-    } catch (error) {
-      console.error('Error checking name:', error);
-      setIsLoading(false);
-      
-      setPendingValidations(prev => {
-        const next = new Set(prev);
-        next.delete(index);
-        return next;
-      });
-      
-      setInputs(prev => 
-        prev.map(input => 
-          input.index === index 
-            ? { ...input, status: 'invalid' } 
-            : input
-        )
-      );
-      
-      setTimeout(() => {
-        inputRefs.current[index]?.focus();
-        inputRefs.current[index]?.select();
-      }, 0);
-      
-      return false;
-    }
+    return nameValidationMutation.mutateAsync({ name, index });
   };
 
   const handleInputChange = (index: number, value: string) => {
@@ -165,7 +162,7 @@ export function useGameState({ targetCount, onGameStateChange }: UseGameStatePro
   return {
     isGameActive,
     elapsedTime,
-    isLoading,
+    isLoading: nameValidationMutation.isPending,
     names,
     inputs,
     inputRefs,
