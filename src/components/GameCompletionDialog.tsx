@@ -29,11 +29,11 @@ export function GameCompletionDialog({
 }: GameCompletionDialogProps) {
   const [username, setUsername] = React.useState("");
   const [token, setToken] = React.useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
-    if (username.length !== 3 || !token) {
-      toast.error("Please complete the verification");
+    if (username.length !== 3 || !token || isSubmitting) {
       return;
     }
     
@@ -44,10 +44,12 @@ export function GameCompletionDialog({
     }
     
     try {
+      setIsSubmitting(true);
       const scoreId = await onSubmitScore(username, token);
       navigate(`/scores/${scoreId}`);
     } catch (error) {
       // Error handling is done in the mutation
+      setIsSubmitting(false);
     }
   };
 
@@ -98,14 +100,14 @@ export function GameCompletionDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
             Close
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={username.length !== 3 || !token}
+            disabled={username.length !== 3 || !token || isSubmitting}
           >
-            Submit Score
+            {isSubmitting ? "Submitting..." : "Submit Score"}
           </Button>
         </DialogFooter>
       </DialogContent>
