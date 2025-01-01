@@ -195,10 +195,13 @@ export function UserHistory() {
             This player has completed{' '}
             <span className="font-bold text-foreground">{stats.totalGames} games</span>
             {userData?.score && (
-              <>, with their most recent score being{' '}
+              <>. This attempt submitted on{' '}
+                <span className="font-bold text-foreground">
+                  {formatSubmissionDate(userData.score.submission_date)}
+                </span> took them{' '}
                 <span className="font-mono font-bold text-foreground">
                   {formatTime(userData.score.score)}
-                </span> in Name {userData.score.name_count}
+                </span> to name {userData.score.name_count} women
               </>
             )}.
             
