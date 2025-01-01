@@ -45,6 +45,7 @@ export const QUERY_KEYS = {
   leaderboard: (gameMode: string) => ['leaderboard', gameMode],
   userHistory: (id: string) => ['userHistory', id],
   recentScores: (gameMode: string) => ['recentScores', gameMode] as const,
+  stats: (gameMode: string) => ['stats', gameMode] as const,
 };
 
 interface ScoreSubmissionResponse {
@@ -153,5 +154,35 @@ export const recentScoresApi = {
       throw new Error(data.error || 'Failed to fetch recent scores');
     }
     return data.scores;
+  },
+};
+
+export interface NameStats {
+  name: string;
+  count: number;
+  variants: string[];
+}
+
+export interface StatsResponse {
+  success: boolean;
+  stats: NameStats[];
+  gameMode: number | null;
+  totalNames: number;
+  totalOccurrences: number;
+  cacheTimestamp: string;
+  cacheExpiresIn: number;
+}
+
+export const statsApi = {
+  getStats: async (gameMode?: string): Promise<StatsResponse> => {
+    const response = await fetch(`${API_URL}/stats${gameMode && gameMode !== 'all' ? `?gameMode=${gameMode}` : ''}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch stats');
+    }
+    const data = await response.json();
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to fetch stats');
+    }
+    return data;
   },
 }; 
