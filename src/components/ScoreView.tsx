@@ -53,9 +53,9 @@ export function ScoreView() {
             variant="ghost" 
             size="icon"
             onClick={handleShare}
-            className="rounded-full hover:bg-transparent"
+            className="rounded-full bg-transparent hover:bg-accent/10"
           >
-            <span className="material-icons text-foreground">ios_share</span>
+            <span className="material-icons text-foreground/80 hover:text-foreground">ios_share</span>
           </Button>
         </div>
       </div>
