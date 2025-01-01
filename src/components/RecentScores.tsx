@@ -42,18 +42,14 @@ export function RecentScores() {
   const [selectedMode, setSelectedMode] = useState<'20' | '50' | '100'>('100');
 
   const { data: recentScoresData, isLoading, error } = useQuery({
-    queryKey: [...QUERY_KEYS.recentScores(selectedMode), currentPage],
+    queryKey: [...QUERY_KEYS.recentScores(selectedMode)],
     queryFn: async (): Promise<RecentScoresResponse> => {
       try {
-        const response = await recentScoresApi.getRecentScores(selectedMode, ITEMS_PER_PAGE);
+        const response = await recentScoresApi.getRecentScores(selectedMode);
         const totalPages = Math.ceil(response.length / ITEMS_PER_PAGE);
-        const paginatedData = response.slice(
-          (currentPage - 1) * ITEMS_PER_PAGE,
-          currentPage * ITEMS_PER_PAGE
-        );
         
         return { 
-          data: paginatedData, 
+          data: response,
           totalPages 
         };
       } catch (err) {
@@ -63,6 +59,11 @@ export function RecentScores() {
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
+
+  const paginatedData = recentScoresData?.data.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   const renderPaginationItems = () => {
     const items = [];
@@ -144,7 +145,7 @@ export function RecentScores() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {recentScoresData?.data.map((entry) => (
+              {paginatedData?.map((entry) => (
                 <TableRow key={entry.id}>
                   <TableCell>
                     <Link 

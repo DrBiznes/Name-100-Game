@@ -143,8 +143,8 @@ export const leaderboardApi = {
 };
 
 export const recentScoresApi = {
-  getRecentScores: async (gameMode: string, limit: number = 10): Promise<LeaderboardEntry[]> => {
-    const response = await fetch(`${API_URL}/recent/${gameMode}?limit=${limit}`);
+  getRecentScores: async (gameMode: string): Promise<LeaderboardEntry[]> => {
+    const response = await fetch(`${API_URL}/recent/${gameMode}`);
     if (!response.ok) {
       throw new Error('Failed to fetch recent scores');
     }
