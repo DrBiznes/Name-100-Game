@@ -28,6 +28,7 @@ interface WomenNameGameProps {
 
 export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProps) {
   const [targetCount, setTargetCount] = useState<GameCount>(100);
+  const [completedGameCount, setCompletedGameCount] = useState<GameCount | null>(null);
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   
@@ -38,10 +39,10 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
     names,
     inputs,
     inputRefs,
-    startGame,
+    startGame: originalStartGame,
     checkName,
     handleInputChange,
-  } = useGameState({ targetCount, onGameStateChange });
+  } = useGameState({ targetCount: completedGameCount || targetCount, onGameStateChange });
 
   const queryClient = useQueryClient();
   
@@ -68,12 +69,18 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
   };
 
   useEffect(() => {
-    if (names.length === targetCount) {
+    if (!completedGameCount && names.length === targetCount) {
+      setCompletedGameCount(targetCount);
       setShowConfetti(true);
       const timer = setTimeout(() => setShowConfetti(false), 3000);
       return () => clearTimeout(timer);
     }
-  }, [names.length, targetCount]);
+  }, [names.length, targetCount, completedGameCount]);
+
+  const startGame = () => {
+    setCompletedGameCount(null);
+    originalStartGame();
+  };
 
   const findNextEmptyInput = (currentIndex: number): number => {
     // Look for the next empty input after the current index
@@ -121,11 +128,16 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
       return Promise.reject();
     }
 
+    if (!completedGameCount) {
+      toast.error("No completed game found");
+      return Promise.reject();
+    }
+
     return submitScoreMutation.mutateAsync({
       username: username.toUpperCase(),
       completion_time: elapsedTime,
       completed_names: names.map(n => n.name),
-      game_mode: targetCount.toString(),
+      game_mode: completedGameCount.toString(),
       cf_turnstile_response: token
     });
   };
@@ -148,6 +160,7 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
             defaultValue="100"
             onValueChange={(value) => setTargetCount(Number(value) as GameCount)}
             disabled={isGameActive}
+            value={targetCount.toString()}
           >
             <SelectTrigger className="w-[110px]">
               <SelectValue placeholder="100" />
@@ -168,8 +181,11 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
         
         <div className="flex items-center gap-4" ref={timerRef}>
           <GameTimer elapsedTime={elapsedTime} />
-          <Progress value={(names.length / targetCount) * 100} className="w-full" />
-          <span>{names.length}/{targetCount}</span>
+          <Progress 
+            value={(names.length / (completedGameCount || targetCount)) * 100} 
+            className="w-full" 
+          />
+          <span>{names.length}/{completedGameCount || targetCount}</span>
         </div>
 
         <Button 
@@ -183,7 +199,7 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
 
       {/* Name Inputs Grid */}
       <div className="grid grid-cols-2 gap-4">
-        {Array.from({ length: targetCount }).map((_, index) => (
+        {Array.from({ length: completedGameCount || targetCount }).map((_, index) => (
           <NameInput
             key={index}
             input={inputs[index]}
@@ -196,7 +212,7 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
         ))}
       </div>
 
-      {names.length === targetCount && !showCompletionDialog && (
+      {completedGameCount && names.length === completedGameCount && !showCompletionDialog && (
         <div className="mt-4 flex justify-center">
           <Button 
             onClick={() => setShowCompletionDialog(true)}
