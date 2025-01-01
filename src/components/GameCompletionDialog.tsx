@@ -12,12 +12,13 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "./ui/input-otp";
 import { formatTime } from "@/lib/utils";
 import { toast } from "sonner";
 import { Turnstile } from '@marsidev/react-turnstile'
+import { useNavigate } from 'react-router-dom';
 
 interface GameCompletionDialogProps {
   isOpen: boolean;
   onClose: () => void;
   elapsedTime: number;
-  onSubmitScore: (username: string, token: string) => void;
+  onSubmitScore: (username: string, token: string) => Promise<number>;
 }
 
 export function GameCompletionDialog({
@@ -28,8 +29,9 @@ export function GameCompletionDialog({
 }: GameCompletionDialogProps) {
   const [username, setUsername] = React.useState("");
   const [token, setToken] = React.useState<string | null>(null);
+  const navigate = useNavigate();
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (username.length !== 3 || !token) {
       toast.error("Please complete the verification");
       return;
@@ -41,7 +43,12 @@ export function GameCompletionDialog({
       return;
     }
     
-    onSubmitScore(username, token);
+    try {
+      const scoreId = await onSubmitScore(username, token);
+      navigate(`/scores/${scoreId}`);
+    } catch (error) {
+      // Error handling is done in the mutation
+    }
   };
 
   return (

@@ -46,6 +46,19 @@ export const QUERY_KEYS = {
   userHistory: (id: string) => ['userHistory', id],
 };
 
+interface ScoreSubmissionResponse {
+  success: boolean;
+  score: {
+    id: number;
+    username: string;
+    score: number;
+    completed_names: string[];
+    name_count: number;
+    username_color: string;
+  };
+  error?: string;
+}
+
 export const leaderboardApi = {
   async getLeaderboard(gameMode: string): Promise<LeaderboardEntry[]> {
     try {
@@ -92,7 +105,7 @@ export const leaderboardApi = {
     };
   },
 
-  async submitScore(score: ScoreSubmission): Promise<void> {
+  async submitScore(score: ScoreSubmission): Promise<number> {
     try {
       const response = await fetch(`${API_URL}/scores`, {
         method: 'POST',
@@ -110,11 +123,13 @@ export const leaderboardApi = {
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as ScoreSubmissionResponse;
       
       if (!data.success) {
         throw new Error(data.error || 'Failed to submit score');
       }
+
+      return data.score.id;
     } catch (error) {
       if (error instanceof Error) {
         throw error;

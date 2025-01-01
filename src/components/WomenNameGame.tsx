@@ -49,10 +49,8 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
   const submitScoreMutation = useMutation({
     mutationFn: leaderboardApi.submitScore,
     onSuccess: () => {
-      // Invalidate relevant queries
+      // Remove the toast and dialog close from here since we'll navigate away
       queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
-      toast.success("Score submitted successfully! 🎉");
-      setShowCompletionDialog(false);
     },
     onError: (error) => {
       const errorMessage = error instanceof Error ? error.message : "Failed to submit score";
@@ -120,10 +118,10 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
   const handleSubmitScore = async (username: string, token: string) => {
     if (username.length !== 3) {
       toast.error("Username must be exactly 3 letters");
-      return;
+      return Promise.reject();
     }
 
-    submitScoreMutation.mutate({
+    return submitScoreMutation.mutateAsync({
       username: username.toUpperCase(),
       completion_time: elapsedTime,
       completed_names: names.map(n => n.name),
