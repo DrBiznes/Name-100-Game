@@ -8,6 +8,7 @@ import { Toaster } from "sonner";
 import { UserHistory } from './components/UserHistory';
 import { ScoreView } from './components/ScoreView';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { NavMenu } from './components/NavMenu';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,7 +33,7 @@ function App() {
           <header className="w-full text-center p-4">
             <div className="max-w-7xl mx-auto">
               <h1 className="text-2xl md:text-4xl font-bold">NAME 100 WOMEN CHALLENGE</h1>
-              <p className="text-sm md:text-base">Test your knowledge: Can you name 100 women?</p>
+              <NavMenu />
             </div>
           </header>
           <main className="container flex-grow">
@@ -60,6 +61,21 @@ function App() {
                       <ScoreView />
                     </div>
                   </>
+                } />
+                <Route path="/scores" element={
+                  <div className="lg:col-span-2">
+                    <h2>Recent Scores Page Coming Soon</h2>
+                  </div>
+                } />
+                <Route path="/stats" element={
+                  <div className="lg:col-span-2">
+                    <h2>Stats Page Coming Soon</h2>
+                  </div>
+                } />
+                <Route path="/about" element={
+                  <div className="lg:col-span-2">
+                    <h2>About Page Coming Soon</h2>
+                  </div>
                 } />
               </Routes>
               <div className="lg:col-span-1">
