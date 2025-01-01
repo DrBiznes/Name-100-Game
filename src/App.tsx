@@ -9,6 +9,7 @@ import { UserHistory } from './components/UserHistory';
 import { ScoreView } from './components/ScoreView';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NavMenu } from './components/NavMenu';
+import { RecentScores } from './components/RecentScores';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,9 +64,14 @@ function App() {
                   </>
                 } />
                 <Route path="/scores" element={
-                  <div className="lg:col-span-2">
-                    <h2>Recent Scores Page Coming Soon</h2>
-                  </div>
+                  <>
+                    <div className="lg:col-span-1">
+                      <Rules />
+                    </div>
+                    <div className="lg:col-span-1">
+                      <RecentScores />
+                    </div>
+                  </>
                 } />
                 <Route path="/stats" element={
                   <div className="lg:col-span-2">

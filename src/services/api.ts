@@ -44,6 +44,7 @@ const defaultHeaders = {
 export const QUERY_KEYS = {
   leaderboard: (gameMode: string) => ['leaderboard', gameMode],
   userHistory: (id: string) => ['userHistory', id],
+  recentScores: (gameMode: string) => ['recentScores', gameMode] as const,
 };
 
 interface ScoreSubmissionResponse {
@@ -139,4 +140,18 @@ export const leaderboardApi = {
       throw new Error('Network error occurred while submitting score');
     }
   }
+};
+
+export const recentScoresApi = {
+  getRecentScores: async (gameMode: string, limit: number = 10): Promise<LeaderboardEntry[]> => {
+    const response = await fetch(`${API_URL}/recent/${gameMode}?limit=${limit}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch recent scores');
+    }
+    const data = await response.json();
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to fetch recent scores');
+    }
+    return data.scores;
+  },
 }; 
