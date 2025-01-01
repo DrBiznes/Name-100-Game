@@ -89,9 +89,10 @@ export const leaderboardApi = {
   async getUserHistory(id: string): Promise<{
     history: ScoreHistoryEntry[];
     score: ScoreData;
+    total: number;
   }> {
     const response = await fetch(
-      `${API_URL}/scores/${id}?include_history=true&history_limit=10`
+      `${API_URL}/scores/${id}?include_history=true&history_limit=100`
     );
     const data = await response.json();
     
@@ -102,6 +103,7 @@ export const leaderboardApi = {
     return {
       history: data.history,
       score: data.score,
+      total: data.history.length,
     };
   },
 

@@ -5,6 +5,7 @@ import { formatTime, formatSubmissionDate } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { QUERY_KEYS, leaderboardApi, LeaderboardEntry } from '@/services/api';
 import { User } from 'lucide-react';
+import { Pagination, PaginationItem, PaginationLink, PaginationContent, PaginationPrevious, PaginationNext, PaginationEllipsis } from './ui/pagination';
 
 interface ScoreHistoryEntry {
   id: number;
@@ -34,16 +35,63 @@ function calculatePercentile(score: number, leaderboardData: LeaderboardEntry[])
   return Math.round((position / leaderboardData.length) * 100);
 }
 
+const ITEMS_PER_PAGE = 10;
+
 export function UserHistory() {
   const { id } = useParams();
   const [stats, setStats] = useState<ScoreStats | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Query for user history
+  // Query for user history - simplified to single request
   const { data: userData, isLoading: isLoadingHistory } = useQuery({
     queryKey: QUERY_KEYS.userHistory(id || ''),
     queryFn: () => leaderboardApi.getUserHistory(id || ''),
     enabled: !!id,
   });
+
+  // Calculate paginated data
+  const paginatedHistory = userData?.history?.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  // Update renderPaginationItems to use full history length
+  const renderPaginationItems = () => {
+    const items = [];
+    const totalPages = Math.ceil((userData?.history?.length || 0) / ITEMS_PER_PAGE);
+    
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - 1 && i <= currentPage + 1)
+      ) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationLink
+              onClick={() => setCurrentPage(i)}
+              isActive={currentPage === i}
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      } else if (
+        i === currentPage - 2 ||
+        i === currentPage + 2
+      ) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+    }
+    return items;
+  };
+
+  // Update pagination navigation
+  const totalPages = Math.ceil((userData?.history?.length || 0) / ITEMS_PER_PAGE);
 
   // Queries for leaderboard data
   const { data: leaderboard20 } = useQuery({
@@ -195,7 +243,7 @@ export function UserHistory() {
 
       <div className="space-y-4">
         <h3 className="text-xl font-semibold">Recent Games</h3>
-        {userData?.history.map((entry) => (
+        {paginatedHistory?.map((entry) => (
           <Link 
             key={entry.id}
             to={`/scores/${entry.id}`}
@@ -214,6 +262,26 @@ export function UserHistory() {
             </div>
           </Link>
         ))}
+        
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+              />
+            </PaginationItem>
+            
+            {renderPaginationItems()}
+            
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </Card>
   );

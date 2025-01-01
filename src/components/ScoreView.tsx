@@ -4,6 +4,7 @@ import { NameInput } from './NameInput';
 import { formatTime } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { QUERY_KEYS, leaderboardApi } from '@/services/api';
+import { Button } from './ui/button';
 
 export function ScoreView() {
   const { id } = useParams();
@@ -13,6 +14,18 @@ export function ScoreView() {
     queryFn: () => leaderboardApi.getUserHistory(id || ''),
     enabled: !!id,
   });
+
+  const handleShare = async () => {
+    try {
+      await navigator.share({
+        title: 'My Score',
+        url: window.location.href
+      });
+    } catch (err) {
+      // Fallback to copying to clipboard
+      navigator.clipboard.writeText(window.location.href);
+    }
+  };
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error instanceof Error ? error.message : 'Failed to load score'}</div>;
@@ -24,10 +37,20 @@ export function ScoreView() {
   return (
     <Card className="p-4 md:p-6 h-full overflow-auto border-0 shadow-none bg-transparent">
       <div className="flex flex-col gap-4 mb-6">
-        <h2 className="text-2xl font-bold text-center">
-          I Named {userData.score.name_count} in{' '}
-          <span className="font-mono">{formatTime(userData.score.score)}</span>
-        </h2>
+        <div className="flex items-center justify-center gap-2">
+          <h2 className="text-2xl font-bold text-center">
+            I Named {userData.score.name_count} in{' '}
+            <span className="font-mono">{formatTime(userData.score.score)}</span>
+          </h2>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={handleShare}
+            className="rounded-full"
+          >
+            <span className="material-icons">ios_share</span>
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
