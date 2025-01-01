@@ -17,6 +17,10 @@
         "wikipedia": "/wiki/Amaranthe"
       },
       {
+        "name": "Anitta",
+        "wikipedia": "/wiki/Anitta_(singer)"
+      },
+      {
         "name": "Aphrodite",
         "wikipedia": "/wiki/Aphrodite"
       },
@@ -359,6 +363,10 @@
       {
         "name": "ROSALÍA",
         "wikipedia": "/wiki/Rosalía_(singer)"
+      },
+      {
+        "name": "Tems",
+        "wikipedia": "/wiki/Tems_(singer)"
       }
     ]
   }

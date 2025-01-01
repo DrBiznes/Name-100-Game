@@ -5,21 +5,72 @@ import { NameCard } from './NameCard';
 import { Input } from './ui/input';
 import { Search } from 'lucide-react';
 import { type NameStats } from '@/services/api';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from './ui/pagination';
 
 interface NameListProps {
   stats: NameStats[];
   isLoading: boolean;
 }
 
+const ITEMS_PER_PAGE = 10;
+
 export function NameList({ stats, isLoading }: NameListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedName, setSelectedName] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const selectedNameRef = useRef<HTMLTableRowElement>(null);
 
   const filteredStats = stats.filter(stat => 
     stat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     stat.variants.some(v => v.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const totalPages = Math.ceil(filteredStats.length / ITEMS_PER_PAGE);
+  const paginatedStats = filteredStats.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const renderPaginationItems = () => {
+    const items = [];
+    
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - 1 && i <= currentPage + 1)
+      ) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationLink
+              onClick={() => setCurrentPage(i)}
+              isActive={currentPage === i}
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      } else if (
+        i === currentPage - 2 ||
+        i === currentPage + 2
+      ) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+    }
+    return items;
+  };
 
   return (
     <Card className="p-4 md:p-6">
@@ -30,7 +81,10 @@ export function NameList({ stats, isLoading }: NameListProps) {
           <Input
             placeholder="Search names..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1); // Reset to first page on search
+            }}
             className="pl-8"
           />
         </div>
@@ -49,7 +103,7 @@ export function NameList({ stats, isLoading }: NameListProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredStats.map((stat) => (
+              {paginatedStats.map((stat) => (
                 <TableRow
                   key={stat.name}
                   ref={selectedName === stat.name ? selectedNameRef : undefined}
@@ -69,6 +123,28 @@ export function NameList({ stats, isLoading }: NameListProps) {
               ))}
             </TableBody>
           </Table>
+
+          <div className="mt-4">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+                
+                {renderPaginationItems()}
+                
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
 
           <NameCard
             name={selectedName || ''}
