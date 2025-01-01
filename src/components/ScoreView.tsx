@@ -5,6 +5,7 @@ import { formatTime } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { QUERY_KEYS, leaderboardApi } from '@/services/api';
 import { Button } from './ui/button';
+import { toast } from "sonner";
 
 export function ScoreView() {
   const { id } = useParams();
@@ -21,9 +22,15 @@ export function ScoreView() {
         title: 'My Score',
         url: window.location.href
       });
+      toast.success('Shared successfully!');
     } catch (err) {
-      // Fallback to copying to clipboard
-      navigator.clipboard.writeText(window.location.href);
+      // If Web Share API fails or isn't supported, fallback to clipboard
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Link copied to clipboard!');
+      } catch (clipboardErr) {
+        toast.error('Failed to share or copy link');
+      }
     }
   };
 

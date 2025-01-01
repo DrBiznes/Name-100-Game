@@ -19,6 +19,7 @@ interface ScoreHistoryEntry {
 interface ScoreStats {
   averageTime: number;
   bestTime: number;
+  worstTime: number;
   totalGames: number;
   gameModeCounts: {
     [key: number]: number;
@@ -35,7 +36,7 @@ function calculatePercentile(score: number, leaderboardData: LeaderboardEntry[])
   return Math.round((position / leaderboardData.length) * 100);
 }
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 5;
 
 export function UserHistory() {
   const { id } = useParams();
@@ -115,19 +116,20 @@ export function UserHistory() {
   useEffect(() => {
     if (!userData?.history) return;
 
-    // Calculate stats as before
     const statCalc: ScoreStats = {
       averageTime: 0,
       bestTime: Infinity,
+      worstTime: -Infinity,
       totalGames: userData.history.length,
       gameModeCounts: {},
-      percentiles: {} // New field for percentiles
+      percentiles: {}
     };
 
     let totalTime = 0;
     userData.history.forEach((entry: ScoreHistoryEntry) => {
       totalTime += entry.score;
       statCalc.bestTime = Math.min(statCalc.bestTime, entry.score);
+      statCalc.worstTime = Math.max(statCalc.worstTime, entry.score);
       statCalc.gameModeCounts[entry.name_count] = 
         (statCalc.gameModeCounts[entry.name_count] || 0) + 1;
     });
@@ -192,48 +194,43 @@ export function UserHistory() {
           <p className="text-sm leading-relaxed text-muted-foreground space-y-1">
             This player has completed{' '}
             <span className="font-bold text-foreground">{stats.totalGames} games</span>
-            {stats.gameModeCounts[20] && (
-              <>
-                , including{' '}
-                <span className="font-bold text-foreground">
-                  {stats.gameModeCounts[20]} games
-                </span>{' '}
-                of Name 20
-              </>
-            )}
-            {stats.gameModeCounts[50] && (
-              <>
-                {' and '}
-                <span className="font-bold text-foreground">
-                  {stats.gameModeCounts[50]} games
-                </span>{' '}
-                of Name 50
-              </>
-            )}
-            {stats.gameModeCounts[100] && (
-              <>
-                {' and '}
-                <span className="font-bold text-foreground">
-                  {stats.gameModeCounts[100]} games
-                </span>{' '}
-                of Name 100
+            {userData?.score && (
+              <>, with their most recent score being{' '}
+                <span className="font-mono font-bold text-foreground">
+                  {formatTime(userData.score.score)}
+                </span> in Name {userData.score.name_count}
               </>
             )}.
+            
+            {Object.entries(stats.gameModeCounts).map(([mode, count], index, arr) => (
+              <span key={mode}>
+                {index === 0 ? ' They have played ' : ''}
+                <span className="font-bold text-foreground">{count} games</span>
+                {' of Name '}{mode}
+                {index < arr.length - 1 ? ', ' : '.'}
+              </span>
+            ))}
+            
             {Object.entries(stats.percentiles).map(([mode, percentile]) => (
               <span key={mode}>
                 {' '}Their best Name {mode} time ranks in the{' '}
                 <span className="font-bold text-foreground">
                   top {100 - percentile}%
-                </span>{' '}
-                of all players.
+                </span>
+                {' '}of all players.
               </span>
             ))}
+            
             <br />
-            Their best time is{' '}
+            Their fastest completion time is{' '}
             <span className="font-mono font-bold text-foreground">
               {formatTime(stats.bestTime)}
-            </span>{' '}
-            with an average completion time of{' '}
+            </span>
+            {' '}and their slowest is{' '}
+            <span className="font-mono font-bold text-foreground">
+              {formatTime(stats.worstTime)}
+            </span>
+            {', '}with an average completion time of{' '}
             <span className="font-mono font-bold text-foreground">
               {formatTime(stats.averageTime)}
             </span>.
