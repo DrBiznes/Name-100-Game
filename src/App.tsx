@@ -39,7 +39,7 @@ function AppContent() {
         <link rel="icon" type="image/png" href="./name100.png" />
       </Helmet>
       <Toaster richColors position="top-center" />
-      <div className="min-h-screen w-full bg-white text-black flex flex-col">
+      <div className="min-h-screen w-full text-black flex flex-col">
         <header className="w-full text-center p-4">
           <div className="max-w-7xl mx-auto">
             <h1 className="text-2xl md:text-4xl font-bold">NAME 100 WOMEN CHALLENGE</h1>

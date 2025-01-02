@@ -216,7 +216,7 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
         <div className="mt-4 flex justify-center">
           <Button 
             onClick={() => setShowCompletionDialog(true)}
-            className="w-full md:w-auto"
+            className="w-full md:w-auto bg-purple-500 hover:bg-purple-600"
           >
             Upload Score
           </Button>
