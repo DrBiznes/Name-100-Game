@@ -90,7 +90,7 @@ function AppContent() {
               } />
             </Routes>
             {showLeaderboard && (
-              <div className="lg:col-span-1">
+              <div className="lg:col-span-1 h-full">
                 <Leaderboard />
               </div>
             )}

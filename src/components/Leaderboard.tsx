@@ -30,6 +30,7 @@ import { QUERY_KEYS, leaderboardApi, LeaderboardEntry } from '@/services/api';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from "sonner";
+import { Separator } from './ui/separator';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -109,10 +110,13 @@ export function Leaderboard() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-center gap-2">
+    <div className="text-lg pt-4 font-comic">
+      <h2 className="flex items-center justify-center gap-2 text-2xl font-bold mb-2 font-comic">
         <Trophy className="h-6 w-6" />
-        <h2 className="text-2xl font-bold">Leaderboard</h2>
+        Leaderboard
+      </h2>
+      <div className="flex justify-center">
+        <Separator className="my-2 w-2/3" />
       </div>
 
       {!selectedMode ? (

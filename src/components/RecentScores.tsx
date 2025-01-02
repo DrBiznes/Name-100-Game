@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { Separator } from './ui/separator';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -110,10 +111,13 @@ export function RecentScores() {
         />
       </Helmet>
 
-      <div className="space-y-4">
-        <div className="flex items-center justify-center gap-2">
+      <div className="text-lg pt-4 font-comic">
+        <h2 className="flex items-center justify-center gap-2 text-2xl font-bold mb-2 font-comic">
           <History className="h-6 w-6" />
-          <h2 className="text-2xl font-bold">Recent Scores</h2>
+          Recent Scores
+        </h2>
+        <div className="flex justify-center">
+          <Separator className="my-2 w-2/3" />
         </div>
 
         <div className="flex justify-center">
