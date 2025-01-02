@@ -14,7 +14,7 @@ export function NavMenu() {
 
   return (
     <div className="text-center">
-      <Separator className="my-1 bg-gray-400 w-[600px] mx-auto" />
+      <Separator className="my-1 bg-gray-400 w-[90%] md:w-[70%] lg:w-[600px] mx-auto" />
       <div className="flex items-center justify-center space-x-2 text-sm md:text-base">
         {navItems.map((item, index) => (
           <React.Fragment key={item.path}>
