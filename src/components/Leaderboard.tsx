@@ -111,7 +111,7 @@ export function Leaderboard() {
 
   return (
     <div className="text-lg pt-4 font-comic">
-      <h2 className="flex items-center justify-center gap-2 text-2xl font-bold mb-2 font-comic">
+      <h2 className="flex items-center justify-center gap-2 text-2xl font-bold mb-2 font-['Chonburi']">
         <Trophy className="h-6 w-6" />
         Leaderboard
       </h2>

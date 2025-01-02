@@ -155,28 +155,28 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
       {/* Game Header */}
       <div className="flex flex-col gap-4 mb-4">
         <div className="flex items-center gap-2 justify-center">
-          <span className="text-xl md:text-2xl font-bold">I Can Name</span>
+          <span className="text-xl md:text-2xl font-bold font-['Chonburi']">I Can Name</span>
           <Select
             defaultValue="100"
             onValueChange={(value) => setTargetCount(Number(value) as GameCount)}
             disabled={isGameActive}
             value={targetCount.toString()}
           >
-            <SelectTrigger className="w-[110px]">
+            <SelectTrigger className="w-[110px] font-['Chonburi']">
               <SelectValue placeholder="100" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="header" disabled>
+              <SelectItem value="header" disabled className="font-['Chonburi']">
                 How Many?
               </SelectItem>
               {GAME_COUNTS.map((count) => (
-                <SelectItem key={count} value={count.toString()}>
+                <SelectItem key={count} value={count.toString()} className="font-['Chonburi']">
                   {count}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <span className="text-xl md:text-2xl font-bold">Women</span>
+          <span className="text-xl md:text-2xl font-bold font-['Chonburi']">Women</span>
         </div>
         
         <div className="flex items-center gap-4" ref={timerRef}>
@@ -185,7 +185,7 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
             value={(names.length / (completedGameCount || targetCount)) * 100} 
             className="w-full" 
           />
-          <span>{names.length}/{completedGameCount || targetCount}</span>
+          <span className="font-mono text-lg whitespace-nowrap">{names.length}/{completedGameCount || targetCount}</span>
         </div>
 
         <Button 
