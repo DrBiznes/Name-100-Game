@@ -196,7 +196,10 @@ export function UserHistory() {
               </span>
             </h2>
             <time className="text-sm text-muted-foreground block mb-4">
-              Joined {formatSubmissionDate(userData.score.submission_date)}
+              Joined {formatSubmissionDate(userData.history.reduce((earliest, entry) => 
+                new Date(entry.submission_date) < new Date(earliest) ? entry.submission_date : earliest,
+                userData.history[0].submission_date
+              ))}
             </time>
           </div>
         )}
