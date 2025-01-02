@@ -34,8 +34,8 @@ function AppContent() {
   return (
     <>
       <Helmet>
-        <title>Name100Women - QUICK name 100 women as fast as you can</title>
-        <meta name="description" content="Name100Women - QUICK name 100 women as fast as you can" />
+        <title>Name100Women - Home of the Official Name 100 Women Challenge</title>
+        <meta name="description" content="Name100Women - The Official Name 100 Women Challenge" />
         <link rel="icon" type="image/png" href="./name100.png" />
       </Helmet>
       <Toaster richColors position="top-center" />
