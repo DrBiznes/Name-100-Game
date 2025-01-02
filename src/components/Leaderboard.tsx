@@ -85,6 +85,7 @@ export function Leaderboard() {
             <PaginationLink
               onClick={() => setCurrentPage(i)}
               isActive={currentPage === i}
+              className="font-['Alegreya']"
             >
               {i}
             </PaginationLink>
@@ -96,7 +97,7 @@ export function Leaderboard() {
       ) {
         items.push(
           <PaginationItem key={i}>
-            <PaginationEllipsis />
+            <PaginationEllipsis className="font-['Alegreya']" />
           </PaginationItem>
         );
       }
@@ -110,7 +111,7 @@ export function Leaderboard() {
   };
 
   return (
-    <div className="text-lg pt-4 font-comic">
+    <div className="text-lg pt-4 font-['Alegreya']">
       <h2 className="flex items-center justify-center gap-2 text-2xl font-bold mb-2 font-['Chonburi']">
         <Trophy className="h-6 w-6" />
         Leaderboard
@@ -124,7 +125,7 @@ export function Leaderboard() {
           <Button
             variant="outline"
             size="lg"
-            className="w-48"
+            className="w-48 font-['Alegreya']"
             onClick={() => handleModeSelect('20')}
           >
             Name 20 Leaderboard
@@ -132,7 +133,7 @@ export function Leaderboard() {
           <Button
             variant="outline"
             size="lg"
-            className="w-48"
+            className="w-48 font-['Alegreya']"
             onClick={() => handleModeSelect('50')}
           >
             Name 50 Leaderboard
@@ -140,7 +141,7 @@ export function Leaderboard() {
           <Button
             variant="outline"
             size="lg"
-            className="w-48"
+            className="w-48 font-['Alegreya']"
             onClick={() => handleModeSelect('100')}
           >
             Name 100 Leaderboard
@@ -153,23 +154,23 @@ export function Leaderboard() {
               value={selectedMode}
               onValueChange={handleModeSelect}
             >
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-[200px] font-['Alegreya']">
                 <SelectValue placeholder="Select game mode">
                   Name {selectedMode} Leaderboard
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="20">Name 20 Leaderboard</SelectItem>
-                <SelectItem value="50">Name 50 Leaderboard</SelectItem>
-                <SelectItem value="100">Name 100 Leaderboard</SelectItem>
+                <SelectItem value="20" className="font-['Alegreya']">Name 20 Leaderboard</SelectItem>
+                <SelectItem value="50" className="font-['Alegreya']">Name 50 Leaderboard</SelectItem>
+                <SelectItem value="100" className="font-['Alegreya']">Name 100 Leaderboard</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {isLoading ? (
-            <div className="text-center py-8">Loading...</div>
+            <div className="text-center py-8 font-['Alegreya']">Loading...</div>
           ) : error ? (
-            <div className="text-center text-red-500 py-8">
+            <div className="text-center text-red-500 py-8 font-['Alegreya']">
               {error instanceof Error ? error.message : 'An error occurred'}
             </div>
           ) : (
@@ -177,14 +178,14 @@ export function Leaderboard() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-16">Rank</TableHead>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Username</TableHead>
-                    <TableHead>Time</TableHead>
-                    <TableHead className="text-right">Date</TableHead>
+                    <TableHead className="w-16 font-['Alegreya']">Rank</TableHead>
+                    <TableHead className="font-['Alegreya']">ID</TableHead>
+                    <TableHead className="font-['Alegreya']">Username</TableHead>
+                    <TableHead className="font-['Alegreya']">Time</TableHead>
+                    <TableHead className="text-right font-['Alegreya']">Date</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
+                <TableBody className="font-['Alegreya']">
                   {leaderboardData?.data.map((entry, index) => (
                     <TableRow key={entry.id}>
                       <TableCell className="font-medium">
@@ -215,11 +216,11 @@ export function Leaderboard() {
               </Table>
 
               <Pagination>
-                <PaginationContent>
+                <PaginationContent className="font-['Alegreya']">
                   <PaginationItem>
                     <PaginationPrevious
                       onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                      className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                      className={`${currentPage === 1 ? 'pointer-events-none opacity-50' : ''}`}
                     />
                   </PaginationItem>
                   
@@ -228,7 +229,7 @@ export function Leaderboard() {
                   <PaginationItem>
                     <PaginationNext
                       onClick={() => setCurrentPage(p => Math.min(leaderboardData?.totalPages || 0, p + 1))}
-                      className={currentPage === leaderboardData?.totalPages ? 'pointer-events-none opacity-50' : ''}
+                      className={`${currentPage === leaderboardData?.totalPages ? 'pointer-events-none opacity-50' : ''}`}
                     />
                   </PaginationItem>
                 </PaginationContent>

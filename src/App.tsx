@@ -106,7 +106,7 @@ function AppContent() {
                     href="https://ui.shadcn.com/" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-gray-600 hover:text-gray-900"
+                    className="text-foreground hover:text-primary transition-colors"
                   >
                     shadcn/ui
                   </a>
@@ -116,7 +116,7 @@ function AppContent() {
                     href="https://fonts.google.com/" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-gray-600 hover:text-gray-900"
+                    className="text-foreground hover:text-primary transition-colors"
                   >
                     Google Fonts
                   </a>
@@ -126,19 +126,19 @@ function AppContent() {
                     href="https://www.npmjs.com/package/react-confetti-explosion" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-gray-600 hover:text-gray-900"
+                    className="text-foreground hover:text-primary transition-colors"
                   >
                     react-confetti-explosion
                   </a>
                 </li>
               </ul>
-              <div className="text-gray-600 text-sm">
+              <div className="text-foreground text-sm">
                 © {new Date().getFullYear()}{' '}
                 <a 
                   href="https://www.jamino.me" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-gray-900"
+                  className="text-foreground hover:text-primary transition-colors"
                 >
                   Jamino
                 </a>
@@ -147,7 +147,7 @@ function AppContent() {
                   href="https://opensource.org/licenses/MIT" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-gray-900 underline"
+                  className="text-foreground hover:text-primary transition-colors underline"
                 >
                   MIT License
                 </a>

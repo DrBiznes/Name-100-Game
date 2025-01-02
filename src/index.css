@@ -6,25 +6,26 @@
 
 @layer base {
   :root {
-    --background: #C8A2D8;
-    --foreground: #040403;
-    --card: #9DD9D2;
-    --card-foreground: #040403;
-    --popover: #FFD6BA;
-    --popover-foreground: #040403;
-    --primary: #592E83;
-    --primary-foreground: #FFD6BA;
-    --secondary: #9DD9D2;
-    --secondary-foreground: #040403;
-    --muted: #FFD6BA;
-    --muted-foreground: #040403;
-    --accent: #FFD6BA;
-    --accent-foreground: #592E83;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: #FFD6BA;
-    --border: #9DD9D2;
-    --input: #FFD6BA;
-    --ring: #592E83;
+    --background: #2D1B3B;
+    --foreground: #FFD6BA;
+    --card: #453454;
+    --card-foreground: #FFD6BA;
+    --popover: #3D2A4B;
+    --popover-foreground: #FFD6BA;
+    --primary: #D49BA7;
+    --primary-foreground: #2D1B3B;
+    --secondary: #9C4C6E;
+    --secondary-foreground: #FFD6BA;
+    --muted: #453454;
+    --muted-foreground: #FFD6BA;
+    --accent: #8E5761;
+    --accent-foreground: #FFD6BA;
+    --destructive: #FF8674;
+    --destructive-foreground: #2D1B3B;
+    --border: #B76E79;
+    --input: #453454;
+    --ring: #B76E79;
+    --header: #E8A0AB;
     --radius: 0.5rem;
   }
 
@@ -41,7 +42,7 @@ body {
   font-family: "Alegreya", Georgia, serif;
   line-height: 1.6;
   background-color: var(--background);
-  color: #040403;
+  color: var(--foreground);
   display: flex;
   flex-direction: column;
 }
@@ -54,46 +55,48 @@ body {
 h1, h2, h3 {
   font-family: "Chonburi", "Times New Roman", serif;
   margin-bottom: 1rem;
-  color: #592E83;
+  color: var(--header);
 }
 
 button {
   border-radius: 8px;
-  border: 1px solid transparent;
+  border: 1px solid var(--border);
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #FFD6BA;
-  color: #592E83;
+  background-color: var(--primary);
+  color: var(--primary-foreground);
   cursor: pointer;
   transition: all 0.25s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 button:hover {
-  background-color: #9DD9D2;
-  color: #040403;
-  border-color: #592E83;
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+  border-color: var(--primary);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 input, select {
-  background-color: #FFD6BA;
-  color: #040403;
-  border: 1px solid #9DD9D2;
+  background-color: var(--input);
+  color: var(--foreground);
+  border: 1px solid var(--border);
 }
 
 input:focus, select:focus {
-  border-color: #592E83;
+  border-color: var(--primary);
   outline: none;
-  ring-color: #592E83;
+  ring-color: var(--ring);
 }
 
 footer a {
   text-decoration: none;
-  color: #592E83;
+  color: var(--primary);
   transition: color 0.2s ease;
 }
 
 footer a:hover {
-  color: #FFD6BA;
+  color: var(--accent);
 }

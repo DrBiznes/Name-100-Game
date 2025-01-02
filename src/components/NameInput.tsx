@@ -44,7 +44,7 @@ export function NameInput({
         ) : input.status === 'pending' ? (
           <span className="material-icons text-yellow-500 animate-spin" style={{ fontSize: '16px' }}>refresh</span>
         ) : (
-          <span className="text-sm text-gray-500">{index + 1}.</span>
+          <span className="text-sm font-bold text-foreground">{index + 1}.</span>
         )}
       </span>
       <Input
