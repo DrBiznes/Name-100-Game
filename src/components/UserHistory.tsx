@@ -5,6 +5,7 @@ import { formatTime, formatSubmissionDate } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { QUERY_KEYS, leaderboardApi, LeaderboardEntry } from '@/services/api';
 import { User } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import { Pagination, PaginationItem, PaginationLink, PaginationContent, PaginationPrevious, PaginationNext, PaginationEllipsis } from './ui/pagination';
 
 interface ScoreHistoryEntry {
@@ -171,118 +172,130 @@ export function UserHistory() {
   if (isLoadingHistory) return <div>Loading...</div>;
 
   return (
-    <Card className="p-4 md:p-6">
+    <>
       {userData?.score && (
-        <div className="mb-8">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-            <User className="h-4 w-4" />
-            <span>Submitted by</span>
+        <Helmet>
+          <title>Name100Women - {userData.score.username}'s Profile</title>
+          <meta 
+            name="description" 
+            content={`View ${userData.score.username}'s game history and stats - ${stats?.totalGames || 0} games played with best time of ${stats ? formatTime(stats.bestTime) : 'N/A'}`} 
+          />
+        </Helmet>
+      )}
+
+      <Card className="p-4 md:p-6">
+        {userData?.score && (
+          <div className="mb-8">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+              <User className="h-4 w-4" />
+              <span>Submitted by</span>
+            </div>
+            <h2 className="text-3xl font-bold mb-2">
+              <span style={{ color: userData.score.username_color }}>
+                {userData.score.username}
+              </span>
+            </h2>
+            <time className="text-sm text-muted-foreground block mb-4">
+              Joined {formatSubmissionDate(userData.score.submission_date)}
+            </time>
           </div>
-          <h2 className="text-3xl font-bold mb-2">
-            <span style={{ color: userData.score.username_color }}>
-              {userData.score.username}
-            </span>
-          </h2>
-          <time className="text-sm text-muted-foreground block mb-4">
-            Joined {formatSubmissionDate(userData.score.submission_date)}
-          </time>
-        </div>
-      )}
+        )}
 
-      {stats && (
-        <div className="prose mb-8">
-          <p className="text-sm leading-relaxed text-muted-foreground space-y-1">
-            This player has completed{' '}
-            <span className="font-bold text-foreground">{stats.totalGames} games</span>
-            {userData?.score && (
-              <>. This attempt submitted on{' '}
-                <span className="font-bold text-foreground">
-                  {formatSubmissionDate(userData.score.submission_date)}
-                </span> took them{' '}
-                <span className="font-mono font-bold text-foreground">
-                  {formatTime(userData.score.score)}
-                </span> to name {userData.score.name_count} women
-              </>
-            )}.
-            
-            {Object.entries(stats.gameModeCounts).map(([mode, count], index, arr) => (
-              <span key={mode}>
-                {index === 0 ? ' They have played ' : ''}
-                <span className="font-bold text-foreground">{count} games</span>
-                {' of Name '}{mode}
-                {index < arr.length - 1 ? ', ' : '.'}
-              </span>
-            ))}
-            
-            {Object.entries(stats.percentiles).map(([mode, percentile]) => (
-              <span key={mode}>
-                {' '}Their best Name {mode} time ranks in the{' '}
-                <span className="font-bold text-foreground">
-                  top {100 - percentile}%
+        {stats && (
+          <div className="prose mb-8">
+            <p className="text-sm leading-relaxed text-muted-foreground space-y-1">
+              This player has completed{' '}
+              <span className="font-bold text-foreground">{stats.totalGames} games</span>
+              {userData?.score && (
+                <>. This attempt submitted on{' '}
+                  <span className="font-bold text-foreground">
+                    {formatSubmissionDate(userData.score.submission_date)}
+                  </span> took them{' '}
+                  <span className="font-mono font-bold text-foreground">
+                    {formatTime(userData.score.score)}
+                  </span> to name {userData.score.name_count} women
+                </>
+              )}.
+              
+              {Object.entries(stats.gameModeCounts).map(([mode, count], index, arr) => (
+                <span key={mode}>
+                  {index === 0 ? ' They have played ' : ''}
+                  <span className="font-bold text-foreground">{count} games</span>
+                  {' of Name '}{mode}
+                  {index < arr.length - 1 ? ', ' : '.'}
                 </span>
-                {' '}of all players.
+              ))}
+              
+              {Object.entries(stats.percentiles).map(([mode, percentile]) => (
+                <span key={mode}>
+                  {' '}Their best Name {mode} time ranks in the{' '}
+                  <span className="font-bold text-foreground">
+                    top {100 - percentile}%
+                  </span>
+                  {' '}of all players.
+                </span>
+              ))}
+              
+              <br />
+              Their fastest completion time is{' '}
+              <span className="font-mono font-bold text-foreground">
+                {formatTime(stats.bestTime)}
               </span>
-            ))}
-            
-            <br />
-            Their fastest completion time is{' '}
-            <span className="font-mono font-bold text-foreground">
-              {formatTime(stats.bestTime)}
-            </span>
-            {' '}and their slowest is{' '}
-            <span className="font-mono font-bold text-foreground">
-              {formatTime(stats.worstTime)}
-            </span>
-            {', '}with an average completion time of{' '}
-            <span className="font-mono font-bold text-foreground">
-              {formatTime(stats.averageTime)}
-            </span>.
-          </p>
-        </div>
-      )}
+              {' '}and their slowest is{' '}
+              <span className="font-mono font-bold text-foreground">
+                {formatTime(stats.worstTime)}
+              </span>
+              {', '}with an average completion time of{' '}
+              <span className="font-mono font-bold text-foreground">
+                {formatTime(stats.averageTime)}
+              </span>.
+            </p>
+          </div>
+        )}
 
-      <div className="space-y-4">
-        <h3 className="text-xl font-semibold">Recent Games</h3>
-        {paginatedHistory?.map((entry) => (
-          <Link 
-            key={entry.id}
-            to={`/scores/${entry.id}`}
-            className="block hover:bg-muted transition-colors"
-          >
-            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-              <div className="flex flex-col">
-                <span className="font-medium">Name {entry.name_count}</span>
-                <span className="text-sm text-muted-foreground">
-                  {formatSubmissionDate(entry.submission_date)}
+        <div className="space-y-4">
+          <h3 className="text-xl font-semibold">Recent Games</h3>
+          {paginatedHistory?.map((entry) => (
+            <Link 
+              key={entry.id}
+              to={`/scores/${entry.id}`}
+              className="block hover:bg-muted transition-colors"
+            >
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div className="flex flex-col">
+                  <span className="font-medium">Name {entry.name_count}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {formatSubmissionDate(entry.submission_date)}
+                  </span>
+                </div>
+                <span className="font-mono text-lg font-bold">
+                  {formatTime(entry.score)}
                 </span>
               </div>
-              <span className="font-mono text-lg font-bold">
-                {formatTime(entry.score)}
-              </span>
-            </div>
-          </Link>
-        ))}
-        
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-              />
-            </PaginationItem>
-            
-            {renderPaginationItems()}
-            
-            <PaginationItem>
-              <PaginationNext
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
-    </Card>
+            </Link>
+          ))}
+          
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                />
+              </PaginationItem>
+              
+              {renderPaginationItems()}
+              
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      </Card>
+    </>
   );
 } 

@@ -191,7 +191,7 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
         <Button 
           onClick={startGame}
           disabled={isLoading || isGameActive}
-          className="w-full md:w-auto"
+          className="w-full md:w-auto bg-purple-500 hover:bg-purple-600"
         >
           Start Game
         </Button>

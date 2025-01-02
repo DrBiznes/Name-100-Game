@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useState } from 'react';
 import { NameList } from '@/components/NameList';
 import { QUERY_KEYS, statsApi, type StatsResponse } from '@/services/api';
+import { Helmet } from 'react-helmet-async';
 
 export function Stats() {
   const [selectedMode, setSelectedMode] = useState<string>('all');
@@ -72,6 +73,14 @@ export function Stats() {
 
   return (
     <>
+      <Helmet>
+        <title>Name100Women - Statistics {selectedMode !== 'all' ? `(Name ${selectedMode})` : ''}</title>
+        <meta 
+          name="description" 
+          content={`Statistics for Name100Women game${selectedMode !== 'all' ? ` in Name ${selectedMode} mode` : ''} - View most named women and common variations.`} 
+        />
+      </Helmet>
+
       <div className="lg:col-span-1">
         <Card className="p-4 md:p-6">
           <div className="flex items-center justify-between mb-6">

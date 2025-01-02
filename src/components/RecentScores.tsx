@@ -22,6 +22,7 @@ import { QUERY_KEYS, recentScoresApi, LeaderboardEntry } from '@/services/api';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from "sonner";
+import { Helmet } from 'react-helmet-async';
 import {
   Select,
   SelectContent,
@@ -100,98 +101,108 @@ export function RecentScores() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-center gap-2">
-        <History className="h-6 w-6" />
-        <h2 className="text-2xl font-bold">Recent Scores</h2>
-      </div>
+    <>
+      <Helmet>
+        <title>Name100Women - Recent Scores (Name {selectedMode})</title>
+        <meta 
+          name="description" 
+          content={`View recent scores for Name${selectedMode} mode - See how others performed in the Name100Women challenge`} 
+        />
+      </Helmet>
 
-      <div className="flex justify-center">
-        <Select
-          value={selectedMode}
-          onValueChange={(value) => {
-            setSelectedMode(value as '20' | '50' | '100');
-            setCurrentPage(1);
-          }}
-        >
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Select game mode">
-              Name {selectedMode} Mode
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="20">Name 20 Mode</SelectItem>
-            <SelectItem value="50">Name 50 Mode</SelectItem>
-            <SelectItem value="100">Name 100 Mode</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {isLoading ? (
-        <div className="text-center py-8">Loading...</div>
-      ) : error ? (
-        <div className="text-center text-red-500 py-8">
-          {error instanceof Error ? error.message : 'An error occurred'}
+      <div className="space-y-4">
+        <div className="flex items-center justify-center gap-2">
+          <History className="h-6 w-6" />
+          <h2 className="text-2xl font-bold">Recent Scores</h2>
         </div>
-      ) : (
-        <>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Username</TableHead>
-                <TableHead>Time</TableHead>
-                <TableHead className="text-right">Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedData?.map((entry) => (
-                <TableRow key={entry.id}>
-                  <TableCell>
-                    <Link 
-                      to={`/scores/${entry.id}`}
-                      className="text-blue-600 hover:text-blue-800 hover:underline"
-                    >
-                      #{entry.id}
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    <span style={{ color: entry.username_color }}>
-                      {entry.username}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    {formatTime(Number(entry.score))}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {formatSubmissionDate(entry.submission_date)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
 
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                />
-              </PaginationItem>
-              
-              {renderPaginationItems()}
-              
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() => setCurrentPage(p => Math.min(recentScoresData?.totalPages || 0, p + 1))}
-                  className={currentPage === recentScoresData?.totalPages ? 'pointer-events-none opacity-50' : ''}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </>
-      )}
-    </div>
+        <div className="flex justify-center">
+          <Select
+            value={selectedMode}
+            onValueChange={(value) => {
+              setSelectedMode(value as '20' | '50' | '100');
+              setCurrentPage(1);
+            }}
+          >
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Select game mode">
+                Name {selectedMode} Mode
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="20">Name 20 Mode</SelectItem>
+              <SelectItem value="50">Name 50 Mode</SelectItem>
+              <SelectItem value="100">Name 100 Mode</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {isLoading ? (
+          <div className="text-center py-8">Loading...</div>
+        ) : error ? (
+          <div className="text-center text-red-500 py-8">
+            {error instanceof Error ? error.message : 'An error occurred'}
+          </div>
+        ) : (
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Username</TableHead>
+                  <TableHead>Time</TableHead>
+                  <TableHead className="text-right">Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedData?.map((entry) => (
+                  <TableRow key={entry.id}>
+                    <TableCell>
+                      <Link 
+                        to={`/scores/${entry.id}`}
+                        className="text-blue-600 hover:text-blue-800 hover:underline"
+                      >
+                        #{entry.id}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <span style={{ color: entry.username_color }}>
+                        {entry.username}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      {formatTime(Number(entry.score))}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatSubmissionDate(entry.submission_date)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+                
+                {renderPaginationItems()}
+                
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => setCurrentPage(p => Math.min(recentScoresData?.totalPages || 0, p + 1))}
+                    className={currentPage === recentScoresData?.totalPages ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </>
+        )}
+      </div>
+    </>
   );
 } 

@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NavMenu } from './components/NavMenu';
 import { RecentScores } from './components/RecentScores';
 import { Stats } from './components/Stats';
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,6 +33,11 @@ function AppContent() {
 
   return (
     <>
+      <Helmet>
+        <title>Name100Women - QUICK name 100 women as fast as you can</title>
+        <meta name="description" content="Name100Women - QUICK name 100 women as fast as you can" />
+        <link rel="icon" type="image/png" href="./name100.png" />
+      </Helmet>
       <Toaster richColors position="top-center" />
       <div className="min-h-screen w-full bg-white text-black flex flex-col">
         <header className="w-full text-center p-4">
@@ -161,11 +167,13 @@ function AppContent() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <HashRouter>
-        <AppContent />
-      </HashRouter>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <HashRouter>
+          <AppContent />
+        </HashRouter>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 }
 

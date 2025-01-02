@@ -4,7 +4,7 @@ export function Rules() {
   return (
     <div className="text-lg pt-6 font-comic">
       <h2 className="flex items-center gap-2 text-2xl font-bold mb-4 font-comic">
-        <span className="material-icons">description</span>
+        <span className="material-icons">gavel</span>
         Rules
       </h2>
       <ol>
