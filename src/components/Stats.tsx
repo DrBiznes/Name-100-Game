@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { NameList } from '@/components/NameList';
 import { QUERY_KEYS, statsApi, type StatsResponse } from '@/services/api';
 import { Helmet } from 'react-helmet-async';
+import { Separator } from './ui/separator';
 
 export function Stats() {
   const [selectedMode, setSelectedMode] = useState<string>('all');
@@ -82,33 +83,39 @@ export function Stats() {
       </Helmet>
 
       <div className="lg:col-span-1">
-        <Card className="p-4 md:p-6 border-0 shadow-none">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Statistics</h2>
-            <Select
-              value={selectedMode}
-              onValueChange={setSelectedMode}
-            >
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Select game mode">
-                  {selectedMode === 'all' ? 'All Modes' : `Name ${selectedMode}`}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Modes</SelectItem>
-                <SelectItem value="20">Name 20</SelectItem>
-                <SelectItem value="50">Name 50</SelectItem>
-                <SelectItem value="100">Name 100</SelectItem>
-              </SelectContent>
-            </Select>
+        <Card className="p-4 md:p-6 bg-transparent border-0 shadow-none">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-4">
+              <h2 className="text-3xl font-bold font-['Chonburi'] text-header leading-none">Statistics</h2>
+              <Select
+                value={selectedMode}
+                onValueChange={setSelectedMode}
+              >
+                <SelectTrigger className="w-[160px] font-['Alegreya'] h-8 -mt-3">
+                  <SelectValue placeholder="Select game mode">
+                    {selectedMode === 'all' ? 'All Modes' : `Name ${selectedMode}`}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all" className="font-['Alegreya']">All Modes</SelectItem>
+                  <SelectItem value="20" className="font-['Alegreya']">Name 20</SelectItem>
+                  <SelectItem value="50" className="font-['Alegreya']">Name 50</SelectItem>
+                  <SelectItem value="100" className="font-['Alegreya']">Name 100</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <div className="mb-6">
+            <Separator className="my-2" />
           </div>
 
           {isLoading ? (
-            <div>Loading stats...</div>
+            <div className="font-['Alegreya'] text-muted-foreground">Loading stats...</div>
           ) : statsData ? (
             renderStatsParagraph()
           ) : (
-            <div>Failed to load stats</div>
+            <div className="font-['Alegreya'] text-destructive">Failed to load stats</div>
           )}
         </Card>
       </div>

@@ -55,20 +55,20 @@ export function GameCompletionDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] overflow-visible">
+      <DialogContent className="sm:max-w-[425px] overflow-visible bg-background border-primary">
         <DialogHeader>
-          <DialogTitle className="text-xl">🎉 Congratulations!</DialogTitle>
-          <DialogDescription className="text-base pt-2">
+          <DialogTitle className="text-xl font-['Chonburi'] text-header">🎉 Congratulations!</DialogTitle>
+          <DialogDescription className="text-base pt-2 font-['Alegreya'] text-foreground">
             You completed the game in {formatTime(elapsedTime)}!
           </DialogDescription>
         </DialogHeader>
         
         <div className="grid gap-4 py-4">
           <div className="flex flex-col gap-4 items-center">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground font-['Alegreya']">
               Enter a 3-letter username to submit your score to the leaderboard:
             </p>
-            <p className="text-xs text-muted-foreground text-center">
+            <p className="text-xs text-muted-foreground text-center font-['Alegreya']">
               Use letters and special characters (!$?&()#@+=/)
             </p>
             <InputOTP
@@ -82,7 +82,7 @@ export function GameCompletionDialog({
                 <InputOTPSlot index={2} />
               </InputOTPGroup>
             </InputOTP>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground font-['Alegreya']">
               Your score will only be visible on the leaderboard after submission.
             </p>
           </div>
@@ -100,12 +100,18 @@ export function GameCompletionDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+          <Button 
+            variant="outline" 
+            onClick={onClose} 
+            disabled={isSubmitting}
+            className="font-['Alegreya']"
+          >
             Close
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={username.length !== 3 || !token || isSubmitting}
+            className="font-['Alegreya']"
           >
             {isSubmitting ? "Submitting..." : "Submit Score"}
           </Button>

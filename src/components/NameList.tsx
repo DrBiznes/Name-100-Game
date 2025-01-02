@@ -14,6 +14,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from './ui/pagination';
+import { Separator } from './ui/separator';
 
 interface NameListProps {
   stats: NameStats[];
@@ -53,6 +54,7 @@ export function NameList({ stats, isLoading }: NameListProps) {
             <PaginationLink
               onClick={() => setCurrentPage(i)}
               isActive={currentPage === i}
+              className="font-['Alegreya']"
             >
               {i}
             </PaginationLink>
@@ -64,7 +66,7 @@ export function NameList({ stats, isLoading }: NameListProps) {
       ) {
         items.push(
           <PaginationItem key={i}>
-            <PaginationEllipsis />
+            <PaginationEllipsis className="font-['Alegreya']" />
           </PaginationItem>
         );
       }
@@ -73,10 +75,10 @@ export function NameList({ stats, isLoading }: NameListProps) {
   };
 
   return (
-    <Card className="p-4 md:p-6 border-0 shadow-none">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">Name Frequencies</h2>
-        <div className="relative w-64">
+    <Card className="p-4 md:p-6 bg-transparent border-0 shadow-none">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-3xl font-bold font-['Chonburi'] text-header leading-none">Name Frequencies</h2>
+        <div className="relative w-64 -mt-3">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search names..."
@@ -85,24 +87,28 @@ export function NameList({ stats, isLoading }: NameListProps) {
               setSearchTerm(e.target.value);
               setCurrentPage(1); // Reset to first page on search
             }}
-            className="pl-8"
+            className="pl-8 font-['Alegreya'] bg-muted text-foreground placeholder:text-muted-foreground focus-visible:ring-primary h-8"
           />
         </div>
       </div>
 
+      <div className="mb-6">
+        <Separator className="my-2" />
+      </div>
+
       {isLoading ? (
-        <div className="text-center py-8">Loading names...</div>
+        <div className="text-center py-8 font-['Alegreya'] text-muted-foreground">Loading names...</div>
       ) : (
         <div className="relative">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Frequency</TableHead>
-                <TableHead>Variations</TableHead>
+                <TableHead className="font-['Alegreya']">Name</TableHead>
+                <TableHead className="font-['Alegreya']">Frequency</TableHead>
+                <TableHead className="font-['Alegreya']">Variations</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody className="font-['Alegreya']">
               {paginatedStats.map((stat) => (
                 <TableRow
                   key={stat.name}
@@ -126,7 +132,7 @@ export function NameList({ stats, isLoading }: NameListProps) {
 
           <div className="mt-4">
             <Pagination>
-              <PaginationContent>
+              <PaginationContent className="font-['Alegreya']">
                 <PaginationItem>
                   <PaginationPrevious
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
