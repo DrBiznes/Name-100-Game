@@ -82,7 +82,7 @@ export function Stats() {
       </Helmet>
 
       <div className="lg:col-span-1">
-        <Card className="p-4 md:p-6">
+        <Card className="p-4 md:p-6 border-0 shadow-none">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">Statistics</h2>
             <Select

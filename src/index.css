@@ -4,25 +4,25 @@
 
 @layer base {
   :root {
-    --background: #FFDAB9;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --background: #C8A2D8;
+    --foreground: #040403;
+    --card: #9DD9D2;
+    --card-foreground: #040403;
+    --popover: #FFD6BA;
+    --popover-foreground: #040403;
+    --primary: #592E83;
+    --primary-foreground: #FFD6BA;
+    --secondary: #9DD9D2;
+    --secondary-foreground: #040403;
+    --muted: #FFD6BA;
+    --muted-foreground: #040403;
+    --accent: #FFD6BA;
+    --accent-foreground: #592E83;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --destructive-foreground: #FFD6BA;
+    --border: #9DD9D2;
+    --input: #FFD6BA;
+    --ring: #592E83;
     --radius: 0.5rem;
   }
 
@@ -38,20 +38,21 @@ body {
   min-height: 100vh;
   font-family: "Courier New", Courier, monospace;
   line-height: 1.6;
-  background-color: #C8A2D8;
-  color: #000;
+  background-color: var(--background);
+  color: #040403;
   display: flex;
   flex-direction: column;
 }
 
 #root {
-  background-color: #C8A2D8;
+  background-color: var(--background);
 }
 
 /* Other styles */
 h1, h2, h3 {
   font-family: "Times New Roman", Times, serif;
   margin-bottom: 1rem;
+  color: #592E83;
 }
 
 button {
@@ -61,12 +62,36 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #FFD6BA;
+  color: #592E83;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: all 0.25s ease;
+}
+
+button:hover {
+  background-color: #9DD9D2;
+  color: #040403;
+  border-color: #592E83;
+}
+
+input, select {
+  background-color: #FFD6BA;
+  color: #040403;
+  border: 1px solid #9DD9D2;
+}
+
+input:focus, select:focus {
+  border-color: #592E83;
+  outline: none;
+  ring-color: #592E83;
 }
 
 footer a {
   text-decoration: none;
+  color: #592E83;
   transition: color 0.2s ease;
+}
+
+footer a:hover {
+  color: #FFD6BA;
 }

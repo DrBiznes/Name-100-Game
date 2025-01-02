@@ -11,14 +11,14 @@ export function Rules() {
       <div className="flex justify-center">
         <Separator className="my-2 w-2/3" />
       </div>
-      <ol className="list-decimal pl-6 font-bold">
+      <ul className="list-disc pl-6 font-bold">
         <li className="mb-2">DONT USE GOOGLE</li>
         <li className="mb-2">CAN BE DEAD WOMEN</li>
         <li className="mb-2">THEY MUST HAVE A WIKIPEDIA PAGE</li>
-        <li className="mb-2">no fictional characters must be real ass women or a god</li>
+        <li className="mb-2">No fictional characters must be a real ass women or a god</li>
         <li className="mb-2">Capitalization and accent marks don't matter</li>
         <li className="mb-2">Press ENTER or TAB to verify each name and automatically move the cursor to the next box</li>
-      </ol>
+      </ul>
     </div>
   );
 } 

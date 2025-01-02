@@ -73,7 +73,7 @@ export function NameList({ stats, isLoading }: NameListProps) {
   };
 
   return (
-    <Card className="p-4 md:p-6">
+    <Card className="p-4 md:p-6 border-0 shadow-none">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold">Name Frequencies</h2>
         <div className="relative w-64">
