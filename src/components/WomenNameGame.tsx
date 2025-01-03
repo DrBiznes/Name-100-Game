@@ -162,7 +162,7 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
             disabled={isGameActive}
             value={targetCount.toString()}
           >
-            <SelectTrigger className="w-[110px] font-['Chonburi']">
+            <SelectTrigger className="w-[105px] font-['Chonburi']">
               <SelectValue placeholder="100" />
             </SelectTrigger>
             <SelectContent>
