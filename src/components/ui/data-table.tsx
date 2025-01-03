@@ -97,7 +97,7 @@ export function DataTable<TData, TValue>({
                   return (
                     <TableHead 
                       key={header.id} 
-                      className="font-['Alegreya'] text-header font-semibold"
+                      className="font-['Alegreya'] text-foreground font-semibold"
                     >
                       {header.isPlaceholder
                         ? null
@@ -119,9 +119,9 @@ export function DataTable<TData, TValue>({
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
-                    className={`border-border hover:bg-accent/50 ${
+                    className={`border-border transition-colors ${
                       row.index % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'
-                    } ${customProps.className || ''}`}
+                    } hover:bg-accent hover:bg-opacity-20 hover:text-accent-foreground ${customProps.className || ''}`}
                     onClick={() => onRowClick?.(row.original)}
                     {...customProps}
                   >
