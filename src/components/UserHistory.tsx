@@ -107,7 +107,7 @@ export function UserHistory() {
         .filter(entry => entry.name_count === 20)
         .reduce((min, entry) => Math.min(min, entry.score), Infinity);
       if (bestScore20 !== Infinity) {
-        statCalc.percentiles[20] = calculatePercentile(bestScore20, leaderboard20);
+        statCalc.percentiles[20] = calculatePercentile(bestScore20, leaderboard20.leaderboard);
       }
     }
 
@@ -117,7 +117,7 @@ export function UserHistory() {
         .filter(entry => entry.name_count === 50)
         .reduce((min, entry) => Math.min(min, entry.score), Infinity);
       if (bestScore50 !== Infinity) {
-        statCalc.percentiles[50] = calculatePercentile(bestScore50, leaderboard50);
+        statCalc.percentiles[50] = calculatePercentile(bestScore50, leaderboard50.leaderboard);
       }
     }
 
@@ -126,7 +126,7 @@ export function UserHistory() {
         .filter(entry => entry.name_count === 100)
         .reduce((min, entry) => Math.min(min, entry.score), Infinity);
       if (bestScore100 !== Infinity) {
-        statCalc.percentiles[100] = calculatePercentile(bestScore100, leaderboard100);
+        statCalc.percentiles[100] = calculatePercentile(bestScore100, leaderboard100.leaderboard);
       }
     }
 

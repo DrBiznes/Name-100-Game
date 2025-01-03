@@ -174,8 +174,8 @@ export function RecentScores() {
               className="w-80 bg-card text-card-foreground border-border shadow-lg"
               sideOffset={8}
             >
-              <div className="flex gap-2 items-start">
-                <span className="material-icons text-header text-lg">info</span>
+              <div className="flex gap-2 items-center">
+                <span className="material-icons text-header">info</span>
                 <p className="text-sm font-['Alegreya'] text-card-foreground">
                   Click anywhere on a row to view the detailed score
                 </p>

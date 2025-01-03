@@ -12,12 +12,15 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from './ui/hover-card';
 import { UsernameBadge } from './ui/UsernameBadge';
+import { RefreshTimer } from './ui/refresh-timer';
 
 const ITEMS_PER_PAGE = 10;
 
 interface LeaderboardResponse {
   data: LeaderboardEntry[];
   totalPages: number;
+  cacheTimestamp: string;
+  cacheExpiresIn: number;
 }
 
 // Separate table component to prevent full remounts
@@ -104,11 +107,16 @@ export function Leaderboard() {
   const { data: leaderboardData, isLoading, error } = useQuery({
     queryKey: [...QUERY_KEYS.leaderboard(selectedMode || ''), currentPage],
     queryFn: async (): Promise<LeaderboardResponse> => {
-      if (!selectedMode) return { data: [], totalPages: 0 };
+      if (!selectedMode) return { 
+        data: [], 
+        totalPages: 0,
+        cacheTimestamp: new Date().toISOString(),
+        cacheExpiresIn: 0
+      };
       
       try {
         const response = await leaderboardApi.getLeaderboard(selectedMode);
-        const sortedData = [...response].sort((a, b) => a.score - b.score);
+        const sortedData = [...response.leaderboard].sort((a, b) => a.score - b.score);
         const totalPages = Math.ceil(sortedData.length / ITEMS_PER_PAGE);
         const paginatedData = sortedData.slice(
           (currentPage - 1) * ITEMS_PER_PAGE,
@@ -117,7 +125,9 @@ export function Leaderboard() {
         
         return { 
           data: paginatedData, 
-          totalPages 
+          totalPages,
+          cacheTimestamp: response.cacheTimestamp,
+          cacheExpiresIn: response.cacheExpiresIn
         };
       } catch (err) {
         toast.error("Failed to load leaderboard");
@@ -125,7 +135,22 @@ export function Leaderboard() {
       }
     },
     enabled: !!selectedMode,
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 10 * 60 * 1000, // 10 minutes - matches server cache
+    gcTime: 10 * 60 * 1000, // 10 minutes - align with server cache
+    refetchInterval: (query) => {
+      if (!query.state.data) return false;
+      
+      // Calculate time until cache expires
+      const cacheTimestamp = new Date(query.state.data.cacheTimestamp).getTime();
+      const expiresAt = cacheTimestamp + (query.state.data.cacheExpiresIn * 1000);
+      const now = Date.now();
+      
+      return Math.max(expiresAt - now, 0);
+    },
+    // Only refetch when cache expires
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   return (
@@ -197,11 +222,19 @@ export function Leaderboard() {
                 className="w-80 bg-card text-card-foreground border-border shadow-lg"
                 sideOffset={8}
               >
-                <div className="flex gap-2 items-start">
-                  <span className="material-icons text-header text-lg">info</span>
-                  <p className="text-sm font-['Alegreya'] text-card-foreground">
-                    Click anywhere on a row to view the detailed score
-                  </p>
+                <div className="space-y-2">
+                  <div className="flex gap-2 items-center">
+                    <span className="material-icons text-header">info</span>
+                    <p className="text-sm font-['Alegreya'] text-card-foreground">
+                      Click anywhere on a row to view the detailed score
+                    </p>
+                  </div>
+                  {leaderboardData && (
+                    <RefreshTimer
+                      cacheTimestamp={leaderboardData.cacheTimestamp}
+                      cacheExpiresIn={leaderboardData.cacheExpiresIn}
+                    />
+                  )}
                 </div>
               </HoverCardContent>
             </HoverCard>

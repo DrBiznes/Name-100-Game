@@ -6,6 +6,8 @@ import { NameList } from '@/components/NameList';
 import { QUERY_KEYS, statsApi, type StatsResponse } from '@/services/api';
 import { Helmet } from 'react-helmet-async';
 import { Separator } from './ui/separator';
+import { RefreshTimer } from './ui/refresh-timer';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from './ui/hover-card';
 
 export function Stats() {
   const [selectedMode, setSelectedMode] = useState<string>('all');
@@ -13,7 +15,22 @@ export function Stats() {
   const { data: statsData, isLoading } = useQuery<StatsResponse>({
     queryKey: QUERY_KEYS.stats(selectedMode),
     queryFn: () => statsApi.getStats(selectedMode),
-    staleTime: 12 * 60 * 60 * 1000, // 12 hours
+    staleTime: 12 * 60 * 60 * 1000, // 12 hours - matches server cache
+    gcTime: 12 * 60 * 60 * 1000, // 12 hours - align with server cache
+    refetchInterval: (query) => {
+      if (!query.state.data) return false;
+      
+      // Calculate time until cache expires
+      const cacheTimestamp = new Date(query.state.data.cacheTimestamp).getTime();
+      const expiresAt = cacheTimestamp + (query.state.data.cacheExpiresIn * 1000);
+      const now = Date.now();
+      
+      return Math.max(expiresAt - now, 0);
+    },
+    // Only refetch when cache expires
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   const renderStatsParagraph = () => {
@@ -103,6 +120,30 @@ export function Stats() {
                   <SelectItem value="100" className="font-['Alegreya']">Name 100</SelectItem>
                 </SelectContent>
               </Select>
+              <HoverCard>
+                <HoverCardTrigger asChild>
+                  <span className="material-icons text-muted-foreground hover:text-header cursor-help transition-colors -mt-3">info</span>
+                </HoverCardTrigger>
+                <HoverCardContent 
+                  className="w-80 bg-card text-card-foreground border-border shadow-lg"
+                  sideOffset={8}
+                >
+                  <div className="space-y-2">
+                    <div className="flex gap-2 items-center">
+                      <span className="material-icons text-header">info</span>
+                      <p className="text-sm font-['Alegreya'] text-card-foreground">
+                        Statistics are updated every 12 hours
+                      </p>
+                    </div>
+                    {statsData && (
+                      <RefreshTimer
+                        cacheTimestamp={statsData.cacheTimestamp}
+                        cacheExpiresIn={statsData.cacheExpiresIn}
+                      />
+                    )}
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
             </div>
           </div>
           

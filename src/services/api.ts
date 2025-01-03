@@ -61,8 +61,15 @@ interface ScoreSubmissionResponse {
   error?: string;
 }
 
+interface LeaderboardApiResponse {
+  success: boolean;
+  leaderboard: LeaderboardEntry[];
+  cacheTimestamp: string;
+  cacheExpiresIn: number;
+}
+
 export const leaderboardApi = {
-  async getLeaderboard(gameMode: string): Promise<LeaderboardEntry[]> {
+  async getLeaderboard(gameMode: string): Promise<LeaderboardApiResponse> {
     try {
       const response = await fetch(`${API_URL}/leaderboard/${gameMode}`, {
         headers: defaultHeaders,
@@ -79,7 +86,7 @@ export const leaderboardApi = {
         throw new Error(data.error || 'Failed to fetch leaderboard');
       }
       
-      return data.leaderboard;
+      return data;
     } catch (error) {
       if (error instanceof Error) {
         throw error;
