@@ -4,6 +4,8 @@
 
 It started with a challenge from Twitch streamer QTCinderella in early 2024[^1]. A simple premise that sparked a fascinating realization about our collective knowledge of women's achievements throughout history. The challenge quickly gained traction, with streamers and content creators testing their knowledge - including NorthernLion's legendary 7:11 speed run[^2].
 
+https://www.youtube.com/watch?v=SqLEGFqgRfc
+
 But attempting the challenge and building a system to verify it are two very different beasts[^3]. When I started developing Name100Women, the skeptics had plenty to say:
 
 - "The Wikipedia API will rate limit you to death"
@@ -22,7 +24,7 @@ Our verification system evolved through three increasingly sophisticated layers[
 2. Wikipedia API verification
 3. Special case handling (like mononyms)
 
-```typescript title="careful bit twiddling"
+```typescript title="Name Normalization and Validation"
 // From nameValidationService.ts
 function normalizeNameForComparison(name: string): string {
   return name
@@ -49,7 +51,7 @@ function checkLocalDatabase(name: string): boolean {
 
 The mononym issue first became apparent when users started entering names like "Cher" and "Beyoncé"[^5]. Our initial system rejected these as invalid since they didn't follow the expected "FirstName LastName" pattern. This led to the creation of our mononym handling system.
 
-```typescript title="careful bit twiddling"
+```typescript title="Mononym Database Structure"
 // From mononyms.json
 {
     "mononyms": [
@@ -76,7 +78,7 @@ The mononym issue first became apparent when users started entering names like "
 
 When our local database check fails, we fall back to the Wikipedia API. This requires careful verification of several factors.
 
-```typescript title="careful bit twiddling"
+```typescript title="Wikipedia API Integration"
 // From wikipediaService.ts
 export async function checkWikipedia(name: string): Promise<boolean> {
   try {
@@ -117,7 +119,7 @@ Found a missing name? Our databases are community-maintained and we welcome cont
 5. Include a brief note about why this person should be included
 
 Example mononym addition:
-```json
+```json title="Example Mononym Entry"
 {
   "name": "NewArtist",
   "wikipedia": "/wiki/NewArtist_(singer)"
@@ -142,7 +144,7 @@ Want to help make these features a reality? Here's how:
 <details>
 <summary>View Development Setup Guide</summary>
 
-```bash
+```bash title="Development Setup"
 git clone https://github.com/yourusername/name100women.git
 cd name100women
 npm install
