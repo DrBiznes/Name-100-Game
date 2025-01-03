@@ -124,6 +124,19 @@ function ScoreViewSkeleton() {
   );
 }
 
+// Helper function to convert hex to RGB
+function hexToRGB(hex: string) {
+  // Remove the hash if present
+  hex = hex.replace('#', '');
+  
+  // Parse the hex values
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  
+  return { r, g, b };
+}
+
 export function ScoreView() {
   const { id } = useParams();
   
@@ -187,19 +200,31 @@ export function ScoreView() {
           >
             <div className="flex items-center justify-center gap-2">
               <h2 className="text-2xl font-bold text-center flex items-center gap-2">
-                <UsernameBadge 
-                  username={userData.score.username}
-                  color={userData.score.username_color}
-                  className="text-sm"
-                />
-                <span>Named {userData.score.name_count} in{' '}
+                {(() => {
+                  const rgb = hexToRGB(userData.score.username_color);
+                  return (
+                    <UsernameBadge 
+                      username={userData.score.username}
+                      color={userData.score.username_color}
+                      className="text-sm [text-shadow:0_0_10px_rgba(var(--badge-glow-r),var(--badge-glow-g),var(--badge-glow-b),0.3),0_0_20px_rgba(var(--badge-glow-r),var(--badge-glow-g),var(--badge-glow-b),0.2)] [box-shadow:0_0_10px_rgba(var(--badge-glow-r),var(--badge-glow-g),var(--badge-glow-b),0.3),0_0_20px_rgba(var(--badge-glow-r),var(--badge-glow-g),var(--badge-glow-b),0.2)]"
+                      style={{ 
+                        borderColor: userData.score.username_color,
+                        color: userData.score.username_color,
+                        '--badge-glow-r': rgb.r,
+                        '--badge-glow-g': rgb.g,
+                        '--badge-glow-b': rgb.b,
+                      } as React.CSSProperties}
+                    />
+                  );
+                })()}
+                <span className="text-glow">Named {userData.score.name_count} in{' '}
                 <span className="font-['Chonburi']">{formatTime(userData.score.score)}</span></span>
               </h2>
               <Button 
                 variant="ghost" 
                 size="icon"
                 onClick={handleShare}
-                className="rounded-full bg-transparent hover:bg-accent/10 border-0 shadow-none"
+                className="rounded-full bg-transparent hover:bg-accent/10 border-0 shadow-none -mt-3"
               >
                 <span className="material-icons text-foreground/80 hover:text-foreground">ios_share</span>
               </Button>
