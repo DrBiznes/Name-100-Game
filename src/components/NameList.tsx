@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
 import { Card } from './ui/card';
-import { Search } from 'lucide-react';
 import { Input } from './ui/input';
 import { NameCard } from './NameCard';
 import { type NameStats } from '@/services/api';
@@ -111,9 +110,12 @@ export function NameList({ stats, isLoading }: NameListProps) {
   return (
     <Card className="p-4 md:p-6 bg-transparent border-0 shadow-none">
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-3xl font-bold font-['Chonburi'] text-header leading-none">Name Frequencies</h2>
-        <div className="relative w-64 -mt-3">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+        <h2 className="text-3xl font-bold font-['Chonburi'] text-header leading-none text-glow flex items-center gap-3">
+          <span className="material-icons text-header text-3xl">military_tech</span>
+          Most Popular Names
+        </h2>
+        <div className="relative w-64 -mt-2">
+          <span className="material-icons absolute left-2 top-1 h-4 w-4 text-muted-foreground text-base">search</span>
           <Input
             placeholder="Search names..."
             value={searchTerm}

@@ -103,7 +103,10 @@ export function Stats() {
         <Card className="p-4 md:p-6 bg-transparent border-0 shadow-none">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-4">
-              <h2 className="text-3xl font-bold font-['Chonburi'] text-header leading-none">Statistics</h2>
+              <h2 className="text-3xl font-bold font-['Chonburi'] text-header leading-none text-glow flex items-center gap-3">
+                <span className="material-icons text-header text-3xl">leaderboard</span>
+                Stats
+              </h2>
               <Select
                 value={selectedMode}
                 onValueChange={setSelectedMode}
