@@ -26,7 +26,7 @@ export function Stats() {
 
     return (
       <div className="prose mb-8">
-        <p className="text-sm leading-relaxed text-muted-foreground space-y-1">
+        <p className="text-base leading-relaxed text-muted-foreground space-y-1">
           A total of{' '}
           <span className="font-bold text-foreground">
             {statsData.totalOccurrences.toLocaleString()}

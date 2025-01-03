@@ -6,7 +6,6 @@ import { useQuery } from '@tanstack/react-query';
 import { QUERY_KEYS, leaderboardApi, LeaderboardEntry } from '@/services/api';
 import { User } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
-import { Pagination, PaginationItem, PaginationLink, PaginationContent, PaginationPrevious, PaginationNext, PaginationEllipsis } from './ui/pagination';
 
 interface ScoreHistoryEntry {
   id: number;
@@ -37,7 +36,7 @@ function calculatePercentile(score: number, leaderboardData: LeaderboardEntry[])
   return Math.round((position / leaderboardData.length) * 100);
 }
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 3;
 
 export function UserHistory() {
   const { id } = useParams();
@@ -56,41 +55,6 @@ export function UserHistory() {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
-
-  // Update renderPaginationItems to use full history length
-  const renderPaginationItems = () => {
-    const items = [];
-    const totalPages = Math.ceil((userData?.history?.length || 0) / ITEMS_PER_PAGE);
-    
-    for (let i = 1; i <= totalPages; i++) {
-      if (
-        i === 1 ||
-        i === totalPages ||
-        (i >= currentPage - 1 && i <= currentPage + 1)
-      ) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationLink
-              onClick={() => setCurrentPage(i)}
-              isActive={currentPage === i}
-            >
-              {i}
-            </PaginationLink>
-          </PaginationItem>
-        );
-      } else if (
-        i === currentPage - 2 ||
-        i === currentPage + 2
-      ) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationEllipsis />
-          </PaginationItem>
-        );
-      }
-    }
-    return items;
-  };
 
   // Update pagination navigation
   const totalPages = Math.ceil((userData?.history?.length || 0) / ITEMS_PER_PAGE);
@@ -183,7 +147,7 @@ export function UserHistory() {
         </Helmet>
       )}
 
-      <Card className="p-4 md:p-6">
+      <Card className="p-4 md:p-6 border-0 shadow-none bg-transparent">
         {userData?.score && (
           <div className="mb-8">
             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
@@ -206,7 +170,7 @@ export function UserHistory() {
 
         {stats && (
           <div className="prose mb-8">
-            <p className="text-sm leading-relaxed text-muted-foreground space-y-1">
+            <p className="text-base leading-relaxed text-muted-foreground space-y-1">
               This player has completed{' '}
               <span className="font-bold text-foreground">{stats.totalGames} games</span>
               {userData?.score && (
@@ -257,46 +221,47 @@ export function UserHistory() {
         )}
 
         <div className="space-y-4">
-          <h3 className="text-xl font-semibold">Recent Games</h3>
-          {paginatedHistory?.map((entry) => (
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-semibold">Recent Games</h3>
+            <div className="flex items-center gap-1 text-sm">
+              <button 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="p-1 hover:bg-muted/50 rounded disabled:opacity-50"
+              >
+                <span className="material-icons text-sm">navigate_before</span>
+              </button>
+              <span className="px-2">
+                {currentPage} / {totalPages}
+              </span>
+              <button 
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="p-1 hover:bg-muted/50 rounded disabled:opacity-50"
+              >
+                <span className="material-icons text-sm">navigate_next</span>
+              </button>
+            </div>
+          </div>
+          {paginatedHistory?.map((entry, index) => (
             <Link 
               key={entry.id}
               to={`/scores/${entry.id}`}
-              className="block hover:bg-muted transition-colors"
+              className={`block hover:bg-muted transition-colors ${index % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'}`}
             >
-              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                <div className="flex flex-col">
-                  <span className="font-medium">Name {entry.name_count}</span>
-                  <span className="text-sm text-muted-foreground">
+              <div className="flex items-center justify-between py-2 px-3 rounded-lg">
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-medium leading-tight">Name {entry.name_count}</span>
+                  <span className="text-sm text-muted-foreground leading-tight">
                     {formatSubmissionDate(entry.submission_date)}
                   </span>
                 </div>
-                <span className="font-mono text-lg font-bold">
+                <span className="font-mono text-lg font-medium">
                   {formatTime(entry.score)}
                 </span>
               </div>
             </Link>
           ))}
-          
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                />
-              </PaginationItem>
-              
-              {renderPaginationItems()}
-              
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
         </div>
       </Card>
     </>

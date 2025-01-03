@@ -52,14 +52,14 @@ export function ScoreView() {
               color={userData.score.username_color}
               className="text-sm"
             />
-            Named {userData.score.name_count} in{' '}
-            <span className="font-mono">{formatTime(userData.score.score)}</span>
+            <span>Named {userData.score.name_count} in{' '}
+            <span className="font-['Chonburi']">{formatTime(userData.score.score)}</span></span>
           </h2>
           <Button 
             variant="ghost" 
             size="icon"
             onClick={handleShare}
-            className="rounded-full bg-transparent hover:bg-accent/10"
+            className="rounded-full bg-transparent hover:bg-accent/10 -mt-3 border-0 shadow-none"
           >
             <span className="material-icons text-foreground/80 hover:text-foreground">ios_share</span>
           </Button>
