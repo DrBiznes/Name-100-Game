@@ -173,20 +173,18 @@ export function Leaderboard() {
                 setCurrentPage(1);
               }}
             >
-              <SelectTrigger className="w-[200px] font-['Alegreya'] bg-card text-card-foreground border-border">
+              <SelectTrigger className="w-[150px] font-['Alegreya']">
                 <SelectValue>
                   Name {selectedMode}
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent 
-                className="bg-card text-card-foreground border-border"
-                position="popper"
-                sideOffset={4}
-              >
-                <div className="text-xs text-muted-foreground px-2 py-1 font-['Alegreya']">Change Gamemode</div>
-                <SelectItem value="20" className="font-['Alegreya'] hover:bg-accent hover:text-accent-foreground">Name 20</SelectItem>
-                <SelectItem value="50" className="font-['Alegreya'] hover:bg-accent hover:text-accent-foreground">Name 50</SelectItem>
-                <SelectItem value="100" className="font-['Alegreya'] hover:bg-accent hover:text-accent-foreground">Name 100</SelectItem>
+              <SelectContent>
+                <SelectItem value="header" disabled className="font-['Alegreya'] font-semibold text-muted-foreground">
+                  Game Mode
+                </SelectItem>
+                <SelectItem value="20" className="font-['Alegreya']">Name 20</SelectItem>
+                <SelectItem value="50" className="font-['Alegreya']">Name 50</SelectItem>
+                <SelectItem value="100" className="font-['Alegreya']">Name 100</SelectItem>
               </SelectContent>
             </Select>
             <HoverCard>
