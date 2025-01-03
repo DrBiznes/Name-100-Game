@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { History } from 'lucide-react';
 import { formatTime, formatSubmissionDate } from '@/lib/utils';
 import { QUERY_KEYS, recentScoresApi, LeaderboardEntry } from '@/services/api';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from "sonner";
 import { Helmet } from 'react-helmet-async';
@@ -34,32 +34,26 @@ function RecentScoresTable({
   currentPage: number;
   onPageChange: (page: number) => void;
 }) {
+  const navigate = useNavigate();
+  
   const columns: ColumnDef<LeaderboardEntry>[] = [
     {
       accessorKey: "id",
       header: "ID",
       cell: ({ row: { original } }) => (
-        <Link 
-          to={`/scores/${original.id}`}
-          className="text-blue-600 hover:text-blue-800 hover:underline"
-        >
+        <span className="text-peach">
           #{original.id}
-        </Link>
+        </span>
       ),
     },
     {
       accessorKey: "username",
       header: "Username",
       cell: ({ row: { original } }) => (
-        <Link 
-          to={`/scores/${original.id}`}
-          className="hover:underline"
-        >
-          <UsernameBadge 
-            username={original.username}
-            color={original.username_color}
-          />
-        </Link>
+        <UsernameBadge 
+          username={original.username}
+          color={original.username_color}
+        />
       ),
     },
     {
@@ -98,6 +92,7 @@ function RecentScoresTable({
       pageCount={data?.totalPages || 1}
       currentPage={currentPage}
       onPageChange={onPageChange}
+      onRowClick={(row) => navigate(`/scores/${(row as LeaderboardEntry).id}`)}
       rowProps={(_, index) => ({
         className: `cursor-pointer border-border transition-colors ${
           index % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'
@@ -182,7 +177,7 @@ export function RecentScores() {
               <div className="flex gap-2 items-start">
                 <span className="material-icons text-header text-lg">info</span>
                 <p className="text-sm font-['Alegreya'] text-card-foreground">
-                  Click on any ID or username to view the detailed score
+                  Click anywhere on a row to view the detailed score
                 </p>
               </div>
             </HoverCardContent>
