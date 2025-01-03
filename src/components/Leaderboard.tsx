@@ -11,6 +11,7 @@ import { DataTable } from './ui/data-table';
 import { ColumnDef } from '@tanstack/react-table';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from './ui/hover-card';
+import { UsernameBadge } from './ui/UsernameBadge';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -54,9 +55,10 @@ function LeaderboardTable({
           to={`/scores/${original.id}`}
           className="hover:underline"
         >
-          <span style={{ color: original.username_color }}>
-            {original.username}
-          </span>
+          <UsernameBadge 
+            username={original.username}
+            color={original.username_color}
+          />
         </Link>
       ),
     },

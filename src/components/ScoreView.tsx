@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { QUERY_KEYS, leaderboardApi } from '@/services/api';
 import { Button } from './ui/button';
 import { toast } from "sonner";
+import { UsernameBadge } from './ui/UsernameBadge';
 
 export function ScoreView() {
   const { id } = useParams();
@@ -45,8 +46,13 @@ export function ScoreView() {
     <Card className="p-4 md:p-6 h-full overflow-auto border-0 shadow-none bg-transparent">
       <div className="flex flex-col gap-4 mb-6">
         <div className="flex items-center justify-center gap-2">
-          <h2 className="text-2xl font-bold text-center">
-            I Named {userData.score.name_count} in{' '}
+          <h2 className="text-2xl font-bold text-center flex items-center gap-2">
+            <UsernameBadge 
+              username={userData.score.username}
+              color={userData.score.username_color}
+              className="text-sm"
+            />
+            Named {userData.score.name_count} in{' '}
             <span className="font-mono">{formatTime(userData.score.score)}</span>
           </h2>
           <Button 
