@@ -102,3 +102,9 @@ footer a {
 footer a:hover {
   color: var(--accent);
 }
+
+.text-glow {
+  text-shadow: 0 0 10px rgba(232, 160, 171, 0.3),
+               0 0 20px rgba(232, 160, 171, 0.2),
+               0 0 30px rgba(232, 160, 171, 0.1);
+}

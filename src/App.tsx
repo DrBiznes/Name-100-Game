@@ -42,7 +42,7 @@ function AppContent() {
       <div className="min-h-screen w-full text-black flex flex-col">
         <header className="w-full text-center p-4">
           <div className="max-w-7xl mx-auto">
-            <h1 className="text-2xl md:text-4xl font-bold">NAME 100 WOMEN CHALLENGE</h1>
+            <h1 className="text-2xl md:text-4xl font-bold text-glow">NAME 100 WOMEN CHALLENGE</h1>
             <NavMenu />
           </div>
         </header>
