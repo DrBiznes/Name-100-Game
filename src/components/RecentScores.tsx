@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { History } from 'lucide-react';
 import { formatTime, formatSubmissionDate } from '@/lib/utils';
 import { QUERY_KEYS, recentScoresApi, LeaderboardEntry } from '@/services/api';
 import { useNavigate } from 'react-router-dom';
@@ -136,8 +135,8 @@ export function RecentScores() {
       </Helmet>
 
       <div className="text-lg pt-4 font-['Alegreya']">
-        <h2 className="flex items-center justify-center gap-2 text-2xl font-bold mb-2 font-['Chonburi']">
-          <History className="h-6 w-6" />
+        <h2 className="flex items-center justify-center gap-2 text-2xl font-bold mb-2 font-['Chonburi'] text-glow">
+          <span className="material-icons text-header">history</span>
           Recent Scores
         </h2>
         <div className="flex justify-center">

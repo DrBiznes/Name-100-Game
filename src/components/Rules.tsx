@@ -4,7 +4,7 @@ import { Separator } from './ui/separator';
 export function Rules() {
   return (
     <div className="text-lg pt-4 font-comic">
-      <h2 className="flex items-center justify-center gap-2 text-2xl font-bold mb-2 font-['Chonburi']">
+      <h2 className="flex items-center justify-center gap-2 text-2xl font-bold mb-2 font-['Chonburi'] text-glow">
         <span className="material-icons text-header">gavel</span>
         Rules
       </h2>

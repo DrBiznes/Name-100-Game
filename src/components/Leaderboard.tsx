@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Trophy } from 'lucide-react';
 import { Button } from './ui/button';
 import { formatTime, formatSubmissionDate } from '@/lib/utils';
 import { QUERY_KEYS, leaderboardApi, LeaderboardEntry } from '@/services/api';
@@ -155,8 +154,8 @@ export function Leaderboard() {
 
   return (
     <div className="text-lg pt-4 font-['Alegreya']">
-      <h2 className="flex items-center justify-center gap-2 text-2xl font-bold mb-2 font-['Chonburi']">
-        <Trophy className="h-6 w-6" />
+      <h2 className="flex items-center justify-center gap-2 text-2xl font-bold mb-2 font-['Chonburi'] text-glow">
+        <span className="material-icons text-header">emoji_events</span>
         Leaderboard
       </h2>
       <div className="flex justify-center">
