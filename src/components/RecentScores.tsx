@@ -11,12 +11,47 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from './ui/hover-card';
 import { UsernameBadge } from './ui/UsernameBadge';
+import { Skeleton } from './ui/skeleton';
+import { motion } from 'framer-motion';
 
 const ITEMS_PER_PAGE = 10;
 
 interface RecentScoresResponse {
   data: LeaderboardEntry[];
   totalPages: number;
+}
+
+function RecentScoresSkeleton() {
+  return (
+    <div className="rounded-md border border-border bg-card">
+      <div className="flex items-center justify-between p-4 border-b border-border">
+        <div className="flex items-center space-x-4">
+          <Skeleton className="h-5 w-16 bg-muted" /> {/* Header - ID */}
+          <Skeleton className="h-5 w-32 bg-muted" /> {/* Header - Username */}
+          <Skeleton className="h-5 w-20 bg-muted" /> {/* Header - Time */}
+          <Skeleton className="h-5 w-24 bg-muted" /> {/* Header - Date */}
+        </div>
+      </div>
+      <div className="divide-y divide-border">
+        {Array.from({ length: ITEMS_PER_PAGE }).map((_, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, delay: i * 0.05 }}
+            className={`flex items-center space-x-6 p-4 ${
+              i % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'
+            }`}
+          >
+            <Skeleton className="h-4 w-12 bg-muted" /> {/* ID */}
+            <Skeleton className="h-4 w-40 bg-muted" /> {/* Username */}
+            <Skeleton className="h-4 w-24 bg-muted" /> {/* Time */}
+            <Skeleton className="h-4 w-32 bg-muted" /> {/* Date */}
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 // Separate table component to prevent full remounts
@@ -68,7 +103,7 @@ function RecentScoresTable({
   ];
 
   if (isLoading) {
-    return <div className="text-center py-8 font-['Alegreya'] text-muted-foreground">Loading...</div>;
+    return <RecentScoresSkeleton />;
   }
 
   if (error) {

@@ -8,6 +8,53 @@ import { Helmet } from 'react-helmet-async';
 import { Separator } from './ui/separator';
 import { RefreshTimer } from './ui/refresh-timer';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from './ui/hover-card';
+import { Skeleton } from './ui/skeleton';
+import { motion, AnimatePresence } from 'framer-motion';
+
+function StatsTextSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <div className="flex items-center space-x-1">
+          <Skeleton className="h-4 w-24 bg-muted" />
+          <Skeleton className="h-4 w-16 bg-muted" />
+          <Skeleton className="h-4 w-32 bg-muted" />
+        </div>
+        <div className="flex items-center space-x-1">
+          <Skeleton className="h-4 w-28 bg-muted" />
+          <Skeleton className="h-4 w-20 bg-muted" />
+          <Skeleton className="h-4 w-24 bg-muted" />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <div className="flex items-center space-x-1">
+          <Skeleton className="h-4 w-48 bg-muted" />
+          <Skeleton className="h-4 w-32 bg-muted" />
+        </div>
+        <div className="flex items-center flex-wrap gap-1">
+          <Skeleton className="h-4 w-24 bg-muted" />
+          <Skeleton className="h-4 w-16 bg-muted" />
+          <Skeleton className="h-4 w-20 bg-muted" />
+          <Skeleton className="h-4 w-28 bg-muted" />
+          <Skeleton className="h-4 w-24 bg-muted" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const textVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.1,
+      duration: 0.5,
+      ease: "easeOut"
+    }
+  })
+};
 
 export function Stats() {
   const [selectedMode, setSelectedMode] = useState<string>('all');
@@ -43,48 +90,69 @@ export function Stats() {
 
     return (
       <div className="prose mb-8">
-        <p className="text-base leading-relaxed text-muted-foreground space-y-1">
-          A total of{' '}
-          <span className="font-bold text-foreground">
-            {statsData.totalOccurrences.toLocaleString()}
-          </span>{' '}
-          names have been submitted across{' '}
-          <span className="font-bold text-foreground">
-            {statsData.totalNames.toLocaleString()}
-          </span>{' '}
-          unique women.
-          
-          {selectedMode !== 'all' && (
-            <span>
-              {' '}These stats are filtered for Name {selectedMode} mode.
-            </span>
-          )}
+        <AnimatePresence mode="wait">
+          <motion.div 
+            className="text-base leading-relaxed text-muted-foreground space-y-4"
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+          >
+            <motion.p 
+              custom={0} 
+              variants={textVariants}
+              className="space-y-1"
+            >
+              A total of{' '}
+              <span className="font-bold text-foreground">
+                {statsData.totalOccurrences.toLocaleString()}
+              </span>{' '}
+              names have been submitted across{' '}
+              <span className="font-bold text-foreground">
+                {statsData.totalNames.toLocaleString()}
+              </span>{' '}
+              unique women.
+              
+              {selectedMode !== 'all' && (
+                <span>
+                  {' '}These stats are filtered for Name {selectedMode} mode.
+                </span>
+              )}
+            </motion.p>
 
-          <br /><br />
-          The most frequently named women are{' '}
-          {topNames.map((stat, index) => (
-            <span key={stat.name}>
-              <span className="font-bold text-foreground">{stat.name}</span>
-              {' '}({stat.count.toLocaleString()} times)
-              {index < topNames.length - 1 ? ', ' : '.'}
-            </span>
-          ))}
-
-          {commonMisspellings.length > 0 && (
-            <>
-              <br /><br />
-              Common variations in submissions include{' '}
-              {commonMisspellings.map((stat, index) => (
+            <motion.p 
+              custom={1} 
+              variants={textVariants}
+              className="space-y-1"
+            >
+              The most frequently named women are{' '}
+              {topNames.map((stat, index) => (
                 <span key={stat.name}>
                   <span className="font-bold text-foreground">{stat.name}</span>
-                  {' '}(submitted as: {stat.variants.slice(0, 3).join(', ')}
-                  {stat.variants.length > 3 ? '...' : ''})
-                  {index < commonMisspellings.length - 1 ? ', ' : '.'}
+                  {' '}({stat.count.toLocaleString()} times)
+                  {index < topNames.length - 1 ? ', ' : '.'}
                 </span>
               ))}
-            </>
-          )}
-        </p>
+            </motion.p>
+
+            {commonMisspellings.length > 0 && (
+              <motion.p 
+                custom={2} 
+                variants={textVariants}
+                className="space-y-1"
+              >
+                Common variations in submissions include{' '}
+                {commonMisspellings.map((stat, index) => (
+                  <span key={stat.name}>
+                    <span className="font-bold text-foreground">{stat.name}</span>
+                    {' '}(submitted as: {stat.variants.slice(0, 3).join(', ')}
+                    {stat.variants.length > 3 ? '...' : ''})
+                    {index < commonMisspellings.length - 1 ? ', ' : '.'}
+                  </span>
+                ))}
+              </motion.p>
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
     );
   };
@@ -155,7 +223,7 @@ export function Stats() {
           </div>
 
           {isLoading ? (
-            <div className="font-['Alegreya'] text-muted-foreground">Loading stats...</div>
+            <StatsTextSkeleton />
           ) : statsData ? (
             renderStatsParagraph()
           ) : (

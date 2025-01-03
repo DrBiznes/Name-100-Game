@@ -7,6 +7,8 @@ import { Separator } from './ui/separator';
 import { DataTable } from './ui/data-table';
 import { ColumnDef } from '@tanstack/react-table';
 import nameDatabase from '@/lib/womendatabase.json';
+import { Skeleton } from './ui/skeleton';
+import { motion } from 'framer-motion';
 
 interface NameListProps {
   stats: NameStats[];
@@ -52,6 +54,37 @@ const findProperName = (name: string): string => {
   
   return databaseMatch || capitalizeNameParts(name);
 };
+
+function NameListSkeleton() {
+  return (
+    <div className="rounded-md border border-border bg-card">
+      <div className="flex items-center justify-between p-4 border-b border-border">
+        <div className="flex items-center space-x-8">
+          <Skeleton className="h-5 w-32 bg-muted" /> {/* Header - Name */}
+          <Skeleton className="h-5 w-24 bg-muted" /> {/* Header - Frequency */}
+          <Skeleton className="h-5 w-48 bg-muted" /> {/* Header - Variations */}
+        </div>
+      </div>
+      <div className="divide-y divide-border">
+        {Array.from({ length: ITEMS_PER_PAGE }).map((_, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, delay: i * 0.05 }}
+            className={`flex items-center space-x-8 p-4 ${
+              i % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'
+            }`}
+          >
+            <Skeleton className="h-4 w-36 bg-muted" /> {/* Name */}
+            <Skeleton className="h-4 w-20 bg-muted" /> {/* Frequency */}
+            <Skeleton className="h-4 w-64 bg-muted" /> {/* Variations */}
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function NameList({ stats, isLoading }: NameListProps) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -133,7 +166,7 @@ export function NameList({ stats, isLoading }: NameListProps) {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-8 font-['Alegreya'] text-muted-foreground">Loading names...</div>
+        <NameListSkeleton />
       ) : (
         <div className="relative">
           <DataTable
