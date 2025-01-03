@@ -19,34 +19,20 @@ interface RecentScoresResponse {
   totalPages: number;
 }
 
-export function RecentScores() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedMode, setSelectedMode] = useState<'20' | '50' | '100'>('100');
-
-  const { data: recentScoresData, isLoading, error } = useQuery({
-    queryKey: [...QUERY_KEYS.recentScores(selectedMode)],
-    queryFn: async (): Promise<RecentScoresResponse> => {
-      try {
-        const response = await recentScoresApi.getRecentScores(selectedMode);
-        const totalPages = Math.ceil(response.length / ITEMS_PER_PAGE);
-        
-        return { 
-          data: response,
-          totalPages 
-        };
-      } catch (err) {
-        toast.error("Failed to load recent scores");
-        throw err;
-      }
-    },
-    staleTime: 10 * 60 * 1000, // 10 minutes
-  });
-
-  const paginatedData = recentScoresData?.data.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
-
+// Separate table component to prevent full remounts
+function RecentScoresTable({
+  data,
+  isLoading,
+  error,
+  currentPage,
+  onPageChange
+}: {
+  data: RecentScoresResponse | undefined;
+  isLoading: boolean;
+  error: unknown;
+  currentPage: number;
+  onPageChange: (page: number) => void;
+}) {
   const columns: ColumnDef<LeaderboardEntry>[] = [
     {
       accessorKey: "id",
@@ -86,6 +72,57 @@ export function RecentScores() {
     },
   ];
 
+  if (isLoading) {
+    return <div className="text-center py-8 font-['Alegreya'] text-muted-foreground">Loading...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="text-center text-red-500 py-8 font-['Alegreya']">
+        {error instanceof Error ? error.message : 'An error occurred'}
+      </div>
+    );
+  }
+
+  const paginatedData = data?.data.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  return (
+    <DataTable
+      columns={columns}
+      data={paginatedData || []}
+      pageCount={data?.totalPages || 1}
+      currentPage={currentPage}
+      onPageChange={onPageChange}
+    />
+  );
+}
+
+export function RecentScores() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedMode, setSelectedMode] = useState<'20' | '50' | '100'>('100');
+
+  const { data: recentScoresData, isLoading, error } = useQuery({
+    queryKey: [...QUERY_KEYS.recentScores(selectedMode)],
+    queryFn: async (): Promise<RecentScoresResponse> => {
+      try {
+        const response = await recentScoresApi.getRecentScores(selectedMode);
+        const totalPages = Math.ceil(response.length / ITEMS_PER_PAGE);
+        
+        return { 
+          data: response,
+          totalPages 
+        };
+      } catch (err) {
+        toast.error("Failed to load recent scores");
+        throw err;
+      }
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+
   return (
     <>
       <Helmet>
@@ -105,64 +142,55 @@ export function RecentScores() {
           <Separator className="my-2 w-2/3" />
         </div>
 
-        {isLoading ? (
-          <div className="text-center py-8 font-['Alegreya'] text-muted-foreground">Loading...</div>
-        ) : error ? (
-          <div className="text-center text-red-500 py-8 font-['Alegreya']">
-            {error instanceof Error ? error.message : 'An error occurred'}
-          </div>
-        ) : (
-          <>
-            <div className="flex justify-center items-center gap-2 mb-4">
-              <Select
-                value={selectedMode}
-                onValueChange={(value) => {
-                  setSelectedMode(value as '20' | '50' | '100');
-                  setCurrentPage(1);
-                }}
-              >
-                <SelectTrigger className="w-[200px] font-['Alegreya'] bg-card text-card-foreground border-border">
-                  <SelectValue>
-                    Name {selectedMode}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent 
-                  className="bg-card text-card-foreground border-border"
-                  position="popper"
-                  sideOffset={4}
-                >
-                  <div className="text-xs text-muted-foreground px-2 py-1 font-['Alegreya']">Change Gamemode</div>
-                  <SelectItem value="20" className="font-['Alegreya'] hover:bg-accent hover:text-accent-foreground">Name 20</SelectItem>
-                  <SelectItem value="50" className="font-['Alegreya'] hover:bg-accent hover:text-accent-foreground">Name 50</SelectItem>
-                  <SelectItem value="100" className="font-['Alegreya'] hover:bg-accent hover:text-accent-foreground">Name 100</SelectItem>
-                </SelectContent>
-              </Select>
-              <HoverCard>
-                <HoverCardTrigger asChild>
-                  <span className="material-icons text-muted-foreground hover:text-header cursor-help transition-colors">info</span>
-                </HoverCardTrigger>
-                <HoverCardContent 
-                  className="w-80 bg-card text-card-foreground border-border shadow-lg"
-                  sideOffset={8}
-                >
-                  <div className="flex gap-2 items-start">
-                    <span className="material-icons text-header text-lg">info</span>
-                    <p className="text-sm font-['Alegreya'] text-card-foreground">
-                      Click on any ID or username to view the detailed score
-                    </p>
-                  </div>
-                </HoverCardContent>
-              </HoverCard>
-            </div>
-            <DataTable
-              columns={columns}
-              data={paginatedData || []}
-              pageCount={recentScoresData?.totalPages || 1}
-              currentPage={currentPage}
-              onPageChange={setCurrentPage}
-            />
-          </>
-        )}
+        <div className="flex justify-center items-center gap-2 mb-4">
+          <Select
+            value={selectedMode}
+            onValueChange={(value) => {
+              setSelectedMode(value as '20' | '50' | '100');
+              setCurrentPage(1);
+            }}
+          >
+            <SelectTrigger className="w-[200px] font-['Alegreya'] bg-card text-card-foreground border-border">
+              <SelectValue>
+                Name {selectedMode}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent 
+              className="bg-card text-card-foreground border-border"
+              position="popper"
+              sideOffset={4}
+            >
+              <div className="text-xs text-muted-foreground px-2 py-1 font-['Alegreya']">Change Gamemode</div>
+              <SelectItem value="20" className="font-['Alegreya'] hover:bg-accent hover:text-accent-foreground">Name 20</SelectItem>
+              <SelectItem value="50" className="font-['Alegreya'] hover:bg-accent hover:text-accent-foreground">Name 50</SelectItem>
+              <SelectItem value="100" className="font-['Alegreya'] hover:bg-accent hover:text-accent-foreground">Name 100</SelectItem>
+            </SelectContent>
+          </Select>
+          <HoverCard>
+            <HoverCardTrigger asChild>
+              <span className="material-icons text-muted-foreground hover:text-header cursor-help transition-colors">info</span>
+            </HoverCardTrigger>
+            <HoverCardContent 
+              className="w-80 bg-card text-card-foreground border-border shadow-lg"
+              sideOffset={8}
+            >
+              <div className="flex gap-2 items-start">
+                <span className="material-icons text-header text-lg">info</span>
+                <p className="text-sm font-['Alegreya'] text-card-foreground">
+                  Click on any ID or username to view the detailed score
+                </p>
+              </div>
+            </HoverCardContent>
+          </HoverCard>
+        </div>
+
+        <RecentScoresTable
+          data={recentScoresData}
+          isLoading={isLoading}
+          error={error}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </>
   );
