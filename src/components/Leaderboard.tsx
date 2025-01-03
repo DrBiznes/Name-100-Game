@@ -1,36 +1,14 @@
 import { useState } from 'react';
 import { Trophy } from 'lucide-react';
 import { Button } from './ui/button';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from './ui/table';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from './ui/pagination';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
 import { formatTime, formatSubmissionDate } from '@/lib/utils';
 import { QUERY_KEYS, leaderboardApi, LeaderboardEntry } from '@/services/api';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from "sonner";
 import { Separator } from './ui/separator';
+import { DataTable } from './ui/data-table';
+import { ColumnDef } from '@tanstack/react-table';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -70,45 +48,44 @@ export function Leaderboard() {
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
 
-  const renderPaginationItems = () => {
-    const items = [];
-    const totalPages = leaderboardData?.totalPages || 0;
-    
-    for (let i = 1; i <= totalPages; i++) {
-      if (
-        i === 1 ||
-        i === totalPages ||
-        (i >= currentPage - 1 && i <= currentPage + 1)
-      ) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationLink
-              onClick={() => setCurrentPage(i)}
-              isActive={currentPage === i}
-              className="font-['Alegreya']"
-            >
-              {i}
-            </PaginationLink>
-          </PaginationItem>
-        );
-      } else if (
-        i === currentPage - 2 ||
-        i === currentPage + 2
-      ) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationEllipsis className="font-['Alegreya']" />
-          </PaginationItem>
-        );
-      }
-    }
-    return items;
-  };
-
-  const handleModeSelect = (mode: string) => {
-    setSelectedMode(mode as '20' | '50' | '100');
-    setCurrentPage(1);
-  };
+  const columns: ColumnDef<LeaderboardEntry>[] = [
+    {
+      accessorKey: "rank",
+      header: "Rank",
+      cell: ({ row: { original, index } }) => (
+        <Link 
+          to={`/scores/${original.id}`}
+          className="text-blue-600 hover:text-blue-800 hover:underline"
+        >
+          #{(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
+        </Link>
+      ),
+    },
+    {
+      accessorKey: "username",
+      header: "Username",
+      cell: ({ row: { original } }) => (
+        <Link 
+          to={`/scores/${original.id}`}
+          className="hover:underline"
+        >
+          <span style={{ color: original.username_color }}>
+            {original.username}
+          </span>
+        </Link>
+      ),
+    },
+    {
+      accessorKey: "score",
+      header: "Time",
+      cell: ({ row: { original } }) => formatTime(Number(original.score)),
+    },
+    {
+      accessorKey: "submission_date",
+      header: "Date",
+      cell: ({ row: { original } }) => formatSubmissionDate(original.submission_date),
+    },
+  ];
 
   return (
     <div className="text-lg pt-4 font-['Alegreya']">
@@ -126,7 +103,7 @@ export function Leaderboard() {
             variant="outline"
             size="lg"
             className="w-48 font-['Alegreya']"
-            onClick={() => handleModeSelect('20')}
+            onClick={() => setSelectedMode('20')}
           >
             Name 20 Leaderboard
           </Button>
@@ -134,7 +111,7 @@ export function Leaderboard() {
             variant="outline"
             size="lg"
             className="w-48 font-['Alegreya']"
-            onClick={() => handleModeSelect('50')}
+            onClick={() => setSelectedMode('50')}
           >
             Name 50 Leaderboard
           </Button>
@@ -142,31 +119,13 @@ export function Leaderboard() {
             variant="outline"
             size="lg"
             className="w-48 font-['Alegreya']"
-            onClick={() => handleModeSelect('100')}
+            onClick={() => setSelectedMode('100')}
           >
             Name 100 Leaderboard
           </Button>
         </div>
       ) : (
         <>
-          <div className="flex justify-center">
-            <Select
-              value={selectedMode}
-              onValueChange={handleModeSelect}
-            >
-              <SelectTrigger className="w-[200px] font-['Alegreya']">
-                <SelectValue placeholder="Select game mode">
-                  Name {selectedMode} Leaderboard
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="20" className="font-['Alegreya']">Name 20 Leaderboard</SelectItem>
-                <SelectItem value="50" className="font-['Alegreya']">Name 50 Leaderboard</SelectItem>
-                <SelectItem value="100" className="font-['Alegreya']">Name 100 Leaderboard</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
           {isLoading ? (
             <div className="text-center py-8 font-['Alegreya']">Loading...</div>
           ) : error ? (
@@ -175,65 +134,21 @@ export function Leaderboard() {
             </div>
           ) : (
             <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-16 font-['Alegreya']">Rank</TableHead>
-                    <TableHead className="font-['Alegreya']">ID</TableHead>
-                    <TableHead className="font-['Alegreya']">Username</TableHead>
-                    <TableHead className="font-['Alegreya']">Time</TableHead>
-                    <TableHead className="text-right font-['Alegreya']">Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody className="font-['Alegreya']">
-                  {leaderboardData?.data.map((entry, index) => (
-                    <TableRow key={entry.id}>
-                      <TableCell className="font-medium">
-                        {(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
-                      </TableCell>
-                      <TableCell>
-                        <Link 
-                          to={`/scores/${entry.id}`}
-                          className="text-blue-600 hover:text-blue-800 hover:underline"
-                        >
-                          #{entry.id}
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <span style={{ color: entry.username_color }}>
-                          {entry.username}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        {formatTime(Number(entry.score))}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {formatSubmissionDate(entry.submission_date)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-
-              <Pagination>
-                <PaginationContent className="font-['Alegreya']">
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                      className={`${currentPage === 1 ? 'pointer-events-none opacity-50' : ''}`}
-                    />
-                  </PaginationItem>
-                  
-                  {renderPaginationItems()}
-                  
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() => setCurrentPage(p => Math.min(leaderboardData?.totalPages || 0, p + 1))}
-                      className={`${currentPage === leaderboardData?.totalPages ? 'pointer-events-none opacity-50' : ''}`}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+              <div className="text-center text-muted-foreground mb-4 font-['Alegreya']">
+                Click on any rank number or username to view the detailed score
+              </div>
+              <DataTable
+                columns={columns}
+                data={leaderboardData?.data || []}
+                pageCount={leaderboardData?.totalPages || 1}
+                currentPage={currentPage}
+                onPageChange={setCurrentPage}
+                gameMode={selectedMode}
+                onGameModeChange={(mode) => {
+                  setSelectedMode(mode);
+                  setCurrentPage(1);
+                }}
+              />
             </>
           )}
         </>

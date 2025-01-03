@@ -1,36 +1,14 @@
 import { useState } from 'react';
 import { History } from 'lucide-react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from './ui/table';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from './ui/pagination';
 import { formatTime, formatSubmissionDate } from '@/lib/utils';
 import { QUERY_KEYS, recentScoresApi, LeaderboardEntry } from '@/services/api';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from "sonner";
 import { Helmet } from 'react-helmet-async';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
 import { Separator } from './ui/separator';
+import { DataTable } from './ui/data-table';
+import { ColumnDef } from '@tanstack/react-table';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -67,39 +45,39 @@ export function RecentScores() {
     currentPage * ITEMS_PER_PAGE
   );
 
-  const renderPaginationItems = () => {
-    const items = [];
-    const totalPages = recentScoresData?.totalPages || 0;
-    
-    for (let i = 1; i <= totalPages; i++) {
-      if (
-        i === 1 ||
-        i === totalPages ||
-        (i >= currentPage - 1 && i <= currentPage + 1)
-      ) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationLink
-              onClick={() => setCurrentPage(i)}
-              isActive={currentPage === i}
-            >
-              {i}
-            </PaginationLink>
-          </PaginationItem>
-        );
-      } else if (
-        i === currentPage - 2 ||
-        i === currentPage + 2
-      ) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationEllipsis />
-          </PaginationItem>
-        );
-      }
-    }
-    return items;
-  };
+  const columns: ColumnDef<LeaderboardEntry>[] = [
+    {
+      accessorKey: "id",
+      header: "ID",
+      cell: ({ row: { original } }) => (
+        <Link 
+          to={`/scores/${original.id}`}
+          className="text-blue-600 hover:text-blue-800 hover:underline"
+        >
+          #{original.id}
+        </Link>
+      ),
+    },
+    {
+      accessorKey: "username",
+      header: "Username",
+      cell: ({ row: { original } }) => (
+        <span style={{ color: original.username_color }}>
+          {original.username}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "score",
+      header: "Time",
+      cell: ({ row: { original } }) => formatTime(Number(original.score)),
+    },
+    {
+      accessorKey: "submission_date",
+      header: "Date",
+      cell: ({ row: { original } }) => formatSubmissionDate(original.submission_date),
+    },
+  ];
 
   return (
     <>
@@ -111,7 +89,7 @@ export function RecentScores() {
         />
       </Helmet>
 
-      <div className="text-lg pt-4 font-comic">
+      <div className="text-lg pt-4 font-['Alegreya']">
         <h2 className="flex items-center justify-center gap-2 text-2xl font-bold mb-2 font-['Chonburi']">
           <History className="h-6 w-6" />
           Recent Scores
@@ -120,91 +98,25 @@ export function RecentScores() {
           <Separator className="my-2 w-2/3" />
         </div>
 
-        <div className="flex justify-center">
-          <Select
-            value={selectedMode}
-            onValueChange={(value) => {
-              setSelectedMode(value as '20' | '50' | '100');
-              setCurrentPage(1);
-            }}
-          >
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select game mode">
-                Name {selectedMode} Mode
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="20">Name 20 Mode</SelectItem>
-              <SelectItem value="50">Name 50 Mode</SelectItem>
-              <SelectItem value="100">Name 100 Mode</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
         {isLoading ? (
-          <div className="text-center py-8">Loading...</div>
+          <div className="text-center py-8 font-['Alegreya']">Loading...</div>
         ) : error ? (
-          <div className="text-center text-red-500 py-8">
+          <div className="text-center text-red-500 py-8 font-['Alegreya']">
             {error instanceof Error ? error.message : 'An error occurred'}
           </div>
         ) : (
-          <>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Username</TableHead>
-                  <TableHead>Time</TableHead>
-                  <TableHead className="text-right">Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedData?.map((entry) => (
-                  <TableRow key={entry.id}>
-                    <TableCell>
-                      <Link 
-                        to={`/scores/${entry.id}`}
-                        className="text-blue-600 hover:text-blue-800 hover:underline"
-                      >
-                        #{entry.id}
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <span style={{ color: entry.username_color }}>
-                        {entry.username}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {formatTime(Number(entry.score))}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatSubmissionDate(entry.submission_date)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
-                
-                {renderPaginationItems()}
-                
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() => setCurrentPage(p => Math.min(recentScoresData?.totalPages || 0, p + 1))}
-                    className={currentPage === recentScoresData?.totalPages ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </>
+          <DataTable
+            columns={columns}
+            data={paginatedData || []}
+            pageCount={recentScoresData?.totalPages || 1}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+            gameMode={selectedMode}
+            onGameModeChange={(mode) => {
+              setSelectedMode(mode);
+              setCurrentPage(1);
+            }}
+          />
         )}
       </div>
     </>

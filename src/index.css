@@ -27,6 +27,8 @@
     --ring: #B76E79;
     --header: #E8A0AB;
     --radius: 0.5rem;
+    --table-row-light: #3D2A4B;
+    --table-row-dark: #2D1B3B;
   }
 
   * {
