@@ -76,7 +76,7 @@ export function NameList({ stats, isLoading }: NameListProps) {
       accessorKey: "name",
       header: "Name",
       cell: ({ row }) => (
-        <div className="font-medium">
+        <div className="font-medium text-foreground">
           {findProperName(row.original.name)}
         </div>
       ),
@@ -85,7 +85,11 @@ export function NameList({ stats, isLoading }: NameListProps) {
     {
       accessorKey: "count",
       header: "Frequency",
-      cell: ({ row }) => row.original.count.toLocaleString(),
+      cell: ({ row }) => (
+        <div className="text-foreground">
+          {row.original.count.toLocaleString()}
+        </div>
+      ),
       size: 150,
     },
     {
@@ -138,14 +142,15 @@ export function NameList({ stats, isLoading }: NameListProps) {
             onPageChange={setCurrentPage}
             onRowClick={(row: NameStats) => {
               setSelectedName(row.name);
-              // Update the ref for the NameCard
               if (selectedNameRef.current) {
                 selectedNameRef.current.click();
               }
             }}
             rowProps={(row: NameStats) => ({
               ref: selectedName === row.name ? selectedNameRef : undefined,
-              className: "cursor-pointer"
+              className: `cursor-pointer transition-colors ${
+                selectedName === row.name ? 'bg-accent/20' : ''
+              }`
             })}
           />
 
