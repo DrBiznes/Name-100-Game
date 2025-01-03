@@ -57,11 +57,9 @@ export function NameInput({
         onKeyDown={e => input.status !== 'pending' && onKeyDown(e, index)}
         spellCheck={true}
         lang="en"
+        data-state={input.status}
         className={cn(
-          "w-full",
-          input.status === 'valid' && "bg-green-50 hover:bg-green-100 cursor-pointer",
-          input.status === 'invalid' && "bg-red-50",
-          input.status === 'pending' && "bg-yellow-50",
+          input.status === 'valid' && "cursor-pointer",
           input.status === 'pending' && "cursor-wait",
         )}
       />
