@@ -175,7 +175,7 @@ export function Leaderboard() {
                 setCurrentPage(1);
               }}
             >
-              <SelectTrigger className="w-[150px] font-['Alegreya']">
+              <SelectTrigger className="w-[155px] font-['Alegreya']">
                 <SelectValue>
                   Name {selectedMode}
                 </SelectValue>
