@@ -15,13 +15,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 
 import {
   Pagination,
@@ -39,8 +32,8 @@ interface DataTableProps<TData, TValue> {
   pageCount?: number
   currentPage?: number
   onPageChange?: (page: number) => void
-  gameMode?: '20' | '50' | '100'
-  onGameModeChange?: (mode: '20' | '50' | '100') => void
+  onRowClick?: (row: TData) => void
+  rowProps?: (row: TData) => React.HTMLAttributes<HTMLTableRowElement>
 }
 
 export function DataTable<TData, TValue>({
@@ -49,8 +42,8 @@ export function DataTable<TData, TValue>({
   pageCount = 1,
   currentPage = 1,
   onPageChange,
-  gameMode,
-  onGameModeChange,
+  onRowClick,
+  rowProps,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -95,30 +88,6 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      {gameMode && onGameModeChange && (
-        <div className="flex justify-center">
-          <Select
-            value={gameMode}
-            onValueChange={(value) => onGameModeChange(value as '20' | '50' | '100')}
-          >
-            <SelectTrigger className="w-[200px] font-['Alegreya'] bg-card text-card-foreground border-border">
-              <SelectValue>
-                Name {gameMode} Mode
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent 
-              className="bg-card text-card-foreground border-border"
-              position="popper"
-              sideOffset={4}
-            >
-              <SelectItem value="20" className="font-['Alegreya'] hover:bg-accent hover:text-accent-foreground">Name 20 Mode</SelectItem>
-              <SelectItem value="50" className="font-['Alegreya'] hover:bg-accent hover:text-accent-foreground">Name 50 Mode</SelectItem>
-              <SelectItem value="100" className="font-['Alegreya'] hover:bg-accent hover:text-accent-foreground">Name 100 Mode</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-
       <div className="rounded-md border border-border bg-card">
         <Table>
           <TableHeader>
@@ -144,24 +113,33 @@ export function DataTable<TData, TValue>({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className={`border-border hover:bg-accent/50 ${
-                    row.index % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'
-                  }`}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell 
-                      key={cell.id} 
-                      className="font-['Alegreya'] text-card-foreground"
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              table.getRowModel().rows.map((row) => {
+                const customProps = rowProps?.(row.original) || {};
+                return (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className={`border-border hover:bg-accent/50 ${
+                      row.index % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'
+                    } ${customProps.className || ''}`}
+                    onClick={() => onRowClick?.(row.original)}
+                    {...customProps}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell 
+                        key={cell.id} 
+                        className="font-['Alegreya'] text-card-foreground"
+                        style={{ 
+                          width: cell.column.getSize(),
+                          maxWidth: cell.column.getSize(),
+                        }}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell

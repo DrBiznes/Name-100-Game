@@ -1,20 +1,13 @@
 import { useState, useRef } from 'react';
 import { Card } from './ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { NameCard } from './NameCard';
-import { Input } from './ui/input';
 import { Search } from 'lucide-react';
+import { Input } from './ui/input';
+import { NameCard } from './NameCard';
 import { type NameStats } from '@/services/api';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from './ui/pagination';
 import { Separator } from './ui/separator';
+import { DataTable } from './ui/data-table';
+import { ColumnDef } from '@tanstack/react-table';
+import nameDatabase from '@/lib/womendatabase.json';
 
 interface NameListProps {
   stats: NameStats[];
@@ -22,6 +15,44 @@ interface NameListProps {
 }
 
 const ITEMS_PER_PAGE = 10;
+
+// Helper function to normalize names for comparison (same as nameValidationService.ts)
+function normalizeNameForComparison(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")  // Remove diacritics
+    .replace(/-/g, ' ')               // Replace hyphens with spaces
+    .replace(/\./g, '')              // Remove periods
+    .trim();                          // Remove leading/trailing whitespace
+}
+
+// Helper function to capitalize name parts
+const capitalizeNameParts = (name: string) => {
+  return name.split(' ').map(part => {
+    // Handle hyphenated names
+    if (part.includes('-')) {
+      return part.split('-').map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join('-');
+    }
+    // Handle names with periods (like initials)
+    if (part.includes('.')) {
+      return part.toUpperCase();
+    }
+    // Regular capitalization
+    return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+  }).join(' ');
+};
+
+// Helper function to find proper name from database
+const findProperName = (name: string): string => {
+  const normalizedInputName = normalizeNameForComparison(name);
+  
+  const databaseMatch = nameDatabase.names.find(dbName => 
+    normalizeNameForComparison(dbName) === normalizedInputName
+  );
+  
+  return databaseMatch || capitalizeNameParts(name);
+};
 
 export function NameList({ stats, isLoading }: NameListProps) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,39 +71,38 @@ export function NameList({ stats, isLoading }: NameListProps) {
     currentPage * ITEMS_PER_PAGE
   );
 
-  const renderPaginationItems = () => {
-    const items = [];
-    
-    for (let i = 1; i <= totalPages; i++) {
-      if (
-        i === 1 ||
-        i === totalPages ||
-        (i >= currentPage - 1 && i <= currentPage + 1)
-      ) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationLink
-              onClick={() => setCurrentPage(i)}
-              isActive={currentPage === i}
-              className="font-['Alegreya']"
-            >
-              {i}
-            </PaginationLink>
-          </PaginationItem>
-        );
-      } else if (
-        i === currentPage - 2 ||
-        i === currentPage + 2
-      ) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationEllipsis className="font-['Alegreya']" />
-          </PaginationItem>
-        );
-      }
-    }
-    return items;
-  };
+  const columns: ColumnDef<NameStats>[] = [
+    {
+      accessorKey: "name",
+      header: "Name",
+      cell: ({ row }) => (
+        <div className="font-medium">
+          {findProperName(row.original.name)}
+        </div>
+      ),
+      size: 200,
+    },
+    {
+      accessorKey: "count",
+      header: "Frequency",
+      cell: ({ row }) => row.original.count.toLocaleString(),
+      size: 150,
+    },
+    {
+      accessorKey: "variants",
+      header: "Variations",
+      cell: ({ row }) => (
+        <div className="text-muted-foreground">
+          {row.original.variants.length > 1 
+            ? row.original.variants.slice(0, 2).join(', ') + 
+              (row.original.variants.length > 2 ? '...' : '')
+            : '-'
+          }
+        </div>
+      ),
+      size: 300,
+    },
+  ];
 
   return (
     <Card className="p-4 md:p-6 bg-transparent border-0 shadow-none">
@@ -100,57 +130,24 @@ export function NameList({ stats, isLoading }: NameListProps) {
         <div className="text-center py-8 font-['Alegreya'] text-muted-foreground">Loading names...</div>
       ) : (
         <div className="relative">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="font-['Alegreya']">Name</TableHead>
-                <TableHead className="font-['Alegreya']">Frequency</TableHead>
-                <TableHead className="font-['Alegreya']">Variations</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody className="font-['Alegreya']">
-              {paginatedStats.map((stat) => (
-                <TableRow
-                  key={stat.name}
-                  ref={selectedName === stat.name ? selectedNameRef : undefined}
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => setSelectedName(stat.name)}
-                >
-                  <TableCell className="font-medium">{stat.name}</TableCell>
-                  <TableCell>{stat.count.toLocaleString()}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {stat.variants.length > 1 
-                      ? stat.variants.slice(0, 2).join(', ') + 
-                        (stat.variants.length > 2 ? '...' : '')
-                      : '-'
-                    }
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
-          <div className="mt-4">
-            <Pagination>
-              <PaginationContent className="font-['Alegreya']">
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
-                
-                {renderPaginationItems()}
-                
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
+          <DataTable
+            columns={columns}
+            data={paginatedStats}
+            pageCount={totalPages}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+            onRowClick={(row: NameStats) => {
+              setSelectedName(row.name);
+              // Update the ref for the NameCard
+              if (selectedNameRef.current) {
+                selectedNameRef.current.click();
+              }
+            }}
+            rowProps={(row: NameStats) => ({
+              ref: selectedName === row.name ? selectedNameRef : undefined,
+              className: "cursor-pointer"
+            })}
+          />
 
           <NameCard
             name={selectedName || ''}

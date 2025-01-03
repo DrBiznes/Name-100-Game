@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Separator } from './ui/separator';
 import { DataTable } from './ui/data-table';
 import { ColumnDef } from '@tanstack/react-table';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -137,17 +138,36 @@ export function Leaderboard() {
               <div className="text-center text-muted-foreground mb-4 font-['Alegreya']">
                 Click on any rank number or username to view the detailed score
               </div>
+              <div className="flex justify-center mb-4">
+                <Select
+                  value={selectedMode}
+                  onValueChange={(value) => {
+                    setSelectedMode(value as '20' | '50' | '100');
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-[200px] font-['Alegreya'] bg-card text-card-foreground border-border">
+                    <SelectValue>
+                      Name {selectedMode} Mode
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent 
+                    className="bg-card text-card-foreground border-border"
+                    position="popper"
+                    sideOffset={4}
+                  >
+                    <SelectItem value="20" className="font-['Alegreya'] hover:bg-accent hover:text-accent-foreground">Name 20 Mode</SelectItem>
+                    <SelectItem value="50" className="font-['Alegreya'] hover:bg-accent hover:text-accent-foreground">Name 50 Mode</SelectItem>
+                    <SelectItem value="100" className="font-['Alegreya'] hover:bg-accent hover:text-accent-foreground">Name 100 Mode</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <DataTable
                 columns={columns}
                 data={leaderboardData?.data || []}
                 pageCount={leaderboardData?.totalPages || 1}
                 currentPage={currentPage}
                 onPageChange={setCurrentPage}
-                gameMode={selectedMode}
-                onGameModeChange={(mode) => {
-                  setSelectedMode(mode);
-                  setCurrentPage(1);
-                }}
               />
             </>
           )}
