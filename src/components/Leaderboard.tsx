@@ -10,6 +10,7 @@ import { Separator } from './ui/separator';
 import { DataTable } from './ui/data-table';
 import { ColumnDef } from '@tanstack/react-table';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from './ui/hover-card';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -128,17 +129,14 @@ export function Leaderboard() {
       ) : (
         <>
           {isLoading ? (
-            <div className="text-center py-8 font-['Alegreya']">Loading...</div>
+            <div className="text-center py-8 font-['Alegreya'] text-muted-foreground">Loading...</div>
           ) : error ? (
             <div className="text-center text-red-500 py-8 font-['Alegreya']">
               {error instanceof Error ? error.message : 'An error occurred'}
             </div>
           ) : (
             <>
-              <div className="text-center text-muted-foreground mb-4 font-['Alegreya']">
-                Click on any rank number or username to view the detailed score
-              </div>
-              <div className="flex justify-center mb-4">
+              <div className="flex justify-center items-center gap-2 mb-4">
                 <Select
                   value={selectedMode}
                   onValueChange={(value) => {
@@ -148,7 +146,7 @@ export function Leaderboard() {
                 >
                   <SelectTrigger className="w-[200px] font-['Alegreya'] bg-card text-card-foreground border-border">
                     <SelectValue>
-                      Name {selectedMode} Mode
+                      Name {selectedMode}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent 
@@ -156,11 +154,28 @@ export function Leaderboard() {
                     position="popper"
                     sideOffset={4}
                   >
-                    <SelectItem value="20" className="font-['Alegreya'] hover:bg-accent hover:text-accent-foreground">Name 20 Mode</SelectItem>
-                    <SelectItem value="50" className="font-['Alegreya'] hover:bg-accent hover:text-accent-foreground">Name 50 Mode</SelectItem>
-                    <SelectItem value="100" className="font-['Alegreya'] hover:bg-accent hover:text-accent-foreground">Name 100 Mode</SelectItem>
+                    <div className="text-xs text-muted-foreground px-2 py-1 font-['Alegreya']">Change Gamemode</div>
+                    <SelectItem value="20" className="font-['Alegreya'] hover:bg-accent hover:text-accent-foreground">Name 20</SelectItem>
+                    <SelectItem value="50" className="font-['Alegreya'] hover:bg-accent hover:text-accent-foreground">Name 50</SelectItem>
+                    <SelectItem value="100" className="font-['Alegreya'] hover:bg-accent hover:text-accent-foreground">Name 100</SelectItem>
                   </SelectContent>
                 </Select>
+                <HoverCard>
+                  <HoverCardTrigger asChild>
+                    <span className="material-icons text-muted-foreground hover:text-header cursor-help transition-colors">info</span>
+                  </HoverCardTrigger>
+                  <HoverCardContent 
+                    className="w-80 bg-card text-card-foreground border-border shadow-lg"
+                    sideOffset={8}
+                  >
+                    <div className="flex gap-2 items-start">
+                      <span className="material-icons text-header text-lg">info</span>
+                      <p className="text-sm font-['Alegreya'] text-card-foreground">
+                        Click on any rank number or username to view the detailed score
+                      </p>
+                    </div>
+                  </HoverCardContent>
+                </HoverCard>
               </div>
               <DataTable
                 columns={columns}
