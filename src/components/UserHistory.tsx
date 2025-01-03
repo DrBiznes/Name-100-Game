@@ -42,9 +42,9 @@ const ITEMS_PER_PAGE = 3;
 
 function UserHistorySkeleton() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {/* User Header Skeleton */}
-      <div className="mb-8">
+      <div className="mb-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
           <User className="h-4 w-4" />
           <Skeleton className="h-4 w-24 bg-muted" />
@@ -53,37 +53,27 @@ function UserHistorySkeleton() {
         <Skeleton className="h-4 w-32 bg-muted" /> {/* Join date */}
       </div>
 
-      {/* Stats Skeleton */}
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <div className="flex items-center flex-wrap gap-1">
-            <Skeleton className="h-4 w-32 bg-muted" />
-            <Skeleton className="h-4 w-24 bg-muted" />
-            <Skeleton className="h-4 w-48 bg-muted" />
-          </div>
-          <div className="flex items-center flex-wrap gap-1">
-            <Skeleton className="h-4 w-40 bg-muted" />
-            <Skeleton className="h-4 w-28 bg-muted" />
-            <Skeleton className="h-4 w-36 bg-muted" />
-          </div>
+      {/* Stats Skeleton - More compact layout */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-32 bg-muted" />
+          <Skeleton className="h-4 w-16 bg-muted" />
+          <Skeleton className="h-4 w-24 bg-muted" />
         </div>
-        <div className="space-y-2">
-          <div className="flex items-center flex-wrap gap-1">
-            <Skeleton className="h-4 w-44 bg-muted" />
-            <Skeleton className="h-4 w-32 bg-muted" />
-            <Skeleton className="h-4 w-40 bg-muted" />
-          </div>
-          <div className="flex items-center flex-wrap gap-1">
-            <Skeleton className="h-4 w-36 bg-muted" />
-            <Skeleton className="h-4 w-28 bg-muted" />
-            <Skeleton className="h-4 w-32 bg-muted" />
-          </div>
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-28 bg-muted" />
+          <Skeleton className="h-4 w-20 bg-muted" />
+          <Skeleton className="h-4 w-32 bg-muted" />
+        </div>
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-36 bg-muted" />
+          <Skeleton className="h-4 w-24 bg-muted" />
         </div>
       </div>
 
       {/* Recent Games Skeleton */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between mb-4">
+      <div className="mt-4">
+        <div className="flex items-center justify-between mb-2">
           <Skeleton className="h-6 w-32 bg-muted" />
           <div className="flex items-center gap-2">
             <Skeleton className="h-6 w-20 bg-muted" />
@@ -92,7 +82,7 @@ function UserHistorySkeleton() {
         {Array.from({ length: 3 }).map((_, i) => (
           <div 
             key={i}
-            className={`block ${i % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'}`}
+            className={`block ${i % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'} mb-1`}
           >
             <div className="flex items-center justify-between py-2 px-3 rounded-lg">
               <div className="flex flex-col gap-0.5">
@@ -239,7 +229,7 @@ export function UserHistory() {
       <Card className="p-4 md:p-6 border-0 shadow-none bg-transparent">
         {userData?.score && (
           <motion.div 
-            className="mb-8"
+            className="mb-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -253,7 +243,7 @@ export function UserHistory() {
                 {userData.score.username}
               </span>
             </h2>
-            <time className="text-sm text-muted-foreground block mb-4">
+            <time className="text-sm text-muted-foreground">
               Joined {formatSubmissionDate(userData.history.reduce((earliest, entry) => 
                 new Date(entry.submission_date) < new Date(earliest) ? entry.submission_date : earliest,
                 userData.history[0].submission_date
@@ -263,82 +253,74 @@ export function UserHistory() {
         )}
 
         {stats && (
-          <div className="prose mb-8">
+          <div className="mb-4">
             <AnimatePresence mode="wait">
               <motion.div 
-                className="text-base leading-relaxed text-muted-foreground space-y-4"
+                className="text-base text-muted-foreground space-y-2"
                 initial="hidden"
                 animate="visible"
                 exit="hidden"
               >
-                <motion.p 
+                <motion.div 
                   custom={0} 
                   variants={textVariants}
-                  className="space-y-1"
+                  className="flex items-center gap-1 flex-wrap"
                 >
-                  This player has completed{' '}
-                  <span className="font-bold text-foreground">{stats.totalGames} games</span>
+                  <span>This player has completed</span>
+                  <span className="font-bold text-foreground">{stats.totalGames} games.</span>
                   {userData?.score && (
-                    <>. This attempt submitted on{' '}
-                      <span className="font-bold text-foreground">
-                        {formatSubmissionDate(userData.score.submission_date)}
-                      </span> took them{' '}
-                      <span className="font-mono font-bold text-foreground">
-                        {formatTime(userData.score.score)}
-                      </span> to name {userData.score.name_count} women
+                    <>
+                      <span>This attempt submitted on</span>
+                      <span className="font-bold text-foreground">{formatSubmissionDate(userData.score.submission_date)}</span>
+                      <span>took them</span>
+                      <span className="font-mono font-bold text-foreground">{formatTime(userData.score.score)}</span>
+                      <span>to name {userData.score.name_count} women.</span>
                     </>
-                  )}.
-                </motion.p>
+                  )}
+                </motion.div>
 
-                <motion.p 
+                <motion.div 
                   custom={1} 
                   variants={textVariants}
-                  className="space-y-1"
+                  className="flex items-center gap-1 flex-wrap"
                 >
+                  <span>They have played</span>
                   {Object.entries(stats.gameModeCounts).map(([mode, count], index, arr) => (
                     <span key={mode}>
-                      {index === 0 ? ' They have played ' : ''}
                       <span className="font-bold text-foreground">{count} games</span>
-                      {' of Name '}{mode}
-                      {index < arr.length - 1 ? ', ' : '.'}
+                      <span>of Name {mode}{index < arr.length - 1 ? ", " : "."}</span>
                     </span>
                   ))}
-                </motion.p>
+                </motion.div>
 
-                <motion.p 
+                <motion.div 
                   custom={2} 
                   variants={textVariants}
-                  className="space-y-1"
+                  className="flex items-center gap-1 flex-wrap"
                 >
-                  {Object.entries(stats.percentiles).map(([mode, percentile]) => (
+                  {Object.entries(stats.percentiles).map(([mode, percentile], index) => (
                     <span key={mode}>
-                      {' '}Their best Name {mode} time ranks in the{' '}
-                      <span className="font-bold text-foreground">
-                        top {100 - percentile}%
-                      </span>
-                      {' '}of all players.
+                      {index === 0 ? "Their " : "and their "}
+                      <span>best Name {mode} time ranks in the</span>
+                      <span className="font-bold text-foreground">top {100 - percentile}%</span>
+                      <span>of all players{index === Object.entries(stats.percentiles).length - 1 ? "." : ", "}</span>
                     </span>
                   ))}
-                </motion.p>
+                </motion.div>
 
-                <motion.p 
+                <motion.div 
                   custom={3} 
                   variants={textVariants}
-                  className="space-y-1"
+                  className="flex items-center gap-1 flex-wrap"
                 >
-                  Their fastest completion time is{' '}
-                  <span className="font-mono font-bold text-foreground">
-                    {formatTime(stats.bestTime)}
-                  </span>
-                  {' '}and their slowest is{' '}
-                  <span className="font-mono font-bold text-foreground">
-                    {formatTime(stats.worstTime)}
-                  </span>
-                  {', '}with an average completion time of{' '}
-                  <span className="font-mono font-bold text-foreground">
-                    {formatTime(stats.averageTime)}
-                  </span>.
-                </motion.p>
+                  <span>Their fastest completion time is</span>
+                  <span className="font-mono font-bold text-foreground">{formatTime(stats.bestTime)}</span>
+                  <span>and their slowest is</span>
+                  <span className="font-mono font-bold text-foreground">{formatTime(stats.worstTime)}</span>
+                  <span>with an average completion time of</span>
+                  <span className="font-mono font-bold text-foreground">{formatTime(stats.averageTime)}</span>
+                  <span>.</span>
+                </motion.div>
               </motion.div>
             </AnimatePresence>
           </div>
@@ -351,7 +333,10 @@ export function UserHistory() {
           transition={{ duration: 0.5, delay: 0.4 }}
         >
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-semibold">Recent Games</h3>
+            <h3 className="flex items-center gap-2 text-xl font-semibold text-header text-glow">
+              <span className="material-icons">history</span>
+              Recent Games
+            </h3>
             <div className="flex items-center gap-1 text-sm">
               <button 
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
