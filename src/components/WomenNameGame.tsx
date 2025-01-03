@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
@@ -199,17 +200,31 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
 
       {/* Name Inputs Grid */}
       <div className="grid grid-cols-2 gap-4">
-        {Array.from({ length: completedGameCount || targetCount }).map((_, index) => (
-          <NameInput
-            key={index}
-            input={inputs[index]}
-            index={index}
-            isGameActive={isGameActive}
-            inputRef={el => inputRefs.current[index] = el}
-            onInputChange={handleInputChange}
-            onKeyDown={handleInputKeyDown}
-          />
-        ))}
+        <AnimatePresence mode="popLayout">
+          {Array.from({ length: completedGameCount || targetCount }).map((_, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              layout
+              transition={{
+                opacity: { duration: 0.2 },
+                layout: { duration: 0.3 },
+                scale: { duration: 0.2 }
+              }}
+            >
+              <NameInput
+                input={inputs[index]}
+                index={index}
+                isGameActive={isGameActive}
+                inputRef={el => inputRefs.current[index] = el}
+                onInputChange={handleInputChange}
+                onKeyDown={handleInputKeyDown}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
 
       {completedGameCount && names.length === completedGameCount && !showCompletionDialog && (

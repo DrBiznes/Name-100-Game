@@ -12,6 +12,7 @@ import { NavMenu } from './components/NavMenu';
 import { RecentScores } from './components/RecentScores';
 import { Stats } from './components/Stats';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
+import { motion } from 'framer-motion';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -66,7 +67,7 @@ function AppContent() {
           </div>
         </header>
         <main className="container flex-grow">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[500px] mb-6">
             <Routes>
               <Route path="/" element={
                 <>
@@ -115,11 +116,17 @@ function AppContent() {
             )}
           </div>
         </main>
-        <footer className="mt-auto py-6">
-          <div className="container mx-auto px-4">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold mb-3">Built With</h3>
-              <ul className="space-y-2 mb-6 list-none p-0 m-0">
+        <motion.footer 
+          layout
+          className="py-6 mt-auto bg-background"
+          transition={{
+            layout: { duration: 0.3, ease: "easeInOut" }
+          }}
+        >
+          <motion.div layout className="container mx-auto px-4">
+            <motion.div layout className="text-center">
+              <motion.h3 layout className="text-lg font-semibold mb-3">Built With</motion.h3>
+              <motion.ul layout className="space-y-2 mb-6 list-none p-0 m-0">
                 <li>
                   <a 
                     href="https://ui.shadcn.com/" 
@@ -150,8 +157,8 @@ function AppContent() {
                     react-confetti-explosion
                   </a>
                 </li>
-              </ul>
-              <div className="text-foreground text-sm">
+              </motion.ul>
+              <motion.div layout className="text-foreground text-sm">
                 © {new Date().getFullYear()}{' '}
                 <a 
                   href="https://www.jamino.me" 
@@ -170,10 +177,10 @@ function AppContent() {
                 >
                   MIT License
                 </a>
-              </div>
-            </div>
-          </div>
-        </footer>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </motion.footer>
         <FloatingTimer 
           elapsedTime={gameState.elapsedTime}
           isGameActive={gameState.isActive}
