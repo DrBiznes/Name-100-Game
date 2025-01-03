@@ -91,6 +91,11 @@ function LeaderboardTable({
       pageCount={data?.totalPages || 1}
       currentPage={currentPage}
       onPageChange={onPageChange}
+      rowProps={(_, index) => ({
+        className: `cursor-pointer border-border transition-colors ${
+          index % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'
+        } hover:bg-accent hover:bg-opacity-20 hover:text-accent-foreground`
+      })}
     />
   );
 }

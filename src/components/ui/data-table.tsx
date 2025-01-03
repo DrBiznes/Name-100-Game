@@ -33,7 +33,7 @@ interface DataTableProps<TData, TValue> {
   currentPage?: number
   onPageChange?: (page: number) => void
   onRowClick?: (row: TData) => void
-  rowProps?: (row: TData) => React.HTMLAttributes<HTMLTableRowElement>
+  rowProps?: (row: TData, index: number) => React.HTMLAttributes<HTMLTableRowElement>
 }
 
 export function DataTable<TData, TValue>({
@@ -114,21 +114,19 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
-                const customProps = rowProps?.(row.original) || {};
+                const customProps = rowProps?.(row.original, row.index) || {};
                 return (
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
-                    className={`border-border transition-colors ${
-                      row.index % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'
-                    } hover:bg-accent hover:bg-opacity-20 hover:text-accent-foreground ${customProps.className || ''}`}
+                    className={`border-border transition-colors ${customProps.className || ''}`}
                     onClick={() => onRowClick?.(row.original)}
                     {...customProps}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell 
                         key={cell.id} 
-                        className="font-['Alegreya'] text-card-foreground"
+                        className="font-['Alegreya'] text-foreground"
                         style={{ 
                           width: cell.column.getSize(),
                           maxWidth: cell.column.getSize(),

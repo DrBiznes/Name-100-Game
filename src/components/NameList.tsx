@@ -146,9 +146,11 @@ export function NameList({ stats, isLoading }: NameListProps) {
                 selectedNameRef.current.click();
               }
             }}
-            rowProps={(row: NameStats) => ({
+            rowProps={(row: NameStats, index: number) => ({
               ref: selectedName === row.name ? selectedNameRef : undefined,
-              className: `cursor-pointer transition-colors ${
+              className: `cursor-pointer border-border transition-colors ${
+                index % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'
+              } hover:bg-accent hover:bg-opacity-20 hover:text-accent-foreground ${
                 selectedName === row.name ? 'bg-accent/20' : ''
               }`
             })}
