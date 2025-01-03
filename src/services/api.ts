@@ -131,7 +131,14 @@ export const leaderboardApi = {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        
+        if (response.status === 400) {
+          throw new Error(errorData.error || 'Invalid submission data');
+        }
+        if (response.status === 504) {
+          throw new Error('Request timed out - please try again');
+        }
+        throw new Error(errorData.error || `Server error (${response.status})`);
       }
 
       const data = await response.json() as ScoreSubmissionResponse;

@@ -50,7 +50,6 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
   const submitScoreMutation = useMutation({
     mutationFn: leaderboardApi.submitScore,
     onSuccess: () => {
-      // Remove the toast and dialog close from here since we'll navigate away
       queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
     },
     onError: (error) => {

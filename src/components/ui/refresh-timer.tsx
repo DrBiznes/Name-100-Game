@@ -42,7 +42,7 @@ export function RefreshTimer({ cacheTimestamp, cacheExpiresIn }: RefreshTimerPro
 
   return (
     <div className="flex items-center gap-2 text-sm font-['Alegreya'] text-muted-foreground">
-      <span className="material-icons text-sm">update</span>
+      <span className="material-icons text-header">update</span>
       {timeRemaining > 0 ? (
         <span>
           Next update in <span className="font-mono">{formatTime(timeRemaining)}</span>

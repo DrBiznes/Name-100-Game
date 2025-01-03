@@ -38,7 +38,7 @@ function AppContent() {
         <meta name="description" content="Name100Women - The Official Name 100 Women Challenge" />
         <link rel="icon" type="image/png" href="./name100.png" />
       </Helmet>
-      <Toaster richColors position="top-center" />
+      <Toaster richColors position="bottom-right" />
       <div className="min-h-screen w-full text-black flex flex-col">
         <header className="w-full text-center p-4">
           <div className="max-w-7xl mx-auto">
