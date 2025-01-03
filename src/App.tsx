@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NavMenu } from './components/NavMenu';
 import { RecentScores } from './components/RecentScores';
 import { Stats } from './components/Stats';
+import { About } from './components/About';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 
@@ -30,7 +31,7 @@ function AppContent() {
   const timerRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
 
-  const showLeaderboard = location.pathname !== '/stats';
+  const showLeaderboard = location.pathname !== '/stats' && location.pathname !== '/about';
 
   return (
     <>
@@ -103,11 +104,7 @@ function AppContent() {
                 </>
               } />
               <Route path="/stats" element={<Stats />} />
-              <Route path="/about" element={
-                <div className="lg:col-span-2">
-                  <h2>About Page Coming Soon</h2>
-                </div>
-              } />
+              <Route path="/about" element={<About />} />
             </Routes>
             {showLeaderboard && (
               <div className="lg:col-span-1 h-full">

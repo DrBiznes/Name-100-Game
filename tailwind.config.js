@@ -53,6 +53,27 @@ export default {
   				'4': 'var(--chart-4)',
   				'5': 'var(--chart-5)'
   			}
+  		},
+  		typography: {
+  			DEFAULT: {
+  				css: {
+  					'--tw-prose-body': 'var(--foreground)',
+  					'--tw-prose-headings': 'var(--header)',
+  					'--tw-prose-links': 'var(--primary)',
+  					'--tw-prose-bold': 'var(--foreground)',
+  					'--tw-prose-counters': 'var(--muted-foreground)',
+  					'--tw-prose-bullets': 'var(--muted-foreground)',
+  					'--tw-prose-hr': 'var(--border)',
+  					'--tw-prose-quotes': 'var(--foreground)',
+  					'--tw-prose-quote-borders': 'var(--border)',
+  					'--tw-prose-captions': 'var(--muted-foreground)',
+  					'--tw-prose-code': 'var(--foreground)',
+  					'--tw-prose-pre-code': 'var(--foreground)',
+  					'--tw-prose-pre-bg': 'var(--card)',
+  					'--tw-prose-th-borders': 'var(--border)',
+  					'--tw-prose-td-borders': 'var(--border)'
+  				}
+  			}
   		}
   	},
   	keyframes: {
@@ -65,5 +86,8 @@ export default {
   		"caret-blink": "caret-blink 1.25s ease-out infinite",
   	},
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    require('@tailwindcss/typography'),
+  ],
 }

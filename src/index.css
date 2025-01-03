@@ -94,7 +94,6 @@ input, select {
 input:focus, select:focus {
   border-color: var(--primary);
   outline: none;
-  ring-color: var(--ring);
 }
 
 footer a {
