@@ -81,21 +81,20 @@ function ScoreViewSkeleton() {
       exit="exit"
     >
       {/* Header Skeleton */}
-      <div className="flex items-center justify-center gap-3">
-        <div className="flex items-center gap-2 bg-card/50 px-3 py-1.5 rounded-full">
-          <Skeleton className="h-5 w-16 bg-muted" /> {/* Username */}
-        </div>
-        <span className="text-xl">Named</span>
-        <span className="text-xl">20</span>
-        <span className="text-xl">in</span>
-        <span className="font-['Chonburi'] text-xl">
-          <Skeleton className="h-6 w-20 bg-muted rounded-md inline-block" /> {/* Time */}
-        </span>
+      <div className="flex items-center justify-center gap-2">
+        <h2 className="text-2xl font-bold text-center flex items-center gap-2">
+          <div className="inline-flex items-center rounded-md border px-2.5 py-0.5 bg-card/50">
+            <Skeleton className="h-4 w-16 bg-muted" /> {/* Username */}
+          </div>
+          <span className="text-glow">Named XX in{' '}
+            <span className="font-['Chonburi'] font-mono opacity-50">0:00</span>
+          </span>
+        </h2>
         <Button 
           variant="ghost" 
           size="icon"
           disabled
-          className="rounded-full bg-transparent border-0 shadow-none opacity-50"
+          className="rounded-full bg-transparent border-0 shadow-none opacity-50 -mt-3"
         >
           <span className="material-icons text-foreground/80">ios_share</span>
         </Button>

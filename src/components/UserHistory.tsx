@@ -256,71 +256,53 @@ export function UserHistory() {
           <div className="mb-4">
             <AnimatePresence mode="wait">
               <motion.div 
-                className="text-base text-muted-foreground space-y-2"
+                className="text-base text-muted-foreground space-y-4"
                 initial="hidden"
                 animate="visible"
                 exit="hidden"
               >
-                <motion.div 
-                  custom={0} 
+                <motion.p
+                  custom={0}
                   variants={textVariants}
-                  className="flex items-center gap-1 flex-wrap"
+                  className="leading-relaxed"
                 >
-                  <span>This player has completed</span>
-                  <span className="font-bold text-foreground">{stats.totalGames} games.</span>
+                  This player has completed <span className="font-bold text-foreground">{stats.totalGames} games</span>.
                   {userData?.score && (
-                    <>
-                      <span>This attempt submitted on</span>
-                      <span className="font-bold text-foreground">{formatSubmissionDate(userData.score.submission_date)}</span>
-                      <span>took them</span>
-                      <span className="font-mono font-bold text-foreground">{formatTime(userData.score.score)}</span>
-                      <span>to name {userData.score.name_count} women.</span>
-                    </>
+                    <> This attempt submitted on <span className="font-bold text-foreground">{formatSubmissionDate(userData.score.submission_date)}</span> took them <span className="font-mono font-bold text-foreground">{formatTime(userData.score.score)}</span> to name {userData.score.name_count} women.</>
                   )}
-                </motion.div>
+                </motion.p>
 
-                <motion.div 
-                  custom={1} 
+                <motion.p
+                  custom={1}
                   variants={textVariants}
-                  className="flex items-center gap-1 flex-wrap"
+                  className="leading-relaxed"
                 >
-                  <span>They have played</span>
-                  {Object.entries(stats.gameModeCounts).map(([mode, count], index, arr) => (
+                  They have played {Object.entries(stats.gameModeCounts).map(([mode, count], index, arr) => (
                     <span key={mode}>
-                      <span className="font-bold text-foreground">{count} games</span>
-                      <span>of Name {mode}{index < arr.length - 1 ? ", " : "."}</span>
+                      <span className="font-bold text-foreground">{count} games</span> of Name {mode}{index < arr.length - 1 ? ", " : "."}
                     </span>
                   ))}
-                </motion.div>
+                </motion.p>
 
-                <motion.div 
-                  custom={2} 
+                <motion.p
+                  custom={2}
                   variants={textVariants}
-                  className="flex items-center gap-1 flex-wrap"
+                  className="leading-relaxed"
                 >
                   {Object.entries(stats.percentiles).map(([mode, percentile], index) => (
                     <span key={mode}>
-                      {index === 0 ? "Their " : "and their "}
-                      <span>best Name {mode} time ranks in the</span>
-                      <span className="font-bold text-foreground">top {100 - percentile}%</span>
-                      <span>of all players{index === Object.entries(stats.percentiles).length - 1 ? "." : ", "}</span>
+                      {index === 0 ? "Their " : "and their "}best Name {mode} time ranks in the <span className="font-bold text-foreground">top {100 - percentile}%</span> of all players{index === Object.entries(stats.percentiles).length - 1 ? "." : ", "}
                     </span>
                   ))}
-                </motion.div>
+                </motion.p>
 
-                <motion.div 
-                  custom={3} 
+                <motion.p
+                  custom={3}
                   variants={textVariants}
-                  className="flex items-center gap-1 flex-wrap"
+                  className="leading-relaxed"
                 >
-                  <span>Their fastest completion time is</span>
-                  <span className="font-mono font-bold text-foreground">{formatTime(stats.bestTime)}</span>
-                  <span>and their slowest is</span>
-                  <span className="font-mono font-bold text-foreground">{formatTime(stats.worstTime)}</span>
-                  <span>with an average completion time of</span>
-                  <span className="font-mono font-bold text-foreground">{formatTime(stats.averageTime)}</span>
-                  <span>.</span>
-                </motion.div>
+                  Their fastest completion time is <span className="font-mono font-bold text-foreground">{formatTime(stats.bestTime)}</span> and their slowest is <span className="font-mono font-bold text-foreground">{formatTime(stats.worstTime)}</span> with an average completion time of <span className="font-mono font-bold text-foreground">{formatTime(stats.averageTime)}</span>.
+                </motion.p>
               </motion.div>
             </AnimatePresence>
           </div>
