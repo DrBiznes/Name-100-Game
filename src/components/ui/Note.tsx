@@ -74,7 +74,7 @@ export function Note({ number, children }: NoteProps) {
             {number}
           </span>
         </HoverCardTrigger>
-        <HoverCardContent className="font-['Alegreya'] lg:hidden bg-card text-foreground">
+        <HoverCardContent className="font-['Alegreya'] md:hidden bg-card text-foreground">
           {children}
         </HoverCardContent>
       </HoverCard>
@@ -82,7 +82,7 @@ export function Note({ number, children }: NoteProps) {
       {/* Render the floating note for desktop */}
       <div 
         ref={noteRef}
-        className="hidden lg:block fixed note-content" 
+        className="hidden md:block fixed note-content" 
         data-note={number}
         style={{
           right: 'calc(2rem + 2vw)',

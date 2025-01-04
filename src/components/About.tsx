@@ -3,6 +3,9 @@ import { MDXProvider } from '@mdx-js/react';
 import { TableOfContents } from './TableOfContents';
 import { Note } from './ui/Note';
 import AboutContent from '../content/about.mdx';
+import { Skeleton } from './ui/skeleton';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Suspense } from 'react';
 
 interface ComponentProps {
   children?: ReactNode;
@@ -26,6 +29,42 @@ const createId = (text: string) => {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
 };
+
+function AboutSkeleton() {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="space-y-8"
+    >
+      {/* Header Skeleton */}
+      <div className="mb-8">
+        <Skeleton className="h-24 w-3/4 mb-4 bg-muted" /> {/* Title */}
+        <Skeleton className="h-6 w-1/2 mb-2 bg-muted" /> {/* Subtitle */}
+        <Skeleton className="h-4 w-1/3 bg-muted" /> {/* Date */}
+      </div>
+
+      {/* Content Skeleton */}
+      <div className="space-y-6">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="space-y-4">
+            <Skeleton className="h-8 w-2/3 bg-muted" /> {/* Section Title */}
+            <div className="space-y-2">
+              {Array.from({ length: 4 }).map((_, j) => (
+                <Skeleton 
+                  key={j} 
+                  className="h-4 bg-muted" 
+                  style={{ width: `${Math.random() * 20 + 80}%` }} 
+                /> 
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
 
 export function About() {
   const components = {
@@ -129,14 +168,29 @@ export function About() {
       <div className="max-w-[120rem] mx-auto px-4 py-8 flex justify-center flex-grow">
         <div className="grid grid-cols-1 lg:grid-cols-[280px_minmax(1000px,_1fr)_250px] gap-8 w-full px-4">
           {/* Table of Contents - Left Column */}
-          <div className="lg:sticky lg:top-8 lg:h-[calc(100vh-4rem)] overflow-visible px-4">
+          <motion.div 
+            className="lg:sticky lg:top-8 lg:h-[calc(100vh-4rem)] overflow-visible px-4"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             <TableOfContents />
-          </div>
+          </motion.div>
 
           {/* Main Content - Middle Column */}
-          <div className="min-w-0 max-w-[1400px] mx-auto">
+          <motion.div 
+            className="min-w-0 max-w-[1400px] mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
             {/* Header Title Area */}
-            <div className="mb-8">
+            <motion.div 
+              className="mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
               <h1 className="text-5xl sm:text-6xl md:text-8xl font-bold mb-4 font-['Chonburi'] text-[var(--about-text)] leading-tight text-glow">
                 THE GOAL:<br />
                 NAME EVERY<br />
@@ -152,25 +206,46 @@ export function About() {
                   day: 'numeric'
                 })}
               </div>
-            </div>
+            </motion.div>
 
             {/* MDX Content Area */}
             <div className="prose prose-invert prose-lg max-w-none [&_pre]:!bg-transparent [&_pre]:!p-0 [&_code]:!bg-transparent [&_code]:whitespace-pre [&_pre]:overflow-x-auto prose-p:max-w-none prose-headings:max-w-none">
-              <MDXProvider components={components}>
-                <AboutContent />
-              </MDXProvider>
+              <AnimatePresence mode="wait">
+                <Suspense fallback={<AboutSkeleton />}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                  >
+                    <MDXProvider components={components}>
+                      <AboutContent />
+                    </MDXProvider>
+                  </motion.div>
+                </Suspense>
+              </AnimatePresence>
             </div>
-          </div>
+          </motion.div>
 
           {/* Notes Area - Right Column */}
-          <div className="hidden lg:block lg:sticky lg:top-8 lg:h-[calc(100vh-4rem)] overflow-auto">
+          <motion.div 
+            className="hidden lg:block lg:sticky lg:top-8 lg:h-[calc(100vh-4rem)] overflow-auto"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
             {/* Notes will be positioned here by the Note component */}
-          </div>
+          </motion.div>
         </div>
       </div>
 
       {/* Social Footer - Full width and centered with viewport */}
-      <footer className="w-full py-16 flex flex-col items-center gap-4">
+      <motion.footer 
+        className="w-full py-16 flex flex-col items-center gap-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.5 }}
+      >
         <div className="text-lg font-['Alegreya'] italic font-medium text-[var(--header)] text-glow">
           Thanks for playing!!!!
         </div>
@@ -252,7 +327,7 @@ export function About() {
             </span>
           </a>
         </div>
-      </footer>
+      </motion.footer>
     </div>
   );
 } 

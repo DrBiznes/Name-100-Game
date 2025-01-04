@@ -57,6 +57,7 @@ export function NameInput({
         onKeyDown={e => input.status !== 'pending' && onKeyDown(e, index)}
         spellCheck={true}
         lang="en"
+        enterKeyHint="next"
         data-state={input.status}
         className={cn(
           input.status === 'valid' && "cursor-pointer",
