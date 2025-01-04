@@ -106,8 +106,8 @@ export function ValidationFlowChart() {
 
   // Add controls UI
   const Controls = () => (
-    <div className="chart-controls">
-      <div className="chart-controls-group">
+    <div className="chart-controls" style={{ gap: '8px', display: 'flex' }}>
+      <div className="chart-controls-group" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
         <button 
           className="icon-button" 
           onClick={() => setTransform(prev => ({ ...prev, scale: Math.min(MAX_SCALE, prev.scale * (1 + SCALE_STEP)) }))}
@@ -125,12 +125,11 @@ export function ValidationFlowChart() {
         >
           <span className="material-symbols-outlined">remove</span>
         </button>
-      </div>
-      <div className="chart-controls-group">
         <button 
           className="icon-button"
           onClick={() => setTransform({ x: 0, y: 0, scale: 1 })}
           title="Reset View"
+          style={{ marginLeft: '4px' }}
         >
           <span className="material-symbols-outlined">restart_alt</span>
         </button>

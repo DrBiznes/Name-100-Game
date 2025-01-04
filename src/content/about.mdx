@@ -7,7 +7,7 @@ In early 2024, a simple challenge emerged that would expose an unsurprising gap 
 
 ![ChatGPT Has No Faith In Humanity](chatgptnofaith.png)
 
-It started with a challenge from Twitch streamer QTCinderella in early 2024. A simple premise that sparked a fascinating realization about our collective knowledge of women's achievements throughout history. The challenge quickly gained traction, with streamers and content creators testing their knowledge - including NorthernLion's legendary 7:11 speed run. <Note number={2}>NorthernLion's speed run demonstrated both the possibility and difficulty of the challenge, setting an early benchmark for others to chase.</Note>
+It started with a challenge from Twitch streamer QTCinderella in early 2024. A simple premise that sparked a fascinating realization about our collective knowledge of women's achievements throughout history. The challenge quickly gained traction, with streamers and content creators testing their knowledge - including [NorthernLion's legendary 7:11 speed run](https://youtu.be/SqLEGFqgRfc?si=VahW0zahMus3IAFF). <Note number={2}>NorthernLion's speed run demonstrated both the possibility and difficulty of the challenge, setting an early benchmark for others to chase.</Note>
 
 But beyond the challenge itself lay a more complex technical problem: how do you build a system that can accurately validate any woman's name throughout history? The engineering challenges would prove to be as interesting as the challenge itself.
 
@@ -28,7 +28,7 @@ Building Name100Women required solving several interconnected technical problems
 - Process edge cases like stage names and mononyms
 - Verify gender through often ambiguous Wikipedia content
 
-To solve these problems, I developed a multi-layered validation pipeline that combines local databases, sophisticated name normalization, and intelligent API usage. Here's how each piece came together:
+To solve these problems, I developed a multi- validation pipeline that combines local databases, sophisticated name normalization, and intelligent API usage. Here's how each piece came together:
 
 <ValidationFlowChart />
 
@@ -61,7 +61,7 @@ This normalization is crucial - it handles everything from diacritics to hyphena
 
 Remember how the UUID blog talked about "finding good UUIDs"? Well, I had to figure out how to handle "good names" - particularly those that break all the rules. Enter the mononym problem.
 
-The mononym issue first became apparent when users started entering names like "Cher" and "Beyoncé". <Note number={6}>Mononyms presented a unique challenge, as they break the traditional FirstName LastName pattern but are still valid entries.</Note>
+The mononym issue first became apparent when users started entering names like "Cher".<Note number={6}>Mononyms presented a unique challenge, as they break the traditional FirstName LastName pattern but are still valid entries.</Note>
 
 My initial system rejected these as invalid since they didn't follow the expected "FirstName LastName" pattern. The solution? A sophisticated mononym detection system that works in layers:
 
@@ -99,27 +99,11 @@ function isValidSingleName(name: string): boolean {
 
 But that's just the first layer. When we hit Wikipedia, we need even more sophisticated mononym detection: <Note number={7}>Stage names and mononyms often require additional context from Wikipedia articles to validate properly.</Note>
 
-<CodeBlock title="Advanced Mononym Detection" language="typescript">{`// Additional check for articles about mononyms/stage names
-if (name.trim().split(/\s+/).length === 1) {
-  const mononymIndicators = [
-    'stage name', 'mononym', 'professional name', 'known professionally',
-    'stage persona', 'performing name', 'artistic name', 'pseudonym',
-    'singer', 'artist', 'performer', 'musician', 'actress', 'known as'
-  ];
-  const hasMononymIndicator = mononymIndicators.some(indicator => 
-    intro.toLowerCase().includes(indicator)
-  );
-  
-  if (!hasMononymIndicator) {
-    continue; // Skip this result if it doesn't indicate a stage name/mononym
-  }
-}`}</CodeBlock>
-
-This two-layer approach helps catch both common and edge cases: <Note number={8}>The system first checks against known mononyms, then falls back to contextual clues in Wikipedia articles.</Note>
+This two-layer approach helps catch both common and edge cases: The system first checks against known mononyms, then falls back to contextual clues in Wikipedia articles.
 
 ### Challenge 3: Wiki Winona
 
-The final boss: Wikipedia API integration. Just as the UUID blog author struggled with bit manipulation, I struggled with extracting gender information from Wikipedia articles. <Note number={9}>Wikipedia's API is powerful but requires careful handling to avoid rate limits and extract meaningful gender information.</Note>
+The final boss: Wikipedia API integration. Just as the UUID blog author struggled with bit manipulation, I struggled with extracting gender information from Wikipedia articles. <Note number={8}>Wikipedia's API is powerful but requires careful handling to avoid rate limits and extract meaningful gender information.</Note>
 
 The gender verification happens in multiple stages:
 
@@ -128,7 +112,7 @@ The gender verification happens in multiple stages:
 3. Finally, we use linguistic analysis to verify the subject is a woman
 
 Here's the complete verification process:
-
+layered
 <CodeBlock title="Complete Wikipedia and Gender Verification" language="typescript">{`export async function checkWikipedia(name: string): Promise<boolean> {
   // First check local database - we know these are all women
   if (checkLocalDatabase(name)) {
@@ -212,9 +196,9 @@ Here's the complete verification process:
   }
 }`}</CodeBlock>
 
-The real magic happens in the gender verification logic: <Note number={10}>The gender verification system uses a combination of linguistic markers and context clues to determine if an article is about a woman.</Note>
+The real magic happens in the gender verification logic: <Note number={9}>The gender verification system uses a combination of linguistic markers and context clues to determine if an article is about a woman.</Note>
 
-This might seem simple, but it handles a surprising number of edge cases. <Note number={11}>The system needs to be both precise enough to avoid false positives and flexible enough to handle historical figures with varying biographical styles.</Note>
+This might seem simple, but it handles a surprising number of edge cases.
 
 For example, it can handle:
 - Modern articles using contemporary language ("businesswoman", "spokeswoman")
@@ -224,7 +208,7 @@ For example, it can handle:
 
 ### Future Features
 
-I'm always looking to improve Name100Women. Some features on my roadmap: <Note number={12}>These features are prioritized based on user feedback and technical feasibility.</Note>
+I'm always looking to improve Name100Women. Some features on my roadmap: <Note number={10}>These features are prioritized based on user feedback and technical feasibility.</Note>
 
 - Integrated learning resources about each woman
 - Multiplayer mode for competitive naming
