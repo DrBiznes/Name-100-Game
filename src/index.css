@@ -155,8 +155,15 @@ footer a:hover {
 
 /* Prose customization */
 .prose {
-  max-width: 85ch;
+  max-width: 50ch;
+  width: 100%;
   font-family: "Alegreya", Georgia, serif;
+}
+
+@media (min-width: 768px) {
+  .prose {
+    max-width: 85ch;
+  }
 }
 
 .prose p, .prose li, .prose strong, .prose em {
