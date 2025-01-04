@@ -200,11 +200,7 @@ export function About() {
                 A simple task for someone of my skillset
               </div>
               <div className="text-[var(--about-text-muted)] italic">
-                {new Date().toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric'
-                })}
+                Jan 1, 2025
               </div>
             </motion.div>
 

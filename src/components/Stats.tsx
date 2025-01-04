@@ -10,6 +10,45 @@ import { RefreshTimer } from './ui/refresh-timer';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from './ui/hover-card';
 import { Skeleton } from './ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
+import nameDatabase from '@/lib/womendatabase.json';
+
+// Helper function to normalize names for comparison (same as nameValidationService.ts)
+function normalizeNameForComparison(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")  // Remove diacritics
+    .replace(/-/g, ' ')               // Replace hyphens with spaces
+    .replace(/\./g, '')              // Remove periods
+    .trim();                          // Remove leading/trailing whitespace
+}
+
+// Helper function to capitalize name parts
+const capitalizeNameParts = (name: string) => {
+  return name.split(' ').map(part => {
+    // Handle hyphenated names
+    if (part.includes('-')) {
+      return part.split('-').map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join('-');
+    }
+    // Handle names with periods (like initials)
+    if (part.includes('.')) {
+      return part.toUpperCase();
+    }
+    // Regular capitalization
+    return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+  }).join(' ');
+};
+
+// Helper function to find proper name from database
+const findProperName = (name: string): string => {
+  const normalizedInputName = normalizeNameForComparison(name);
+  
+  const databaseMatch = nameDatabase.names.find(dbName => 
+    normalizeNameForComparison(dbName) === normalizedInputName
+  );
+  
+  return databaseMatch || capitalizeNameParts(name);
+};
 
 function StatsTextSkeleton() {
   return (
@@ -127,7 +166,7 @@ export function Stats() {
               The most frequently named women are{' '}
               {topNames.map((stat, index) => (
                 <span key={stat.name}>
-                  <span className="font-bold text-foreground">{stat.name}</span>
+                  <span className="font-bold text-foreground">{findProperName(stat.name)}</span>
                   {' '}({stat.count.toLocaleString()} times)
                   {index < topNames.length - 1 ? ', ' : '.'}
                 </span>
@@ -143,8 +182,8 @@ export function Stats() {
                 Common variations in submissions include{' '}
                 {commonMisspellings.map((stat, index) => (
                   <span key={stat.name}>
-                    <span className="font-bold text-foreground">{stat.name}</span>
-                    {' '}(submitted as: {stat.variants.slice(0, 3).join(', ')}
+                    <span className="font-bold text-foreground">{findProperName(stat.name)}</span>
+                    {' '}(submitted as: {stat.variants.slice(0, 3).map(v => findProperName(v)).join(', ')}
                     {stat.variants.length > 3 ? '...' : ''})
                     {index < commonMisspellings.length - 1 ? ', ' : '.'}
                   </span>
