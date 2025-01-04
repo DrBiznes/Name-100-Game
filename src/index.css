@@ -140,12 +140,24 @@ footer a:hover {
 .note-content {
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+  z-index: 50;
+  pointer-events: none;
 }
 
 .note-content[data-note].active {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
+}
+
+.note-content > div {
+  transition: transform 0.3s ease-in-out;
+  transform: translateX(20px);
+}
+
+.note-content.active > div {
+  transform: translateX(0);
 }
 
 /* Intersection Observer target for notes */

@@ -9,8 +9,19 @@ interface NoteProps {
 
 export function Note({ number, children }: NoteProps) {
   const triggerRef = useRef<HTMLSpanElement>(null);
+  const noteRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const updateNotePosition = () => {
+      if (!triggerRef.current || !noteRef.current) return;
+
+      const triggerRect = triggerRef.current.getBoundingClientRect();
+      const noteElement = noteRef.current;
+      
+      // Calculate the vertical position relative to the viewport
+      noteElement.style.top = `${triggerRect.top}px`;
+    };
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -20,6 +31,7 @@ export function Note({ number, children }: NoteProps) {
           if (noteElement) {
             if (entry.isIntersecting) {
               noteElement.classList.add('active');
+              updateNotePosition();
             } else {
               noteElement.classList.remove('active');
             }
@@ -28,6 +40,7 @@ export function Note({ number, children }: NoteProps) {
       },
       {
         rootMargin: '-20% 0px -60% 0px',
+        threshold: [0, 1]
       }
     );
 
@@ -35,8 +48,18 @@ export function Note({ number, children }: NoteProps) {
       observer.observe(triggerRef.current);
     }
 
-    return () => observer.disconnect();
+    // Update position on scroll and resize
+    window.addEventListener('scroll', updateNotePosition);
+    window.addEventListener('resize', updateNotePosition);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', updateNotePosition);
+      window.removeEventListener('resize', updateNotePosition);
+    };
   }, [number]);
+
+  const numberIndicatorClass = "inline-flex items-center justify-center px-2 h-[1.4em] text-sm font-['Alegreya'] bg-card text-primary rounded-full border border-primary";
 
   return (
     <>
@@ -46,7 +69,7 @@ export function Note({ number, children }: NoteProps) {
           <span 
             ref={triggerRef}
             data-note-trigger={number}
-            className="inline-flex items-center justify-center w-5 h-5 text-sm font-['Alegreya'] bg-card text-primary rounded-full border border-primary cursor-help align-text-top -mt-1"
+            className={cn(numberIndicatorClass, "cursor-help align-text-top -mt-1")}
           >
             {number}
           </span>
@@ -58,14 +81,25 @@ export function Note({ number, children }: NoteProps) {
 
       {/* Render the floating note for desktop */}
       <div 
-        className="hidden lg:block fixed right-[max(2rem,calc((100vw-90rem)/2+2rem))] w-72 note-content" 
+        ref={noteRef}
+        className="hidden lg:block fixed note-content" 
         data-note={number}
         style={{
-          maxWidth: 'calc((100vw - 90rem) / 2 + 16rem)'
+          right: 'calc(2rem + 2vw)',
+          width: '18rem',
+          maxWidth: '20rem',
+          marginLeft: '2rem'
         }}
       >
-        <div className="bg-card p-4 rounded-lg border border-border shadow-lg font-['Alegreya'] text-foreground">
-          {children}
+        <div className="font-['Alegreya'] text-foreground">
+          <div className="flex items-start gap-3">
+            <span className={numberIndicatorClass}>
+              {number}
+            </span>
+            <div className="flex-1">
+              {children}
+            </div>
+          </div>
         </div>
       </div>
     </>
