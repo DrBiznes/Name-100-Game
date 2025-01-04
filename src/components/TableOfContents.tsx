@@ -7,16 +7,26 @@ export function TableOfContents() {
   const navigate = useNavigate();
   
   const sections = [
-    { id: 'about-name100women', text: 'About' },
-    { id: 'the-challenge', text: 'The Challenge' },
-    { id: 'why-this-matters', text: 'Why This Matters' },
-    { id: 'how-it-works', text: 'How It Works' },
-    { id: 'scoring-system', text: 'Scoring System' },
-    { id: 'technical-implementation', text: 'Technical Implementation' },
-    { id: 'future-plans', text: 'Future Plans' },
-    { id: 'contributing', text: 'Contributing' },
-    { id: 'contact', text: 'Contact' },
-    { id: 'acknowledgments', text: 'Acknowledgments' },
+    { id: 'name-every-woman', text: 'NAME EVERY WOMAN' },
+    { 
+      id: 'the-challenges', 
+      text: 'The Challenges',
+      subsections: [
+        { id: 'challenge-1-verification-vanessa', text: 'Challenge 1' },
+        { id: 'challenge-2-mononym-mary', text: 'Challenge 2' },
+        { id: 'challenge-3-wiki-winona', text: 'Challenge 3' }
+      ]
+    },
+    { id: 'missing-mononyms', text: 'Missing Mononyms' },
+    { 
+      id: 'tech-stack', 
+      text: 'Tech Stack',
+      subsections: [
+        { id: 'frontend', text: 'Frontend' },
+        { id: 'backend', text: 'Backend' }
+      ]
+    },
+    { id: 'wrap-up', text: 'Wrap Up' },
   ];
 
   // Handle initial section scroll on mount and hash changes
@@ -36,6 +46,14 @@ export function TableOfContents() {
 
   const handleSectionClick = (sectionId: string) => (e: React.MouseEvent) => {
     e.preventDefault();
+    
+    // Special case for the top entry to scroll to top of page
+    if (sectionId === 'name-every-woman') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      navigate('/about');
+      return;
+    }
+
     navigate(`/about#${sectionId}`);
 
     const element = document.getElementById(sectionId);
@@ -52,16 +70,31 @@ export function TableOfContents() {
         Table Of<br />Contents
       </h4>
       <Separator className="mb-6" />
-      <ul className="space-y-3">
+      <ul className="space-y-4">
         {sections.map((section) => (
           <li key={section.id}>
             <a
-              href={`#${section.id}`}
-              className="block font-['Alegreya'] text-base text-foreground hover:text-primary transition-colors"
+              href={section.id === 'name-every-woman' ? '#' : `#${section.id}`}
+              className="block font-['Alegreya'] text-xl font-medium text-foreground hover:text-primary transition-colors"
               onClick={handleSectionClick(section.id)}
             >
               {section.text}
             </a>
+            {section.subsections && (
+              <ul className="ml-6 mt-3 space-y-3">
+                {section.subsections.map((subsection) => (
+                  <li key={subsection.id}>
+                    <a
+                      href={`#${subsection.id}`}
+                      className="block font-['Alegreya'] text-lg text-muted-foreground hover:text-primary transition-colors"
+                      onClick={handleSectionClick(subsection.id)}
+                    >
+                      {subsection.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
           </li>
         ))}
       </ul>
