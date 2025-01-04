@@ -143,6 +143,7 @@ footer a:hover {
   transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
   z-index: 50;
   pointer-events: none;
+  font-size: 1rem;
 }
 
 .note-content[data-note].active {
@@ -170,17 +171,19 @@ footer a:hover {
   max-width: 50ch;
   width: 100%;
   font-family: "Alegreya", Georgia, serif;
+  font-size: 1.2rem;
 }
 
 @media (min-width: 768px) {
   .prose {
-    max-width: 85ch;
+    max-width: 80ch;
+    font-size: 1.25rem;
   }
 }
 
 .prose p, .prose li, .prose strong, .prose em {
   color: var(--about-text) !important;
-  line-height: 1.8;
+  line-height: 1.6;
 }
 
 .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
@@ -193,12 +196,16 @@ footer a:hover {
 
 .prose a {
   color: var(--about-text-bright) !important;
-  text-decoration: none;
-  transition: color 0.2s ease;
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-color: var(--border);
+  text-underline-offset: 4px;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
 }
 
 .prose a:hover {
   color: var(--about-text-dim) !important;
+  text-decoration-color: var(--primary);
 }
 
 .prose code {
@@ -241,4 +248,9 @@ footer a:hover {
 
 .prose h3 span[role="img"] {
   font-size: 1.5em;
+}
+
+/* Also set HoverCard content size */
+.hover-card-content {
+  font-size: 1rem;
 }

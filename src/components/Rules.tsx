@@ -99,7 +99,7 @@ export function Rules() {
           whileHover={standardHoverEffect}
           style={{ textShadow: '2px 2px 4px rgba(255,214,186,0.3)' }}
         >
-          Press ENTER <span className="material-icons align-middle text-white">keyboard_return</span> or TAB <span className="material-icons align-middle text-white">keyboard_tab</span> to verify each name
+          Press ENTER <span className="material-icons align-middle">keyboard_return</span> or TAB <span className="material-icons align-middle">keyboard_tab</span> to verify each name
         </motion.li>
       </motion.ul>
     </div>

@@ -232,7 +232,7 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
           <Button 
             onClick={() => setShowCompletionDialog(true)}
             variant="default"
-            className="w-full md:w-auto"
+            className="w-full md:w-auto mx-auto"
           >
             Upload Score
           </Button>

@@ -1,0 +1,93 @@
+# Using Custom Components in MDX
+
+This guide explains how to use the custom components available in our MDX files.
+
+## Note Component
+
+The `Note` component creates a floating note on desktop and a hover card on mobile. It's perfect for adding side commentary or additional context.
+
+```jsx
+<Note number={1}>
+  This is a floating note that will appear on the right side on desktop
+  and as a hover card on mobile.
+</Note>
+```
+
+## Code Blocks
+
+Code blocks can be displayed in two ways:
+
+### 1. Using Markdown Code Blocks
+
+Standard markdown code blocks with language specification:
+
+```typescript
+function example() {
+  console.log("This is a code example");
+}
+```
+
+### 2. Using the CodeBlock Component
+
+The `CodeBlock` component provides additional features like collapsible sections and syntax highlighting:
+
+```jsx
+<CodeBlock 
+  title="Example Function" 
+  language="typescript" 
+  collapsed={true}
+>
+{`function example() {
+  console.log("This is a collapsible code example");
+}`}
+</CodeBlock>
+```
+
+## Text Formatting
+
+All standard MDX/Markdown formatting is supported with custom styling:
+
+- **Headings**: Use `#`, `##`, `###` for different levels
+- **Links**: `[Link Text](url)`
+- **Images**: `![Alt Text](image-url)`
+- **Lists**: Use `-` or `*` for bullet points
+- **Code inline**: Use \`backticks\` for inline code
+- **Blockquotes**: Use `>` for quoted text
+
+## Example Usage
+
+Here's a complete example combining multiple components:
+
+```mdx
+# Main Topic
+
+Here's an interesting point<Note number={1}>This provides additional context 
+about the interesting point.</Note> that we should explore.
+
+<CodeBlock title="Implementation" language="typescript">
+{`function implementFeature() {
+  // Your code here
+  return result;
+}`}
+</CodeBlock>
+
+> Important quote or callout text
+
+## Subtopic
+
+- List item one
+- List item two
+- List item three
+```
+
+## Component Props
+
+### Note Component
+- `number`: Required. Unique identifier for the note
+- `children`: Required. Content of the note
+
+### CodeBlock Component
+- `title`: Optional. Title of the code block (default: 'Code Example')
+- `language`: Optional. Programming language for syntax highlighting (default: 'typescript')
+- `collapsed`: Optional. Whether the code block starts collapsed (default: true)
+- `children`: Required. The code content as a string 
