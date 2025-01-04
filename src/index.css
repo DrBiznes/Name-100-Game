@@ -26,6 +26,10 @@
     --input: #453454;
     --ring: #B76E79;
     --header: #E8A0AB;
+    --about-text: #FFD6BA;
+    --about-text-muted: #FFD6BA99;
+    --about-text-bright: #FFF1E6;
+    --about-text-dim: #D4B09A;
     --radius: 0.5rem;
     --table-row-light: #3D2A4B;
     --table-row-dark: #2D1B3B;
@@ -136,28 +140,28 @@ footer a:hover {
   font-family: "Alegreya", Georgia, serif;
 }
 
-.prose p {
-  color: var(--foreground);
+.prose p, .prose li, .prose strong, .prose em {
+  color: var(--about-text) !important;
   line-height: 1.8;
 }
 
-.prose h1, .prose h2, .prose h3 {
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
   font-family: "Chonburi", "Times New Roman", serif;
-  color: var(--header);
+  color: var(--about-text) !important;
 }
 
 .prose a {
-  color: var(--primary);
+  color: var(--about-text-bright) !important;
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .prose a:hover {
-  color: var(--accent);
+  color: var(--about-text-dim) !important;
 }
 
 .prose code {
-  color: var(--primary);
+  color: var(--about-text-bright) !important;
   background-color: var(--card);
   padding: 0.2em 0.4em;
   border-radius: 0.2em;
@@ -169,6 +173,31 @@ footer a:hover {
 }
 
 .prose blockquote {
-  border-left-color: var(--primary);
-  color: var(--muted-foreground);
+  border-left-color: var(--about-text-dim);
+  color: var(--about-text-muted) !important;
+}
+
+/* MDX specific styles */
+.prose ul li::marker {
+  color: var(--about-text-dim) !important;
+}
+
+.prose ol li::marker {
+  color: var(--about-text-dim) !important;
+}
+
+.prose ul, .prose ol {
+  color: var(--about-text) !important;
+}
+
+/* Emoji headings */
+.prose h3:has(span[role="img"]) {
+  color: var(--about-text) !important;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.prose h3 span[role="img"] {
+  font-size: 1.5em;
 }

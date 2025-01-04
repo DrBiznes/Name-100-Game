@@ -1,163 +1,138 @@
+import { Note } from '../components/ui/Note';
 import { CodeBlock } from '../components/ui/CodeBlock';
 
-# About Name100Women
+# Name 100 Women Challenge
 
-Welcome to Name100Women, a unique challenge that tests your knowledge of influential women throughout history. This project was born from a simple yet powerful idea: to celebrate and remember the countless women who have shaped our world.
+*"Name a single historical woman! Wait, not her - name another one! Keep going..."* <Note number={1}>This challenge originated from Twitch streamer QTCinderella in early 2024, quickly becoming a viral sensation in the streaming community.</Note>
 
-## The Challenge
+It started with a challenge from Twitch streamer QTCinderella in early 2024. A simple premise that sparked a fascinating realization about our collective knowledge of women's achievements throughout history. The challenge quickly gained traction, with streamers and content creators testing their knowledge - including NorthernLion's legendary 7:11 speed run. <Note number={2}>NorthernLion's speed run demonstrated both the possibility and difficulty of the challenge, setting an early benchmark for others to chase.</Note>
 
-The challenge is straightforward: name 100 women in 15 minutes. While it might sound simple, this task reveals interesting patterns in how we remember and recognize women's contributions to society. Some key aspects of the challenge include:
+But attempting the challenge and building a system to verify it are two very different beasts. When I started developing Name100Women, the skeptics had plenty to say:
 
-- No restrictions on time period or field
-- Names can be from any country or culture
-- Both historical and contemporary figures are valid
-- Fictional characters are not accepted
+- "The Wikipedia API will rate limit you to death" <Note number={3}>We solved this through aggressive caching and a multi-layered verification system that minimizes API calls.</Note>
+- "You'll never handle all the edge cases with names"
+- "What about non-English names?"
 
-## Why This Matters
+They weren't entirely wrong - but they weren't right either. Here's how we built it.
 
-In a world where women's achievements have often been overlooked or underrepresented, this challenge serves multiple purposes:
+## The Technical Trials
 
-1. **Awareness**: It helps us realize how many (or how few) women we can readily name
-2. **Education**: It encourages learning about women's contributions across different fields
-3. **Recognition**: It promotes the acknowledgment of women's achievements throughout history
-4. **Discussion**: It sparks conversations about representation and historical documentation
+### 🔍 Verification Vanessa: The Name Validation Saga
 
-## How It Works
+Our verification system evolved through three increasingly sophisticated layers: <Note number={4}>Each layer of verification adds both accuracy and complexity, requiring careful balance between speed and correctness.</Note>
 
-The game mechanics are designed to be simple and engaging. Here's a look at the core game loop:
+1. Local database lookup
+2. Wikipedia API verification
+3. Special case handling (like mononyms)
 
-<CodeBlock title="Game Loop Implementation" language="typescript">{`
-const gameLoop = {
-  timeLimit: 15 * 60, // 15 minutes in seconds
-  targetNames: 100,
-  validateName: async (name: string) => {
-    // Check local database first
-    if (await checkLocalDatabase(name)) {
-      return true;
-    }
-    
-    // Fall back to Wikipedia API
-    return await checkWikipediaForWoman(name);
-  },
-  calculateScore: (names: string[], timeRemaining: number) => {
-    return {
-      namesCount: names.length,
-      timeBonus: timeRemaining > 0 ? timeRemaining * 10 : 0,
-      uniqueBonus: calculateUniqueBonus(names),
-      total: names.length * 100 + (timeRemaining > 0 ? timeRemaining * 10 : 0)
-    };
-  }
-};
-`}</CodeBlock>
-
-### Scoring System
-
-Your final score is calculated based on several factors:
-
-<CodeBlock title="Score Calculation" language="typescript">{`
-function calculateScore(submission: GameSubmission): Score {
-  const baseScore = submission.validNames.length * 100;
-  const timeBonus = Math.max(0, submission.timeRemaining) * 10;
-  const uniqueBonus = submission.validNames
-    .filter(name => isUniqueName(name))
-    .length * 50;
-
-  return {
-    base: baseScore,
-    timeBonus,
-    uniqueBonus,
-    total: baseScore + timeBonus + uniqueBonus
-  };
-}
-`}</CodeBlock>
-
-## Technical Implementation
-
-This project is built using modern web technologies. Here's how we handle name validation:
-
-<CodeBlock title="Name Validation System" language="typescript">{`
-async function validateName(name: string): Promise<ValidationResult> {
-  // Normalize the name for comparison
-  const normalized = name
+<CodeBlock title="Core Name Validation Implementation" language="typescript">{`// From nameValidationService.ts
+function normalizeNameForComparison(name: string): string {
+  return name
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")  // Remove diacritics
-    .trim();
-
-  // Check against our local database first
-  const localResult = await checkLocalDatabase(normalized);
-  if (localResult.isValid) {
-    return {
-      isValid: true,
-      name: localResult.canonicalName,
-      source: 'local'
-    };
-  }
-
-  // Fall back to Wikipedia API
-  const wikiResult = await checkWikipedia(normalized);
-  if (wikiResult.isValid) {
-    // Cache the result for future use
-    await cacheValidName(wikiResult.canonicalName);
-    return {
-      isValid: true,
-      name: wikiResult.canonicalName,
-      source: 'wikipedia'
-    };
-  }
-
-  return {
-    isValid: false,
-    error: 'Name not found or not verified as a woman'
-  };
+    .replace(/-/g, ' ')               // Replace hyphens with spaces
+    .replace(/\./g, '')              // Remove periods
+    .trim();                          // Remove leading/trailing whitespace
 }
-`}</CodeBlock>
 
-## Future Plans
+// Check local database first
+function checkLocalDatabase(name: string): boolean {
+  const normalizedInputName = normalizeNameForComparison(name);
+  
+  return names.some(dbName => {
+    const normalizedDbName = normalizeNameForComparison(dbName);
+    return normalizedDbName === normalizedInputName;
+  });
+}`}</CodeBlock>
 
-We're constantly working to improve the game. Some planned features include:
+#### 🎭 Mononym Mary: The Single-Name Sensation
 
-- Educational resources about each woman
-- Categories and themes
-- Multiplayer mode
-- Historical statistics and trends
+The mononym issue first became apparent when users started entering names like "Cher" and "Beyoncé". <Note number={5}>Mononyms presented a unique challenge, as they break the traditional FirstName LastName pattern but are still valid entries.</Note> Our initial system rejected these as invalid since they didn't follow the expected "FirstName LastName" pattern. This led to the creation of our mononym handling system:
 
-## Contributing
+```json
+// From mononyms.json
+{
+    "mononyms": [
+      {
+        "name": "Aaliyah",
+        "wikipedia": "/wiki/Aaliyah"
+      },
+      {
+        "name": "Cher",
+        "wikipedia": "/wiki/Cher"
+      }
+      // ... many more
+    ]
+}
+```
 
-Want to help improve Name100Women? Here's how you can contribute:
+<CodeBlock title="Mononym Validation Logic" language="typescript">{`// From nameValidationService.ts
+function checkMononymDatabase(name: string): string | null {
+  const normalizedInputName = normalizeNameForComparison(name);
+  const mononym = mononyms.find(m => 
+    normalizeNameForComparison(m.name) === normalizedInputName
+  );
+  return mononym ? mononym.wikipedia : null;
+}`}</CodeBlock>
 
-<CodeBlock title="Local Development Setup" language="bash">{`
+##### Contributing to the Databases
+
+Found a missing name? Our databases are community-maintained and we welcome contributions! <Note number={6}>Community contributions have been vital in expanding our database coverage, especially for non-Western names and historical figures.</Note>
+
+```json
+// Example mononym addition to mononyms.json
+{
+  "name": "NewArtist",
+  "wikipedia": "/wiki/NewArtist_(singer)"
+}
+```
+
+#### 📚 Wiki Winona: The Wikipedia Warriors
+
+When our local database check fails, we fall back to the Wikipedia API. This requires careful verification of several factors. <Note number={7}>The Wikipedia API provides rich data but requires careful parsing to determine if an article is about a woman.</Note>
+
+<CodeBlock title="Wikipedia Verification Implementation" language="typescript">{`// From wikipediaService.ts
+export async function checkWikipedia(name: string): Promise<boolean> {
+  try {
+    const searchUrl = \`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch="\${encodeURIComponent(name)}"&format=json&origin=*\`;
+    const searchResponse = await fetch(searchUrl);
+    const searchData = await searchResponse.json();
+
+    if (searchData.query.search.length === 0) {
+      return false;
+    }
+
+    // Analyze the article content for gender indicators
+    const femaleIndicators = [
+      'she', 'her', 'hers', 'woman', 'female', 'girl', 'actress',
+      'chairwoman', 'congresswoman', 'businesswoman', 'feminist',
+      'spokeswoman'
+    ];
+
+    // Verify the article is about a woman
+    const pageId = searchData.query.search[0].pageid;
+    const contentUrl = \`https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&pageids=\${pageId}&format=json&origin=*\`;
+    // ... rest of implementation
+}`}</CodeBlock>
+
+### 🎯 Future Features
+
+We're always looking to improve Name100Women. Some features on our roadmap: <Note number={8}>These features are prioritized based on user feedback and technical feasibility.</Note>
+
+- Integrated learning resources about each woman
+- Multiplayer mode for competitive naming
+- Historical timeline view of named women
+- Statistics on most commonly named women
+
+Want to help make these features a reality? Here's how:
+
+```bash
 # Clone the repository
 git clone https://github.com/yourusername/name100women.git
-
-# Install dependencies
 cd name100women
 npm install
-
-# Start the development server
 npm run dev
+```
 
-# Run tests
-npm test
-
-# Build for production
-npm run build
-`}</CodeBlock>
-
-## Contact
-
-For questions, suggestions, or collaboration inquiries, reach out through:
-
-- GitHub Issues
-- Twitter: @name100women
-- Email: contact@name100women.com
-
-## Acknowledgments
-
-Special thanks to:
-
-- All contributors and beta testers
-- The open source community
-- Everyone who plays and shares the game
-
-Remember: Every name you remember is a story worth telling. 
+See our [contributing guidelines](placeholder_link) for more details. 

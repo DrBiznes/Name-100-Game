@@ -7,10 +7,19 @@ interface CodeBlockProps {
   title?: string;
   language?: string;
   children: string;
+  collapsed?: boolean;
 }
 
-export function CodeBlock({ title = 'Code Example', language = 'typescript', children }: CodeBlockProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+export function CodeBlock({ 
+  title = 'Code Example', 
+  language = 'typescript', 
+  children,
+  collapsed = false 
+}: CodeBlockProps) {
+  const [isExpanded, setIsExpanded] = useState(!collapsed);
+
+  // Clean up the code by removing any trailing newline
+  const code = children.trim();
 
   return (
     <div className="my-4 rounded-lg border border-border bg-card overflow-hidden">
@@ -43,19 +52,21 @@ export function CodeBlock({ title = 'Code Example', language = 'typescript', chi
           >
             <Highlight
               theme={themes.nightOwl}
-              code={children.trim()}
+              code={code}
               language={language}
             >
               {({ className, style, tokens, getLineProps, getTokenProps }) => (
                 <pre className="p-4 overflow-x-auto m-0" style={style}>
                   {tokens.map((line, i) => (
-                    <div key={i} {...getLineProps({ line })}>
-                      <span className="text-muted-foreground mr-4 select-none">
+                    <div key={i} {...getLineProps({ line })} className="table-row">
+                      <span className="table-cell text-muted-foreground pr-4 text-right select-none w-[2.5rem] text-sm">
                         {(i + 1).toString().padStart(2, '0')}
                       </span>
-                      {line.map((token, key) => (
-                        <span key={key} {...getTokenProps({ token })} />
-                      ))}
+                      <span className="table-cell">
+                        {line.map((token, key) => (
+                          <span key={key} {...getTokenProps({ token })} />
+                        ))}
+                      </span>
                     </div>
                   ))}
                 </pre>
