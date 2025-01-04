@@ -13,7 +13,7 @@ export function CodeBlock({
   title = 'Code Example', 
   language = 'typescript', 
   children,
-  collapsed = false 
+  collapsed = true 
 }: CodeBlockProps) {
   const [isExpanded, setIsExpanded] = useState(!collapsed);
 
@@ -29,7 +29,7 @@ export function CodeBlock({
         <span className="material-symbols-outlined transition-all group-hover:text-glow">
           {isExpanded ? 'visibility_off' : 'visibility'}
         </span>
-        <span>{title}</span>
+        <span className="italic">{title}</span>
         {language && (
           <span className="text-xs px-2 py-1 rounded-full bg-primary/20 text-primary">
             {language}
