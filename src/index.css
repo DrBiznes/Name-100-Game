@@ -112,3 +112,63 @@ footer a:hover {
                0 0 20px rgba(232, 160, 171, 0.2),
                0 0 30px rgba(232, 160, 171, 0.1);
 }
+
+/* Note styles */
+.note-content {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+}
+
+.note-content[data-note].active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Intersection Observer target for notes */
+[data-note-trigger] {
+  scroll-margin-top: 2rem;
+}
+
+/* Prose customization */
+.prose {
+  max-width: 65ch;
+  font-family: "Alegreya", Georgia, serif;
+}
+
+.prose p {
+  color: var(--foreground);
+  line-height: 1.8;
+}
+
+.prose h1, .prose h2, .prose h3 {
+  font-family: "Chonburi", "Times New Roman", serif;
+  color: var(--header);
+}
+
+.prose a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.prose a:hover {
+  color: var(--accent);
+}
+
+.prose code {
+  color: var(--primary);
+  background-color: var(--card);
+  padding: 0.2em 0.4em;
+  border-radius: 0.2em;
+}
+
+.prose pre {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+}
+
+.prose blockquote {
+  border-left-color: var(--primary);
+  color: var(--muted-foreground);
+}

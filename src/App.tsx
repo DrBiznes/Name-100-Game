@@ -67,55 +67,56 @@ function AppContent() {
             <NavMenu />
           </div>
         </header>
-        <main className="container flex-grow">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[500px] mb-6">
+        <main className={location.pathname === '/about' ? 'w-full' : 'container flex-grow'}>
+          {location.pathname === '/about' ? (
             <Routes>
-              <Route path="/" element={
-                <>
-                  <div className="lg:col-span-1">
-                    <Rules />
-                  </div>
-                  <div className="lg:col-span-1">
-                    <WomenNameGame 
-                      onGameStateChange={setGameState} 
-                      timerRef={timerRef}
-                    />
-                  </div>
-                </>
-              } />
-              <Route path="/scores/:id" element={
-                <>
-                  <div className="lg:col-span-1">
-                    <UserHistory />
-                  </div>
-                  <div className="lg:col-span-1">
-                    <ScoreView />
-                  </div>
-                </>
-              } />
-              <Route path="/scores" element={
-                <>
-                  <div className="lg:col-span-1">
-                    <Rules />
-                  </div>
-                  <div className="lg:col-span-1">
-                    <RecentScores />
-                  </div>
-                </>
-              } />
-              <Route path="/stats" element={<Stats />} />
-              <Route path="/about" element={
-                <div className="lg:col-span-3">
-                  <About />
-                </div>
-              } />
+              <Route path="/about" element={<About />} />
             </Routes>
-            {showLeaderboard && (
-              <div className="lg:col-span-1 h-full">
-                <Leaderboard />
-              </div>
-            )}
-          </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[500px] mb-6">
+              <Routes>
+                <Route path="/" element={
+                  <>
+                    <div className="lg:col-span-1">
+                      <Rules />
+                    </div>
+                    <div className="lg:col-span-1">
+                      <WomenNameGame 
+                        onGameStateChange={setGameState} 
+                        timerRef={timerRef}
+                      />
+                    </div>
+                  </>
+                } />
+                <Route path="/scores/:id" element={
+                  <>
+                    <div className="lg:col-span-1">
+                      <UserHistory />
+                    </div>
+                    <div className="lg:col-span-1">
+                      <ScoreView />
+                    </div>
+                  </>
+                } />
+                <Route path="/scores" element={
+                  <>
+                    <div className="lg:col-span-1">
+                      <Rules />
+                    </div>
+                    <div className="lg:col-span-1">
+                      <RecentScores />
+                    </div>
+                  </>
+                } />
+                <Route path="/stats" element={<Stats />} />
+              </Routes>
+              {showLeaderboard && (
+                <div className="lg:col-span-1 h-full">
+                  <Leaderboard />
+                </div>
+              )}
+            </div>
+          )}
         </main>
         <motion.footer 
           layout

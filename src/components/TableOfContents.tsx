@@ -1,72 +1,64 @@
-import React, { useEffect, useState } from 'react';
-
-interface Section {
-  id: string;
-  text: string;
-  level: number;
-}
+import React, { useEffect } from 'react';
+import { Separator } from './ui/separator';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export function TableOfContents() {
-  const [sections, setSections] = useState<Section[]>([]);
-  const [activeSection, setActiveSection] = useState<string>('');
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  const sections = [
+    { id: 'about-name100women', text: 'About' },
+    { id: 'the-challenge', text: 'The Challenge' },
+    { id: 'why-this-matters', text: 'Why This Matters' },
+    { id: 'how-it-works', text: 'How It Works' },
+    { id: 'scoring-system', text: 'Scoring System' },
+    { id: 'technical-implementation', text: 'Technical Implementation' },
+    { id: 'future-plans', text: 'Future Plans' },
+    { id: 'contributing', text: 'Contributing' },
+    { id: 'contact', text: 'Contact' },
+    { id: 'acknowledgments', text: 'Acknowledgments' },
+  ];
 
+  // Handle initial section scroll on mount and hash changes
   useEffect(() => {
-    // Find all heading elements in the content
-    const headings = Array.from(document.querySelectorAll('h1, h2, h3'))
-      .filter(heading => heading.closest('.prose')); // Only get headings within our content area
+    const hash = location.hash.replace('#', '');
+    if (hash) {
+      setTimeout(() => {
+        const element = document.getElementById(hash);
+        if (element) {
+          const yOffset = -20;
+          const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [location.hash]);
 
-    const sectionData = headings.map(heading => ({
-      id: heading.id,
-      text: heading.textContent || '',
-      level: parseInt(heading.tagName[1]),
-    }));
+  const handleSectionClick = (sectionId: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate(`/about#${sectionId}`);
 
-    setSections(sectionData);
-
-    // Set up intersection observer
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
-      },
-      {
-        rootMargin: '-20% 0px -80% 0px',
-      }
-    );
-
-    // Observe all section headings
-    headings.forEach(heading => observer.observe(heading));
-
-    return () => observer.disconnect();
-  }, []);
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const yOffset = -20;
+      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  };
 
   return (
-    <nav className="sticky top-8 bg-card p-4 rounded-lg shadow-lg border border-border overflow-y-auto max-h-[calc(100vh-200px)] mb-8">
-      <h4 className="text-lg font-bold mb-4 text-header">Table of Contents</h4>
-      <ul className="space-y-2">
+    <nav className="sticky top-8">
+      <h4 className="text-4xl font-bold font-['Chonburi'] text-[#E8A0AB] text-glow mb-4">
+        Table Of<br />Contents
+      </h4>
+      <Separator className="mb-6" />
+      <ul className="space-y-3">
         {sections.map((section) => (
-          <li
-            key={section.id}
-            style={{
-              paddingLeft: `${(section.level - 1) * 1}rem`,
-            }}
-          >
+          <li key={section.id}>
             <a
               href={`#${section.id}`}
-              className={`block py-1 px-2 rounded transition-colors hover:bg-muted ${
-                activeSection === section.id
-                  ? 'text-primary font-semibold'
-                  : 'text-muted-foreground'
-              }`}
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById(section.id)?.scrollIntoView({
-                  behavior: 'smooth',
-                });
-              }}
+              className="block font-['Alegreya'] text-base text-foreground hover:text-primary transition-colors"
+              onClick={handleSectionClick(section.id)}
             >
               {section.text}
             </a>
