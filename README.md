@@ -1,6 +1,6 @@
 # Name 100 Women Challenge
 
-Quick name 100 notable women as fast as you can! Test your knowledge of influential women throughout history in this challenging browser game.
+Try to beat NL prove you love women
 
 ## Acknowledgements
 
