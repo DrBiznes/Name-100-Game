@@ -165,11 +165,11 @@ export function About() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="max-w-[120rem] mx-auto px-4 py-8 flex justify-center flex-grow">
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_minmax(1000px,_1fr)_250px] gap-8 w-full px-4">
+      <div className="max-w-[120rem] mx-auto px-0 sm:px-4 py-8 flex justify-center flex-grow">
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_minmax(0,_1fr)_250px] gap-8 w-full px-2 sm:px-4">
           {/* Table of Contents - Left Column */}
           <motion.div 
-            className="lg:sticky lg:top-8 lg:h-[calc(100vh-4rem)] overflow-visible px-4"
+            className="hidden lg:block lg:sticky lg:top-8 lg:h-[calc(100vh-4rem)] overflow-visible px-4"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
@@ -179,7 +179,7 @@ export function About() {
 
           {/* Main Content - Middle Column */}
           <motion.div 
-            className="min-w-0 max-w-[1400px] mx-auto"
+            className="min-w-0 w-full max-w-full lg:max-w-[1400px] mx-auto px-2 sm:px-0"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -191,7 +191,7 @@ export function About() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <h1 className="text-5xl sm:text-6xl md:text-8xl font-bold mb-4 font-['Chonburi'] text-[var(--about-text)] leading-tight text-glow">
+              <h1 className="text-4xl sm:text-6xl md:text-8xl font-bold mb-4 font-['Chonburi'] text-[var(--about-text)] leading-tight text-glow">
                 THE GOAL:<br />
                 NAME EVERY<br />
                 WOMAN
@@ -205,7 +205,7 @@ export function About() {
             </motion.div>
 
             {/* MDX Content Area */}
-            <div className="prose prose-invert prose-lg max-w-none [&_pre]:!bg-transparent [&_pre]:!p-0 [&_code]:!bg-transparent [&_code]:whitespace-pre [&_pre]:overflow-x-auto prose-p:max-w-none prose-headings:max-w-none">
+            <div className="prose prose-invert prose-lg max-w-none overflow-hidden [&_pre]:!bg-transparent [&_pre]:!p-0 [&_code]:!bg-transparent [&_code]:whitespace-pre [&_pre]:overflow-x-auto prose-p:max-w-none prose-headings:max-w-none">
               <AnimatePresence mode="wait">
                 <Suspense fallback={<AboutSkeleton />}>
                   <motion.div
