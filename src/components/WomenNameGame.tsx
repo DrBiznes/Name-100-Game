@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
@@ -32,6 +32,7 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
   const [completedGameCount, setCompletedGameCount] = useState<GameCount | null>(null);
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const hiddenInputRef = useRef<HTMLInputElement>(null);
   
   const {
     isGameActive,
@@ -80,6 +81,19 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
   const startGame = () => {
     setCompletedGameCount(null);
     originalStartGame();
+    
+    // Focus hidden input first (forces mobile keyboard)
+    if (hiddenInputRef.current) {
+      hiddenInputRef.current.focus();
+    }
+    
+    // Then focus the actual input with a slight delay
+    setTimeout(() => {
+      const firstInput = inputRefs.current[0];
+      if (firstInput) {
+        firstInput.focus();
+      }
+    }, 50);
   };
 
   const findNextEmptyInput = (currentIndex: number): number => {
@@ -144,6 +158,15 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
 
   return (
     <Card className="p-4 md:p-6 h-full overflow-auto border-0 shadow-none bg-transparent">
+      {/* Hidden input for mobile keyboard trigger */}
+      <input
+        ref={hiddenInputRef}
+        type="text"
+        className="opacity-0 h-0 w-0 absolute -z-10"
+        aria-hidden="true"
+        readOnly
+      />
+      
       {showConfetti && (
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">

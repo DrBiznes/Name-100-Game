@@ -58,6 +58,10 @@ export function NameInput({
         spellCheck={true}
         lang="en"
         enterKeyHint="next"
+        inputMode="text"
+        autoComplete="on"
+        autoCorrect="on"
+        autoCapitalize="on"
         data-state={input.status}
         className={cn(
           input.status === 'valid' && "cursor-pointer",
