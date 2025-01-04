@@ -179,11 +179,11 @@ export function Stats() {
                 variants={textVariants}
                 className="space-y-1"
               >
-                Common variations in submissions include{' '}
+                Common misspellings include{' '}
                 {commonMisspellings.map((stat, index) => (
                   <span key={stat.name}>
                     <span className="font-bold text-foreground">{findProperName(stat.name)}</span>
-                    {' '}(submitted as: {stat.variants.slice(0, 3).map(v => findProperName(v)).join(', ')}
+                    {' '}(misspelled as: {stat.variants.slice(0, 3).join(', ')}
                     {stat.variants.length > 3 ? '...' : ''})
                     {index < commonMisspellings.length - 1 ? ', ' : '.'}
                   </span>

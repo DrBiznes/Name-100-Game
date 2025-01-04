@@ -126,7 +126,7 @@ export function NameList({ stats, isLoading }: NameListProps) {
     },
     {
       accessorKey: "variants",
-      header: "Variations",
+      header: "Misspellings",
       cell: ({ row }) => (
         <div className="text-muted-foreground">
           {row.original.variants.length > 1 
