@@ -292,17 +292,30 @@ footer a:hover {
 }
 
 .validation-chart-title {
-  font-family: "Chonburi", "Times New Roman", serif;
-  color: var(--header);
+  font-family: "Alegreya", Georgia, serif !important;
+  color: var(--about-text-muted);
   text-align: left;
-  padding: 0.75rem 1rem;
+  padding: 0.3rem 0.75rem;
   margin: 0;
-  font-size: 1rem;
-  text-shadow: 0 0 10px rgba(232, 160, 171, 0.3),
-               0 0 20px rgba(232, 160, 171, 0.2),
-               0 0 30px rgba(232, 160, 171, 0.1);
+  font-size: 1.4rem !important;
+  line-height: 1 !important;
+  font-style: italic;
   border-bottom: 1px solid var(--border);
   background: var(--card);
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  min-height: 0;
+  height: 2.8rem;
+  max-height: 2.8rem;
+}
+
+/* Override any prose heading styles for the chart title */
+.prose h4.validation-chart-title {
+  font-size: 1.4rem !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0.3rem 0.75rem !important;
 }
 
 .validation-chart-container {
@@ -318,6 +331,7 @@ footer a:hover {
   position: relative;
   display: flex;
   flex-direction: column;
+  gap: 0;
 }
 
 .validation-chart-content {

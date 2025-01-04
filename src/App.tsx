@@ -172,7 +172,7 @@ function AppContent() {
                 </a>
                 . Released under the{' '}
                 <a 
-                  href="https://opensource.org/licenses/MIT" 
+                  href="https://github.com/DrBiznes/Name-100-Game/tree/main?tab=MIT-1-ov-file" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-foreground hover:text-primary transition-colors underline"

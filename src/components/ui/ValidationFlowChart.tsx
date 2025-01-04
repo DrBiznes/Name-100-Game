@@ -187,7 +187,7 @@ flowchart TB
         className="validation-chart-container"
       >
         <h4 className="validation-chart-title">
-          <em>How a name flows through the validation pipeline from input to verification</em>
+          Name Validation Flow
         </h4>
         <div
           className="validation-chart-content"
