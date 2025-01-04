@@ -101,11 +101,18 @@ export function About() {
       </a>
     ),
     img: ({ src, alt }: ImageProps) => (
-      <img 
-        src={src} 
-        alt={alt} 
-        className="rounded-lg shadow-lg my-8 max-w-full h-auto"
-      />
+      <figure className="my-8 flex flex-col items-center">
+        <img 
+          src={src} 
+          alt={alt} 
+          className="rounded-lg shadow-lg max-w-full h-auto"
+        />
+        {alt && (
+          <figcaption className="mt-2 text-sm text-[var(--about-text-muted)] italic w-full text-center">
+            {alt}
+          </figcaption>
+        )}
+      </figure>
     ),
     blockquote: ({ children }: ComponentProps) => (
       <blockquote className="border-l-4 border-[var(--about-text-dim)] pl-4 italic my-4 text-[var(--about-text-muted)]">
@@ -128,7 +135,7 @@ export function About() {
         {/* Main Content - Middle Column */}
         <div className="min-w-0 max-w-[1400px] mx-auto">
           {/* Header Title Area */}
-          <div className="mb-16">
+          <div className="mb-8">
             <h1 className="text-5xl sm:text-6xl md:text-8xl font-bold mb-4 font-['Chonburi'] text-[var(--about-text)] leading-tight text-glow">
               THE GOAL:<br />
               NAME EVERY<br />

@@ -1,24 +1,25 @@
 import { Note } from '../components/ui/Note';
 import { CodeBlock } from '../components/ui/CodeBlock';
 
+In early 2024, a simple challenge emerged that would expose an unsurprising gap in humanities collective knowledge: Name 100 women. <Note number={1}>This challenge originated from Twitch streamer QTCinderella in early 2024, quickly becoming a viral sensation in the streaming community.</Note>
 
-*"Name a single historical woman! Wait, not her - name another one! Keep going..."* <Note number={1}>This challenge originated from Twitch streamer QTCinderella in early 2024, quickly becoming a viral sensation in the streaming community.</Note>
+![ChatGPT Has No Faith In Humanity](chatgptnofaith.png)
 
 It started with a challenge from Twitch streamer QTCinderella in early 2024. A simple premise that sparked a fascinating realization about our collective knowledge of women's achievements throughout history. The challenge quickly gained traction, with streamers and content creators testing their knowledge - including NorthernLion's legendary 7:11 speed run. <Note number={2}>NorthernLion's speed run demonstrated both the possibility and difficulty of the challenge, setting an early benchmark for others to chase.</Note>
 
-But attempting the challenge and building a system to verify it are two very different beasts. When I started developing Name100Women, the skeptics had plenty to say:
+When I (James Femino, aka jamino) started developing Name100Women, the skeptics had plenty to say:
 
-- "The Wikipedia API will rate limit you to death" <Note number={3}>We solved this through aggressive caching and a multi-layered verification system that minimizes API calls.</Note>
+- "The Wikipedia API will rate limit you to death" <Note number={3}>I solved this through aggressive caching and a multi-layered verification system that minimizes API calls.</Note>
 - "You'll never handle all the edge cases with names"
 - "What about non-English names?"
 
-They weren't entirely wrong - but they weren't right either. Here's how we built it.
+They weren't entirely wrong - but they weren't right either. Here's how I built it.
 
-## The Technical Trials
+## The Challenges
 
-### 🔍 Verification Vanessa: The Name Validation Saga
+### Challenge 1: Verification Vanessa
 
-Our verification system evolved through three increasingly sophisticated layers: <Note number={4}>Each layer of verification adds both accuracy and complexity, requiring careful balance between speed and correctness.</Note>
+My verification system evolved through three increasingly sophisticated layers: <Note number={4}>Each layer of verification adds both accuracy and complexity, requiring careful balance between speed and correctness.</Note>
 
 1. Local database lookup
 2. Wikipedia API verification
@@ -45,9 +46,9 @@ function checkLocalDatabase(name: string): boolean {
   });
 }`}</CodeBlock>
 
-#### 🎭 Mononym Mary: The Single-Name Sensation
+### Challenge 2: Mononym Mary
 
-The mononym issue first became apparent when users started entering names like "Cher" and "Beyoncé". <Note number={5}>Mononyms presented a unique challenge, as they break the traditional FirstName LastName pattern but are still valid entries.</Note> Our initial system rejected these as invalid since they didn't follow the expected "FirstName LastName" pattern. This led to the creation of our mononym handling system:
+The mononym issue first became apparent when users started entering names like "Cher" and "Beyoncé". <Note number={5}>Mononyms presented a unique challenge, as they break the traditional FirstName LastName pattern but are still valid entries.</Note> My initial system rejected these as invalid since they didn't follow the expected "FirstName LastName" pattern. This led to the creation of my mononym handling system:
 
 ```json
 {
@@ -76,7 +77,7 @@ function checkMononymDatabase(name: string): string | null {
 
 ##### Contributing to the Databases
 
-Found a missing name? Our databases are community-maintained and we welcome contributions! <Note number={6}>Community contributions have been vital in expanding our database coverage, especially for non-Western names and historical figures.</Note>
+Found a missing name? The databases are community-maintained and I welcome contributions! <Note number={6}>Community contributions have been vital in expanding the database coverage, especially for non-Western names and historical figures.</Note>
 
 ```json
 {
@@ -85,9 +86,9 @@ Found a missing name? Our databases are community-maintained and we welcome cont
 }
 ```
 
-#### 📚 Wiki Winona: The Wikipedia Warriors
+### Challenge 3: Wiki Winona
 
-When our local database check fails, we fall back to the Wikipedia API. This requires careful verification of several factors. <Note number={7}>The Wikipedia API provides rich data but requires careful parsing to determine if an article is about a woman.</Note>
+When the local database check fails, I fall back to the Wikipedia API. This requires careful verification of several factors. <Note number={7}>The Wikipedia API provides rich data but requires careful parsing to determine if an article is about a woman.</Note>
 
 <CodeBlock title="Wikipedia Verification Implementation" language="typescript">{`// From wikipediaService.ts
 export async function checkWikipedia(name: string): Promise<boolean> {
@@ -113,9 +114,9 @@ export async function checkWikipedia(name: string): Promise<boolean> {
     // ... rest of implementation
 }`}</CodeBlock>
 
-### 🎯 Future Features
+### Future Features
 
-We're always looking to improve Name100Women. Some features on our roadmap: <Note number={8}>These features are prioritized based on user feedback and technical feasibility.</Note>
+I'm always looking to improve Name100Women. Some features on my roadmap: <Note number={8}>These features are prioritized based on user feedback and technical feasibility.</Note>
 
 - Integrated learning resources about each woman
 - Multiplayer mode for competitive naming
@@ -132,4 +133,4 @@ npm install
 npm run dev
 ```
 
-See our [contributing guidelines](placeholder_link) for more details. 
+See my [contributing guidelines](placeholder_link) for more details. 
