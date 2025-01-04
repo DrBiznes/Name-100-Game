@@ -39,8 +39,8 @@ export function Note({ number, children }: NoteProps) {
         });
       },
       {
-        rootMargin: '-20% 0px -60% 0px',
-        threshold: [0, 1]
+        rootMargin: '-10% 0px -30% 0px',
+        threshold: [0, 0.2, 1]
       }
     );
 
