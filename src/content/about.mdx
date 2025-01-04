@@ -51,7 +51,6 @@ function checkLocalDatabase(name: string): boolean {
 The mononym issue first became apparent when users started entering names like "Cher" and "Beyoncé". <Note number={5}>Mononyms presented a unique challenge, as they break the traditional FirstName LastName pattern but are still valid entries.</Note> Our initial system rejected these as invalid since they didn't follow the expected "FirstName LastName" pattern. This led to the creation of our mononym handling system:
 
 ```json
-// From mononyms.json
 {
     "mononyms": [
       {
@@ -81,7 +80,6 @@ function checkMononymDatabase(name: string): string | null {
 Found a missing name? Our databases are community-maintained and we welcome contributions! <Note number={6}>Community contributions have been vital in expanding our database coverage, especially for non-Western names and historical figures.</Note>
 
 ```json
-// Example mononym addition to mononyms.json
 {
   "name": "NewArtist",
   "wikipedia": "/wiki/NewArtist_(singer)"

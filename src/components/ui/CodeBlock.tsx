@@ -56,19 +56,18 @@ export function CodeBlock({
               language={language}
             >
               {({ className, style, tokens, getLineProps, getTokenProps }) => (
-                <pre className="p-4 overflow-x-auto m-0" style={style}>
-                  {tokens.map((line, i) => (
-                    <div key={i} {...getLineProps({ line })} className="table-row">
-                      <span className="table-cell text-muted-foreground pr-4 text-right select-none w-[2.5rem] text-sm">
-                        {(i + 1).toString().padStart(2, '0')}
-                      </span>
-                      <span className="table-cell">
-                        {line.map((token, key) => (
-                          <span key={key} {...getTokenProps({ token })} />
-                        ))}
-                      </span>
-                    </div>
-                  ))}
+                <pre className="overflow-x-auto m-0" style={style}>
+                  <div className="py-4 px-4">
+                    {tokens.map((line, i) => (
+                      <div key={i} {...getLineProps({ line })} className="table-row">
+                        <span className="table-cell">
+                          {line.map((token, key) => (
+                            <span key={key} {...getTokenProps({ token })} />
+                          ))}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </pre>
               )}
             </Highlight>

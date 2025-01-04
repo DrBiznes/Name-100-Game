@@ -34,7 +34,7 @@ export function About() {
       return (
         <h1 
           id={id}
-          className="text-4xl font-bold mb-8 font-['Chonburi'] text-foreground scroll-mt-8" 
+          className="text-4xl font-bold mb-8 font-['Chonburi'] text-foreground scroll-mt-8 text-glow" 
           {...props}
         >
           {children}
@@ -46,7 +46,7 @@ export function About() {
       return (
         <h2 
           id={id}
-          className="text-3xl font-bold mt-16 mb-8 font-['Chonburi'] text-foreground scroll-mt-8" 
+          className="text-3xl font-bold mt-16 mb-8 font-['Chonburi'] text-foreground scroll-mt-8 text-glow" 
           {...props}
         >
           {children}
@@ -58,7 +58,7 @@ export function About() {
       return (
         <h3 
           id={id}
-          className="text-2xl font-bold mt-12 mb-6 font-['Chonburi'] text-foreground scroll-mt-8" 
+          className="text-2xl font-bold mt-12 mb-6 font-['Chonburi'] text-foreground scroll-mt-8 text-glow" 
           {...props}
         >
           {children}
@@ -80,13 +80,13 @@ export function About() {
     ),
     pre: ({ children }: ComponentProps) => (
       <div className="my-4 rounded-lg border border-border bg-card overflow-hidden">
-        <div className="relative">
+        <div className="relative overflow-x-auto py-4 px-4">
           {children}
         </div>
       </div>
     ),
     code: ({ children }: ComponentProps) => (
-      <code className="text-[var(--about-text-bright)] px-1 py-0.5 bg-muted rounded">
+      <code className="text-[var(--about-text-bright)] px-1 py-0.5 bg-muted rounded whitespace-pre">
         {children}
       </code>
     ),
@@ -129,7 +129,7 @@ export function About() {
         <div className="min-w-0 max-w-[1200px] mx-auto">
           {/* Header Title Area */}
           <div className="mb-16">
-            <h1 className="text-5xl sm:text-6xl md:text-8xl font-bold mb-4 font-['Chonburi'] text-[var(--about-text)] leading-tight">
+            <h1 className="text-5xl sm:text-6xl md:text-8xl font-bold mb-4 font-['Chonburi'] text-[var(--about-text)] leading-tight text-glow">
               THE GOAL:<br />
               NAME EVERY<br />
               WOMAN
@@ -147,7 +147,7 @@ export function About() {
           </div>
 
           {/* MDX Content Area */}
-          <div className="prose prose-invert prose-lg max-w-none [&_pre]:!bg-transparent [&_pre]:!p-0 [&_code]:!bg-transparent">
+          <div className="prose prose-invert prose-lg max-w-none [&_pre]:!bg-transparent [&_pre]:!p-0 [&_code]:!bg-transparent [&_code]:whitespace-pre [&_pre]:overflow-x-auto">
             <MDXProvider components={components}>
               <AboutContent />
             </MDXProvider>
