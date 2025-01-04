@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ChevronDown, ChevronUp, Code2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Highlight, themes } from 'prism-react-renderer';
@@ -56,7 +56,7 @@ export function CodeBlock({
               language={language}
             >
               {({ className, style, tokens, getLineProps, getTokenProps }) => (
-                <pre className="overflow-x-auto m-0" style={style}>
+                <pre className={`overflow-x-auto m-0 ${className}`} style={style}>
                   <div className="py-4 px-4">
                     {tokens.map((line, i) => (
                       <div key={i} {...getLineProps({ line })} className="table-row">

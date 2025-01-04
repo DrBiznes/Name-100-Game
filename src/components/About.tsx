@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { MDXProvider } from '@mdx-js/react';
 import { TableOfContents } from './TableOfContents';
 import { Note } from './ui/Note';
@@ -66,12 +66,12 @@ export function About() {
       );
     },
     p: ({ children }: ComponentProps) => (
-      <p className="mb-6 leading-relaxed text-[var(--about-text)] max-w-2xl">
+      <p className="mb-6 leading-relaxed text-[var(--about-text)]">
         {children}
       </p>
     ),
     ul: ({ children }: ComponentProps) => (
-      <ul className="list-disc pl-6 mb-6 text-[var(--about-text)] max-w-2xl space-y-2">
+      <ul className="list-disc pl-6 mb-6 text-[var(--about-text)] space-y-2">
         {children}
       </ul>
     ),
@@ -119,14 +119,14 @@ export function About() {
 
   return (
     <div className="max-w-[120rem] mx-auto px-4 py-8 flex justify-center">
-      <div className="grid grid-cols-1 lg:grid-cols-[250px_minmax(800px,_1fr)_250px] gap-8 w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_minmax(1000px,_1fr)_250px] gap-8 w-full px-4">
         {/* Table of Contents - Left Column */}
-        <div className="lg:sticky lg:top-8 lg:h-[calc(100vh-4rem)] overflow-auto">
+        <div className="lg:sticky lg:top-8 lg:h-[calc(100vh-4rem)] overflow-visible px-4">
           <TableOfContents />
         </div>
 
         {/* Main Content - Middle Column */}
-        <div className="min-w-0 max-w-[1200px] mx-auto">
+        <div className="min-w-0 max-w-[1400px] mx-auto">
           {/* Header Title Area */}
           <div className="mb-16">
             <h1 className="text-5xl sm:text-6xl md:text-8xl font-bold mb-4 font-['Chonburi'] text-[var(--about-text)] leading-tight text-glow">
@@ -147,7 +147,7 @@ export function About() {
           </div>
 
           {/* MDX Content Area */}
-          <div className="prose prose-invert prose-lg max-w-none [&_pre]:!bg-transparent [&_pre]:!p-0 [&_code]:!bg-transparent [&_code]:whitespace-pre [&_pre]:overflow-x-auto">
+          <div className="prose prose-invert prose-lg max-w-none [&_pre]:!bg-transparent [&_pre]:!p-0 [&_code]:!bg-transparent [&_code]:whitespace-pre [&_pre]:overflow-x-auto prose-p:max-w-none prose-headings:max-w-none">
             <MDXProvider components={components}>
               <AboutContent />
             </MDXProvider>
