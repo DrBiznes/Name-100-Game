@@ -61,6 +61,25 @@ body {
   font-family: "Comic Sans MS", "Comic Neue", cursive;
 }
 
+/* Material Icons */
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 300,
+  'GRAD' 0,
+  'opsz' 24;
+}
+
+.group-hover\:text-glow {
+  transition: text-shadow 0.2s ease;
+}
+
+.group:hover .group-hover\:text-glow {
+  text-shadow: 0 0 10px rgba(232, 160, 171, 0.5),
+               0 0 20px rgba(232, 160, 171, 0.3),
+               0 0 30px rgba(232, 160, 171, 0.2);
+}
+
 /* Other styles */
 h1, h2, h3 {
   font-family: "Chonburi", "Times New Roman", serif;

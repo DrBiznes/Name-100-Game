@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Code2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Highlight, themes } from 'prism-react-renderer';
 
@@ -22,24 +21,19 @@ export function CodeBlock({
   const code = children.trim();
 
   return (
-    <div className="my-4 rounded-lg border border-border bg-card overflow-hidden">
+    <div className="my-4">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-4 py-2 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
+        className="flex items-center gap-3 text-muted-foreground hover:text-foreground transition-colors group bg-transparent border-0 p-0 shadow-none hover:bg-transparent hover:shadow-none"
       >
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Code2 className="w-4 h-4" />
-          <span>{title}</span>
-          {language && (
-            <span className="text-xs px-2 py-1 rounded-full bg-primary/20 text-primary">
-              {language}
-            </span>
-          )}
-        </div>
-        {isExpanded ? (
-          <ChevronUp className="w-4 h-4 text-muted-foreground" />
-        ) : (
-          <ChevronDown className="w-4 h-4 text-muted-foreground" />
+        <span className="material-symbols-outlined transition-all group-hover:text-glow">
+          {isExpanded ? 'visibility_off' : 'visibility'}
+        </span>
+        <span>{title}</span>
+        {language && (
+          <span className="text-xs px-2 py-1 rounded-full bg-primary/20 text-primary">
+            {language}
+          </span>
         )}
       </button>
       <AnimatePresence>
@@ -49,28 +43,31 @@ export function CodeBlock({
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
+            className="mt-2"
           >
-            <Highlight
-              theme={themes.nightOwl}
-              code={code}
-              language={language}
-            >
-              {({ className, style, tokens, getLineProps, getTokenProps }) => (
-                <pre className={`overflow-x-auto m-0 ${className}`} style={style}>
-                  <div className="py-4 px-4">
-                    {tokens.map((line, i) => (
-                      <div key={i} {...getLineProps({ line })} className="table-row">
-                        <span className="table-cell">
-                          {line.map((token, key) => (
-                            <span key={key} {...getTokenProps({ token })} />
-                          ))}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </pre>
-              )}
-            </Highlight>
+            <div className="rounded-lg border border-border bg-card overflow-hidden">
+              <Highlight
+                theme={themes.nightOwl}
+                code={code}
+                language={language}
+              >
+                {({ className, style, tokens, getLineProps, getTokenProps }) => (
+                  <pre className={`overflow-x-auto m-0 ${className}`} style={style}>
+                    <div className="py-4 px-4">
+                      {tokens.map((line, i) => (
+                        <div key={i} {...getLineProps({ line })} className="table-row">
+                          <span className="table-cell">
+                            {line.map((token, key) => (
+                              <span key={key} {...getTokenProps({ token })} />
+                            ))}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </pre>
+                )}
+              </Highlight>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
