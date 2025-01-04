@@ -1,11 +1,15 @@
 import { Note } from '../components/ui/Note';
 import { CodeBlock } from '../components/ui/CodeBlock';
+import { ValidationFlowChart } from '../components/ui/ValidationFlowChart';
+import { useState } from 'react';
 
 In early 2024, a simple challenge emerged that would expose an unsurprising gap in humanities collective knowledge: Name 100 women. <Note number={1}>This challenge originated from Twitch streamer QTCinderella in early 2024, quickly becoming a viral sensation in the streaming community.</Note>
 
 ![ChatGPT Has No Faith In Humanity](chatgptnofaith.png)
 
 It started with a challenge from Twitch streamer QTCinderella in early 2024. A simple premise that sparked a fascinating realization about our collective knowledge of women's achievements throughout history. The challenge quickly gained traction, with streamers and content creators testing their knowledge - including NorthernLion's legendary 7:11 speed run. <Note number={2}>NorthernLion's speed run demonstrated both the possibility and difficulty of the challenge, setting an early benchmark for others to chase.</Note>
+
+But beyond the challenge itself lay a more complex technical problem: how do you build a system that can accurately validate any woman's name throughout history? The engineering challenges would prove to be as interesting as the challenge itself.
 
 When I (James Femino, aka jamino) started developing Name100Women, the skeptics had plenty to say:
 
@@ -17,15 +21,30 @@ They weren't entirely wrong - but they weren't right either. Here's how I built 
 
 ## The Challenges
 
+Building Name100Women required solving several interconnected technical problems. At its core, the application needed to:
+- Validate names quickly and accurately
+- Handle names from any culture or time period
+- Manage API rate limits and caching
+- Process edge cases like stage names and mononyms
+- Verify gender through often ambiguous Wikipedia content
+
+To solve these problems, I developed a multi-layered validation pipeline that combines local databases, sophisticated name normalization, and intelligent API usage. Here's how each piece came together:
+
+<ValidationFlowChart />
+
 ### Challenge 1: Verification Vanessa
 
 My verification system evolved through three increasingly sophisticated layers: <Note number={4}>Each layer of verification adds both accuracy and complexity, requiring careful balance between speed and correctness.</Note>
 
-1. Local database lookup
-2. Wikipedia API verification
-3. Special case handling (like mononyms)
+Just like the UUID blog's author needed to handle trillions of possibilities, I needed to handle millions of potential name variations. The solution? A multi-layered verification system that gets progressively more complex (and computationally expensive) as needed.
 
-<CodeBlock title="Core Name Validation Implementation" language="typescript">{`// From nameValidationService.ts
+1. **Local Database Lookup**: Lightning fast, no API calls needed
+2. **Wikipedia API Verification**: For names not in our database
+3. **Special Case Handling**: For those tricky edge cases that break all the rules
+
+Here's how the core validation pipeline works:
+
+<CodeBlock title="Name Normalization" language="typescript">{`// From nameValidationService.ts
 function normalizeNameForComparison(name: string): string {
   return name
     .toLowerCase()
@@ -34,65 +53,98 @@ function normalizeNameForComparison(name: string): string {
     .replace(/-/g, ' ')               // Replace hyphens with spaces
     .replace(/\./g, '')              // Remove periods
     .trim();                          // Remove leading/trailing whitespace
-}
-
-// Check local database first
-function checkLocalDatabase(name: string): boolean {
-  const normalizedInputName = normalizeNameForComparison(name);
-  
-  return names.some(dbName => {
-    const normalizedDbName = normalizeNameForComparison(dbName);
-    return normalizedDbName === normalizedInputName;
-  });
 }`}</CodeBlock>
+
+This normalization is crucial - it handles everything from diacritics to hyphenated names. <Note number={5}>Name normalization is the unsung hero of the validation system, handling countless edge cases before they become problems.</Note>
 
 ### Challenge 2: Mononym Mary
 
-The mononym issue first became apparent when users started entering names like "Cher" and "Beyoncé". <Note number={5}>Mononyms presented a unique challenge, as they break the traditional FirstName LastName pattern but are still valid entries.</Note> My initial system rejected these as invalid since they didn't follow the expected "FirstName LastName" pattern. This led to the creation of my mononym handling system:
+Remember how the UUID blog talked about "finding good UUIDs"? Well, I had to figure out how to handle "good names" - particularly those that break all the rules. Enter the mononym problem.
 
-```json
-{
-    "mononyms": [
-      {
-        "name": "Aaliyah",
-        "wikipedia": "/wiki/Aaliyah"
-      },
-      {
-        "name": "Cher",
-        "wikipedia": "/wiki/Cher"
-      }
-      // ... many more
-    ]
-}
-```
+The mononym issue first became apparent when users started entering names like "Cher" and "Beyoncé". <Note number={6}>Mononyms presented a unique challenge, as they break the traditional FirstName LastName pattern but are still valid entries.</Note>
 
-<CodeBlock title="Mononym Validation Logic" language="typescript">{`// From nameValidationService.ts
-function checkMononymDatabase(name: string): string | null {
-  const normalizedInputName = normalizeNameForComparison(name);
-  const mononym = mononyms.find(m => 
-    normalizeNameForComparison(m.name) === normalizedInputName
+My initial system rejected these as invalid since they didn't follow the expected "FirstName LastName" pattern. The solution? A sophisticated mononym detection system that works in layers:
+
+<CodeBlock title="Complete Mononym Validation System" language="typescript">{`// From nameValidationService.ts
+// Get list of valid mononyms from database
+function getValidMononyms(): Set<string> {
+  return new Set(
+    names
+      .filter(name => !name.includes(' '))  // Get only single-word names
+      .map(name => normalizeNameForComparison(name))
   );
-  return mononym ? mononym.wikipedia : null;
+}
+
+// Check if input is likely just a first name
+function isValidSingleName(name: string): boolean {
+  // Split the name and check if it's just one word
+  const nameParts = name.trim().split(/\s+/);
+  if (nameParts.length !== 1) {
+    return true; // If it's more than one word, it's valid
+  }
+
+  // Common name prefixes that might indicate a stage name
+  const artistPrefixes = ['dj', 'mc', 'dr', 'h.e.r'];
+  const normalizedName = normalizeNameForComparison(name);
+  
+  // If the name has any of these prefixes, it's likely a stage name
+  if (artistPrefixes.some(prefix => normalizedName.startsWith(prefix))) {
+    return true;
+  }
+
+  // Check against our database of valid mononyms
+  const validMononyms = getValidMononyms();
+  return validMononyms.has(normalizedName);
 }`}</CodeBlock>
 
-##### Contributing to the Databases
+But that's just the first layer. When we hit Wikipedia, we need even more sophisticated mononym detection: <Note number={7}>Stage names and mononyms often require additional context from Wikipedia articles to validate properly.</Note>
 
-Found a missing name? The databases are community-maintained and I welcome contributions! <Note number={6}>Community contributions have been vital in expanding the database coverage, especially for non-Western names and historical figures.</Note>
+<CodeBlock title="Advanced Mononym Detection" language="typescript">{`// Additional check for articles about mononyms/stage names
+if (name.trim().split(/\s+/).length === 1) {
+  const mononymIndicators = [
+    'stage name', 'mononym', 'professional name', 'known professionally',
+    'stage persona', 'performing name', 'artistic name', 'pseudonym',
+    'singer', 'artist', 'performer', 'musician', 'actress', 'known as'
+  ];
+  const hasMononymIndicator = mononymIndicators.some(indicator => 
+    intro.toLowerCase().includes(indicator)
+  );
+  
+  if (!hasMononymIndicator) {
+    continue; // Skip this result if it doesn't indicate a stage name/mononym
+  }
+}`}</CodeBlock>
 
-```json
-{
-  "name": "NewArtist",
-  "wikipedia": "/wiki/NewArtist_(singer)"
-}
-```
+This two-layer approach helps catch both common and edge cases: <Note number={8}>The system first checks against known mononyms, then falls back to contextual clues in Wikipedia articles.</Note>
 
 ### Challenge 3: Wiki Winona
 
-When the local database check fails, I fall back to the Wikipedia API. This requires careful verification of several factors. <Note number={7}>The Wikipedia API provides rich data but requires careful parsing to determine if an article is about a woman.</Note>
+The final boss: Wikipedia API integration. Just as the UUID blog author struggled with bit manipulation, I struggled with extracting gender information from Wikipedia articles. <Note number={9}>Wikipedia's API is powerful but requires careful handling to avoid rate limits and extract meaningful gender information.</Note>
 
-<CodeBlock title="Wikipedia Verification Implementation" language="typescript">{`// From wikipediaService.ts
-export async function checkWikipedia(name: string): Promise<boolean> {
+The gender verification happens in multiple stages:
+
+1. First, we check our local database (which we know contains only women)
+2. Then, if needed, we search Wikipedia and analyze the article content
+3. Finally, we use linguistic analysis to verify the subject is a woman
+
+Here's the complete verification process:
+
+<CodeBlock title="Complete Wikipedia and Gender Verification" language="typescript">{`export async function checkWikipedia(name: string): Promise<boolean> {
+  // First check local database - we know these are all women
+  if (checkLocalDatabase(name)) {
+    return true;
+  }
+
+  // Reject invalid single names before making API call
+  if (!isValidSingleName(name)) {
+    return false;
+  }
+
   try {
+    const normalizedName = name.toLowerCase().normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/-/g, ' ');
+
     const searchUrl = \`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch="\${encodeURIComponent(name)}"&format=json&origin=*\`;
     const searchResponse = await fetch(searchUrl);
     const searchData = await searchResponse.json();
@@ -101,22 +153,78 @@ export async function checkWikipedia(name: string): Promise<boolean> {
       return false;
     }
 
-    // Analyze the article content for gender indicators
-    const femaleIndicators = [
-      'she', 'her', 'hers', 'woman', 'female', 'girl', 'actress',
-      'chairwoman', 'congresswoman', 'businesswoman', 'feminist',
-      'spokeswoman'
-    ];
+    for (let result of searchData.query.search) {
+      const normalizedTitle = result.title.toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/-/g, ' ');
+      
+      if (!normalizedTitle.includes(normalizedName)) {
+        continue;
+      }
 
-    // Verify the article is about a woman
-    const pageId = searchData.query.search[0].pageid;
-    const contentUrl = \`https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&pageids=\${pageId}&format=json&origin=*\`;
-    // ... rest of implementation
+      const pageId = result.pageid;
+      const contentUrl = \`https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&pageids=\${pageId}&format=json&origin=*\`;
+      const contentResponse = await fetch(contentUrl);
+      const contentData = await contentResponse.json();
+
+      const page = contentData.query.pages[pageId];
+      const intro = page.extract || '';
+
+      // Handle mononyms/stage names first
+      if (name.trim().split(/\s+/).length === 1) {
+        const mononymIndicators = [
+          'stage name', 'mononym', 'professional name', 'known professionally',
+          'stage persona', 'performing name', 'artistic name', 'pseudonym',
+          'singer', 'artist', 'performer', 'musician', 'actress', 'known as'
+        ];
+        const hasMononymIndicator = mononymIndicators.some(indicator => 
+          intro.toLowerCase().includes(indicator)
+        );
+        
+        if (!hasMononymIndicator) {
+          continue; // Skip this result if it doesn't indicate a stage name/mononym
+        }
+      }
+
+      // This is where the gender verification happens
+      const plainText = intro.replace(/<[^>]*>/g, '');
+      const femaleIndicators = [
+        'she', 'her', 'hers', 'woman', 'female', 'girl', 'actress',
+        'chairwoman', 'congresswoman', 'businesswoman', 'feminist',
+        'spokeswoman', 'singer', 'performer'
+      ];
+      const words = plainText.toLowerCase().split(/\s+/);
+      const firstFemaleIndicator = words.find((word: string) => 
+        femaleIndicators.includes(word)
+      );
+
+      if (firstFemaleIndicator) {
+        return true;
+      }
+    }
+
+    return false;
+
+  } catch (error) {
+    console.error('Error checking Wikipedia:', error);
+    return false;
+  }
 }`}</CodeBlock>
+
+The real magic happens in the gender verification logic: <Note number={10}>The gender verification system uses a combination of linguistic markers and context clues to determine if an article is about a woman.</Note>
+
+This might seem simple, but it handles a surprising number of edge cases. <Note number={11}>The system needs to be both precise enough to avoid false positives and flexible enough to handle historical figures with varying biographical styles.</Note>
+
+For example, it can handle:
+- Modern articles using contemporary language ("businesswoman", "spokeswoman")
+- Historical figures with period-appropriate descriptions
+- Articles that use pronouns rather than explicit gender markers
+- Stage names and mononyms through context clues
 
 ### Future Features
 
-I'm always looking to improve Name100Women. Some features on my roadmap: <Note number={8}>These features are prioritized based on user feedback and technical feasibility.</Note>
+I'm always looking to improve Name100Women. Some features on my roadmap: <Note number={12}>These features are prioritized based on user feedback and technical feasibility.</Note>
 
 - Integrated learning resources about each woman
 - Multiplayer mode for competitive naming
