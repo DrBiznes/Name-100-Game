@@ -134,7 +134,7 @@ export function About() {
               NAME EVERY<br />
               WOMAN
             </h1>
-            <div className="text-lg text-[var(--about-text-muted)] mb-2">
+            <div className="text-lg text-[var(--about-text-muted)] mb-2 italic">
               A simple task for someone of my skillset
             </div>
             <div className="text-[var(--about-text-muted)] italic">
