@@ -6,17 +6,15 @@ import GitHubButton from 'react-github-btn';
 
 In early 2024, a simple challenge emerged that would expose an unsurprising gap in humanities collective knowledge: Name 100 women. [NL's attempt](https://youtu.be/SqLEGFqgRfc?si=rpo2DjbnEuJoXr-7) at this challenge inspired me to create this game, as an excerise in creating a backend api for the first time! <Note number={1}>This challenge originated from Twitch streamer QTCinderella in early 2024, after Obama's wife asked me to name 100 women.</Note>
 
-![ChatGPT Has No Faith In Humanity](chatgptnofaith.png)
+![ChatGPT Has No Faith In Us](chatgptnofaith.png)
 
 SILLY ROBOT SAY TASK IMPOSSIBLE BUT APE KNOW BETTER!! APE NO NEED NAME ALL WOMEN, APE JUST NEED HELP HUMANS REMEMBER 100 AMAZING WOMEN!! APE MAKE GAME TO SHOW HUMANS CAN DO IT!! 🦍
 
 ## The Challenges
 
-APE FACE BIG PROBLEMS WHEN MAKE GAME!! APE NEED:
+APE FACE BIG PROBLEMS WHEN MAKE GAME!!
 
-APE need check names FAST and GOOD!! not easy because names come from ALL OVER WORLD and ALL TIME PERIODS!! sometimes wikipedia say NO MORE API CALLS so APE need be SMART with cache!! 
-
-some humans have WEIRD names like "Madonna" or "Cher" but APE handle this good!! APE also need figure out if human is woman when wikipedia page not clear!!
+APE need check names FAST and GOOD!! not easy because names come from ALL OVER WORLD and ALL TIME PERIODS!! sometimes wikipedia say NO MORE API CALLS so APE need be SMART with cache!! Also some humans have WEIRD names like "Madonna" or "Cher" but APE handle this good!! APE also need figure out if human is woman when wikipedia page not clear!!
 
 APE SOLVE ALL PROBLEMS BECAUSE APE STRONG!! 🦍
 
@@ -28,13 +26,13 @@ Sorry an ape keeps taking my keyboard. Anyways, to solve these problems, I devel
 
 Validating various versions of voluminous names ventured through three vital layers: <Note number={2}>Each layer of verification adds both accuracy and complexity, requiring careful balance between speed and correctness.</Note>
 
-Validating various versions of voluminous names needed novel solutions - we're talking millions of magnificent monikers! The solution? A multi-layered verification system that gets progressively more precise (and computationally powerful) as needed.
+The names needed novel solutions - we're talking millions of magnificent monikers!!! The solution? A multi-layered verification system that gets progressively more precise (and computationally powerful) as needed.
 
 1. **Local Database Lookup**: Lightning fast, no API calls needed
 2. **Wikipedia API Verification**: For names not in our database
 3. **Special Case Handling**: For those tricky edge cases that break all the rules
 
-But before doing all that, we need to normalize the name:
+But before doing all that, we needed to normalize the name:
 
 <CodeBlock title="Name Normalization" language="typescript" collapsed={false}>{`// From nameValidationService.ts
 function normalizeNameForComparison(name: string): string {
@@ -47,7 +45,7 @@ function normalizeNameForComparison(name: string): string {
     .trim();                          // Remove leading/trailing whitespace
 }`}</CodeBlock>
 
-This normalization is crucial - it handles everything from diacritics to hyphenated names. <Note number={3}>Name normalization is the unsung hero of the validation system, handling countless edge cases before they become problems.</Note>
+This normalization is crucial - it handles everything from diacritics to hyphenated names. <Note number={3}>I use this ish all over the project so I should've probably made it better</Note>
 
 ### Challenge 2: Wiki Winona
 
@@ -150,7 +148,7 @@ Here's the complete verification process:
   }
 }`}</CodeBlock>
 
-The real magic happens in the gender verification logic: <Note number={7}>The gender verification system uses a combination of linguistic markers and context clues to determine if an article is about a woman.</Note>
+At the heart of the system lies our gender verification **engine** - a sophisticated combination of linguistic analysis and contextual understanding: <Note number={7}>The system analyzes pronouns, titles, and biographical context to accurately identify articles about women, handling everything from historical figures to modern professionals.</Note>
 
 This might seem simple, but it handles a surprising number of edge cases.
 

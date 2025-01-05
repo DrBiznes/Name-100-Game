@@ -219,7 +219,7 @@ flowchart TB
     Input["✍️ User enters name"]:::input
     LocalDB{"📚 Check local<br/>database"}:::decision
     SingleName{"🔤 Is mononym?"}:::decision
-    MononymCheck{"🎭 Check valid<br/>mononyms"}:::decision
+    MononymCheck{"🎭 Check mononym<br/>database"}:::decision
     WikiSearch["🔍 Search<br/>Wikipedia"]:::process
     Results{"📋 Has search<br/>results?"}:::decision
     CheckTitle{"📑 Title matches<br/>input?"}:::decision
