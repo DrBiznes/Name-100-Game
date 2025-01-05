@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from './hover-card';
 import { cn } from '@/lib/utils';
 
@@ -10,6 +10,7 @@ interface NoteProps {
 export function Note({ number, children }: NoteProps) {
   const triggerRef = useRef<HTMLSpanElement>(null);
   const noteRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const updateNotePosition = () => {
@@ -63,23 +64,31 @@ export function Note({ number, children }: NoteProps) {
 
   return (
     <>
-      {/* Always render the hover card for mobile */}
-      <HoverCard>
+      {/* Mobile hover card with touch support */}
+      <HoverCard open={isOpen} onOpenChange={setIsOpen}>
         <HoverCardTrigger asChild>
           <span 
             ref={triggerRef}
             data-note-trigger={number}
             className={cn(numberIndicatorClass, "cursor-help align-text-top -mt-1")}
+            onClick={() => setIsOpen(!isOpen)} // Toggle on click for mobile
+            onTouchEnd={(e) => {
+              e.preventDefault(); // Prevent default touch behavior
+              setIsOpen(!isOpen);
+            }}
           >
             {number}
           </span>
         </HoverCardTrigger>
-        <HoverCardContent className="font-['Alegreya'] md:hidden bg-card text-foreground">
+        <HoverCardContent 
+          className="font-['Alegreya'] md:hidden bg-card text-foreground"
+          onPointerDownOutside={() => setIsOpen(false)} // Close when clicking outside
+        >
           {children}
         </HoverCardContent>
       </HoverCard>
 
-      {/* Render the floating note for desktop */}
+      {/* Desktop floating note */}
       <div 
         ref={noteRef}
         className="hidden md:block fixed note-content" 

@@ -165,6 +165,46 @@ footer a:hover {
 /* Intersection Observer target for notes */
 [data-note-trigger] {
   scroll-margin-top: 2rem;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mobile hover card styles */
+@media (max-width: 768px) {
+  [data-note-trigger] {
+    cursor: pointer;
+  }
+
+  /* Override Radix positioning for mobile */
+  [data-radix-popper-content-wrapper] {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: calc(100vw - 2rem) !important;
+    max-width: 90vw !important;
+    pointer-events: auto !important;
+  }
+
+  /* Style the hover card content */
+  .hover-card-content {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 1.5rem;
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    max-height: 80vh;
+  }
+
+  /* Add backdrop overlay */
+  [data-radix-hover-card-content]::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: -1;
+  }
 }
 
 /* Prose customization */
@@ -378,6 +418,8 @@ footer a:hover {
   display: flex;
   flex-direction: column;
   gap: 0;
+  touch-action: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .validation-chart-content {
@@ -385,6 +427,7 @@ footer a:hover {
   padding: 1rem;
   overflow: hidden;
   position: relative;
+  touch-action: none;
 }
 
 .validation-chart-container:hover {
@@ -414,32 +457,41 @@ footer a:hover {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   z-index: 10;
   user-select: none;
+  touch-action: none;
 }
 
 .chart-controls-group {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.25rem;
-  border-radius: var(--radius);
 }
 
-/* Remove the border and adjust spacing */
-.chart-controls-group + .chart-controls-group {
-  margin-left: 0.25rem;
-  padding-left: 0.25rem;
-}
+@media (max-width: 768px) {
+  .chart-controls {
+    bottom: 0.5rem;
+    right: 0.5rem;
+    padding: 0.25rem;
+  }
 
-.zoom-level {
-  min-width: 3.5rem;
-  text-align: center;
-  color: var(--about-text);
-  font-family: "Alegreya", Georgia, serif;
-  font-size: 0.9rem;
-  padding: 0.25rem;
-  background: var(--popover);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
+  .chart-controls-group {
+    gap: 0.125rem;
+  }
+
+  .icon-button {
+    width: 2.5rem;
+    height: 2.5rem;
+    min-width: 2.5rem;
+  }
+
+  .icon-button .material-symbols-outlined {
+    font-size: 1.5rem;
+  }
+
+  .zoom-level {
+    min-width: 3rem;
+    font-size: 0.875rem;
+    padding: 0.125rem 0.25rem;
+  }
 }
 
 .icon-button {
@@ -457,6 +509,7 @@ footer a:hover {
   padding: 0;
   transition: all 0.2s ease;
   position: relative;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .icon-button:hover {
@@ -470,6 +523,13 @@ footer a:hover {
   box-shadow: none;
 }
 
+@media (hover: none) {
+  .icon-button:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
 .icon-button .material-symbols-outlined {
   font-size: 1.2rem;
   font-variation-settings:
@@ -477,6 +537,19 @@ footer a:hover {
     'wght' 400,
     'GRAD' 0,
     'opsz' 24;
+}
+
+.zoom-level {
+  min-width: 3.5rem;
+  text-align: center;
+  color: var(--about-text);
+  font-family: "Alegreya", Georgia, serif;
+  font-size: 0.9rem;
+  padding: 0.25rem;
+  background: var(--popover);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  user-select: none;
 }
 
 /* Remove tooltip styles */
