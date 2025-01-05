@@ -3,7 +3,7 @@ import { Card } from './ui/card';
 import { NameInput } from './NameInput';
 import { formatTime } from '@/lib/utils';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { QUERY_KEYS, leaderboardApi, LeaderboardEntry, ScoreData } from '@/services/api';
+import { QUERY_KEYS, leaderboardApi, ScoreData, UserHistoryResponse } from '@/services/api';
 import { Button } from './ui/button';
 import { toast } from "sonner";
 import { UsernameBadge } from './ui/UsernameBadge';
@@ -141,52 +141,46 @@ export function ScoreView() {
   const queryClient = useQueryClient();
   
   const { data: userData, isLoading, error } = useQuery<ScoreData, Error>({
-    queryKey: QUERY_KEYS.userScore(id || ''),
+    queryKey: ['score', id],
     queryFn: async () => {
+      if (!id) throw new Error('No score ID provided');
+
       // First, try to find the complete score in existing user history queries
-      const historyQueries = queryClient.getQueriesData<{ scores: Record<string, ScoreData> }>({ 
+      const historyQueries = queryClient.getQueriesData<UserHistoryResponse>({ 
         queryKey: ['userHistory'] 
       });
       
       for (const [, data] of historyQueries) {
-        if (data?.scores?.[id!]) {
-          return data.scores[id!];
+        if (data?.scores?.[id] && data.scores[id].completed_names?.length > 0) {
+          return data.scores[id];
         }
       }
 
-      // Then check leaderboard caches for partial data
-      const leaderboardModes = ['20', '50', '100'] as const;
-      for (const mode of leaderboardModes) {
-        const leaderboardData = queryClient.getQueryData<{ leaderboard: LeaderboardEntry[] }>(
-          QUERY_KEYS.leaderboard(mode)
-        );
-        const scoreFromLeaderboard = leaderboardData?.leaderboard.find(entry => entry.id === id);
-        if (scoreFromLeaderboard) {
-          // Found in leaderboard, but need to fetch full data
-          const result = await leaderboardApi.getUserHistory(id || '');
-          return result.score;
-        }
-      }
-
-      // Check recent scores cache
-      for (const mode of leaderboardModes) {
-        const recentData = queryClient.getQueryData<LeaderboardEntry[]>(
-          QUERY_KEYS.recentScores(mode)
-        );
-        const scoreFromRecent = recentData?.find(entry => entry.id === id);
-        if (scoreFromRecent) {
-          // Found in recent scores, but need to fetch full data
-          const result = await leaderboardApi.getUserHistory(id || '');
-          return result.score;
-        }
-      }
+      // If we don't have the full data, we need to fetch it
+      // Always include history to get completed_names
+      const result = await leaderboardApi.getUserHistory(id, true);
       
-      // If not found in any cache, fetch it
-      const result = await leaderboardApi.getUserHistory(id || '');
+      // Update all caches with the full data
+      queryClient.setQueryData(['score', id], result.score);
+      
+      // Also update the user history cache if it exists
+      const userHistoryQueryKey = QUERY_KEYS.userHistory(id);
+      const existingHistory = queryClient.getQueryData<UserHistoryResponse>(userHistoryQueryKey);
+      if (existingHistory) {
+        queryClient.setQueryData<UserHistoryResponse>(userHistoryQueryKey, {
+          ...existingHistory,
+          scores: {
+            ...existingHistory.scores,
+            [id]: result.score
+          }
+        });
+      }
+
       return result.score;
     },
     enabled: !!id,
     staleTime: 10 * 60 * 1000, // 10 minutes to match server cache
+    retry: 1, // Only retry once if we fail to get the data
   });
 
   const handleShare = async () => {
@@ -222,7 +216,7 @@ export function ScoreView() {
           >
             Error: {error instanceof Error ? error.message : 'Failed to load score'}
           </motion.div>
-        ) : !userData ? (
+        ) : !userData || !userData.completed_names ? (
           <motion.div
             key="not-found"
             variants={sharedAnimationVariants}

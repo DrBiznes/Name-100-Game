@@ -24,6 +24,7 @@ export interface ScoreHistoryEntry {
   submission_date: string;
   name_count: number;
   username_color: string;
+  completed_names?: string[];
 }
 
 export interface ScoreData {
@@ -34,6 +35,44 @@ export interface ScoreData {
   submission_date: string;
   name_count: number;
   completed_names: string[];
+}
+
+export interface UserHistoryResponse {
+  success: boolean;
+  score: ScoreData;
+  history: ScoreHistoryEntry[];
+  total: number;
+  scores: { [key: string]: ScoreData };
+}
+
+export interface LeaderboardApiResponse {
+  success: boolean;
+  leaderboard: LeaderboardEntry[];
+  cacheTimestamp: string;
+  cacheExpiresIn: number;
+}
+
+export interface RecentScoresResponse {
+  success: boolean;
+  scores: LeaderboardEntry[];
+  limit: number;
+  total: number;
+}
+
+export interface NameStats {
+  name: string;
+  count: number;
+  variants: string[];
+}
+
+export interface StatsResponse {
+  success: boolean;
+  stats: NameStats[];
+  gameMode: number | null;
+  totalNames: number;
+  totalOccurrences: number;
+  cacheTimestamp: string;
+  cacheExpiresIn: number;
 }
 
 const defaultHeaders = {
@@ -48,33 +87,6 @@ export const QUERY_KEYS = {
   recentScores: (gameMode: string) => ['recentScores', gameMode] as const,
   stats: (gameMode: string) => ['stats', gameMode] as const,
 };
-
-interface ScoreSubmissionResponse {
-  success: boolean;
-  score: {
-    id: number;
-    username: string;
-    score: number;
-    completed_names: string[];
-    name_count: number;
-    username_color: string;
-  };
-  error?: string;
-}
-
-interface LeaderboardApiResponse {
-  success: boolean;
-  leaderboard: LeaderboardEntry[];
-  cacheTimestamp: string;
-  cacheExpiresIn: number;
-}
-
-export interface UserHistoryResponse {
-  history: ScoreHistoryEntry[];
-  score: ScoreData;
-  total: number;
-  scores: { [key: string]: ScoreData };  // Cache of individual scores
-}
 
 export const leaderboardApi = {
   async getLeaderboard(gameMode: string): Promise<LeaderboardApiResponse> {
@@ -103,9 +115,9 @@ export const leaderboardApi = {
     }
   },
 
-  async getUserHistory(id: string): Promise<UserHistoryResponse> {
+  async getUserHistory(id: string, includeHistory: boolean = true, historyLimit: number = 100): Promise<UserHistoryResponse> {
     const response = await fetch(
-      `${API_URL}/scores/${id}?include_history=true&history_limit=100`
+      `${API_URL}/scores/${id}?include_history=${includeHistory}&history_limit=${historyLimit}`
     );
     const data = await response.json();
     
@@ -124,15 +136,16 @@ export const leaderboardApi = {
           score: entry.score,
           submission_date: entry.submission_date,
           name_count: entry.name_count,
-          completed_names: [], // We'll only have this for the main score
+          completed_names: entry.completed_names || [], // Handle completed_names if present in history
         };
         return acc;
       }, {}),
     };
 
     return {
-      history: data.history,
+      success: data.success,
       score: data.score,
+      history: data.history,
       total: data.history.length,
       scores,
     };
@@ -147,7 +160,7 @@ export const leaderboardApi = {
           ...score,
           username: score.username.toUpperCase(),
           completed_names: score.completed_names,
-          game_mode: score.game_mode.toString(),
+          game_mode: score.game_mode,
         }),
       });
 
@@ -163,7 +176,7 @@ export const leaderboardApi = {
         throw new Error(errorData.error || `Server error (${response.status})`);
       }
 
-      const data = await response.json() as ScoreSubmissionResponse;
+      const data = await response.json();
       
       if (!data.success) {
         throw new Error(data.error || 'Failed to submit score');
@@ -180,8 +193,8 @@ export const leaderboardApi = {
 };
 
 export const recentScoresApi = {
-  getRecentScores: async (gameMode: string): Promise<LeaderboardEntry[]> => {
-    const response = await fetch(`${API_URL}/recent/${gameMode}`);
+  getRecentScores: async (gameMode: string, limit: number = 25): Promise<LeaderboardEntry[]> => {
+    const response = await fetch(`${API_URL}/recent/${gameMode}?limit=${limit}`);
     if (!response.ok) {
       throw new Error('Failed to fetch recent scores');
     }
@@ -192,22 +205,6 @@ export const recentScoresApi = {
     return data.scores;
   },
 };
-
-export interface NameStats {
-  name: string;
-  count: number;
-  variants: string[];
-}
-
-export interface StatsResponse {
-  success: boolean;
-  stats: NameStats[];
-  gameMode: number | null;
-  totalNames: number;
-  totalOccurrences: number;
-  cacheTimestamp: string;
-  cacheExpiresIn: number;
-}
 
 export const statsApi = {
   getStats: async (gameMode?: string): Promise<StatsResponse> => {

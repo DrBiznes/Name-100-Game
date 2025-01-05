@@ -218,14 +218,14 @@ export function ValidationFlowChart() {
 flowchart TB
     Input["✍️ User enters name"]:::input
     LocalDB{"📚 Check local<br/>database"}:::decision
-    SingleName{"🔤 Is single<br/>name?"}:::decision
+    SingleName{"🔤 Is mononym?"}:::decision
     MononymCheck{"🎭 Check valid<br/>mononyms"}:::decision
     WikiSearch["🔍 Search<br/>Wikipedia"]:::process
     Results{"📋 Has search<br/>results?"}:::decision
     CheckTitle{"📑 Title matches<br/>input?"}:::decision
     SingleWord{"💭 Single word<br/>name?"}:::decision
     StageCheck{"🎪 Stage name<br/>indicators?"}:::decision
-    GenderCheck{"👩 Woman/Women<br/>indicators?"}:::decision
+    GenderCheck{"👩 Women<br/>indicators?"}:::decision
     Valid["✅ Valid"]:::valid
     Invalid["❌ Invalid"]:::invalid
 

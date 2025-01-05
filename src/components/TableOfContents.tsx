@@ -13,8 +13,8 @@ export function TableOfContents() {
       text: 'The Challenges',
       subsections: [
         { id: 'challenge-1-verification-vanessa', text: 'Challenge 1' },
-        { id: 'challenge-2-mononym-mary', text: 'Challenge 2' },
-        { id: 'challenge-3-wiki-winona', text: 'Challenge 3' }
+        { id: 'challenge-2-wiki-winona', text: 'Challenge 2' },
+        { id: 'challenge-3-mononym-mary', text: 'Challenge 3' }
       ]
     },
     { id: 'missing-mononyms', text: 'Missing Mononyms' },

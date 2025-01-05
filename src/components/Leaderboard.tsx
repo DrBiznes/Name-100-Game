@@ -3,7 +3,7 @@ import { Button } from './ui/button';
 import { formatTime, formatSubmissionDate } from '@/lib/utils';
 import { QUERY_KEYS, leaderboardApi, LeaderboardEntry } from '@/services/api';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from "sonner";
 import { Separator } from './ui/separator';
 import { DataTable } from './ui/data-table';
@@ -109,6 +109,16 @@ function LeaderboardTable({
   onPageChange: (page: number) => void;
 }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const handleRowClick = async (row: LeaderboardEntry) => {
+    // Prefetch the score data
+    await queryClient.prefetchQuery({
+      queryKey: ['score', row.id],
+      queryFn: () => leaderboardApi.getUserHistory(row.id, true),
+    });
+    navigate(`/scores/${row.id}`);
+  };
   
   const columns: ColumnDef<LeaderboardEntry>[] = [
     {
@@ -173,7 +183,7 @@ function LeaderboardTable({
         pageCount={data?.totalPages || 1}
         currentPage={currentPage}
         onPageChange={onPageChange}
-        onRowClick={(row) => navigate(`/scores/${(row as LeaderboardEntry).id}`)}
+        onRowClick={handleRowClick}
         rowProps={(_, index) => ({
           className: `cursor-pointer border-border transition-colors ${
             index % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'

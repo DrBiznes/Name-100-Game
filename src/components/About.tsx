@@ -205,7 +205,7 @@ export function About() {
             </motion.div>
 
             {/* MDX Content Area */}
-            <div className="prose prose-invert prose-lg max-w-none overflow-hidden [&_pre]:!bg-transparent [&_pre]:!p-0 [&_code]:!bg-transparent [&_code]:whitespace-pre [&_pre]:overflow-x-auto prose-p:max-w-none prose-headings:max-w-none">
+            <div className="prose prose-invert prose-lg max-w-none overflow-visible [&_pre]:!bg-transparent [&_pre]:!p-0 [&_code]:!bg-transparent [&_code]:whitespace-pre [&_pre]:overflow-x-auto prose-p:max-w-none prose-headings:max-w-none">
               <AnimatePresence mode="wait">
                 <Suspense fallback={<AboutSkeleton />}>
                   <motion.div
@@ -213,6 +213,7 @@ export function About() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.5, delay: 0.3 }}
+                    className="overflow-visible"
                   >
                     <MDXProvider components={components}>
                       <AboutContent />

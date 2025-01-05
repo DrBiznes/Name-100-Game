@@ -34,9 +34,9 @@ Validating various versions of voluminous names needed novel solutions - we're t
 2. **Wikipedia API Verification**: For names not in our database
 3. **Special Case Handling**: For those tricky edge cases that break all the rules
 
-Here's how the core validation pipeline works:
+But before doing all that, we need to normalize the name:
 
-<CodeBlock title="Name Normalization" language="typescript">{`// From nameValidationService.ts
+<CodeBlock title="Name Normalization" language="typescript" collapsed={false}>{`// From nameValidationService.ts
 function normalizeNameForComparison(name: string): string {
   return name
     .toLowerCase()
@@ -49,54 +49,12 @@ function normalizeNameForComparison(name: string): string {
 
 This normalization is crucial - it handles everything from diacritics to hyphenated names. <Note number={3}>Name normalization is the unsung hero of the validation system, handling countless edge cases before they become problems.</Note>
 
-### Challenge 2: Mononym Mary
-
-Managing mysterious mononyms meant mastering multiple methods of name validation. The perplexing problem presented itself when players proposed peculiar patterns - particularly powerful performers like "Cher". <Note number={4}>Mononyms presented a unique challenge, as they break the traditional FirstName LastName pattern but are still valid entries.</Note>
-
-My meticulous matching mechanism initially marked these magnificent monikers as mistakes since they didn't follow the familiar "FirstName LastName" format. The solution? A sophisticated system of staged scanning:
-
-<CodeBlock title="Complete Mononym Validation System" language="typescript">{`// From nameValidationService.ts
-// Get list of valid mononyms from database
-function getValidMononyms(): Set<string> {
-  return new Set(
-    names
-      .filter(name => !name.includes(' '))  // Get only single-word names
-      .map(name => normalizeNameForComparison(name))
-  );
-}
-
-// Check if input is likely just a first name
-function isValidSingleName(name: string): boolean {
-  // Split the name and check if it's just one word
-  const nameParts = name.trim().split(/\s+/);
-  if (nameParts.length !== 1) {
-    return true; // If it's more than one word, it's valid
-  }
-
-  // Common name prefixes that might indicate a stage name
-  const artistPrefixes = ['dj', 'mc', 'dr', 'h.e.r'];
-  const normalizedName = normalizeNameForComparison(name);
-  
-  // If the name has any of these prefixes, it's likely a stage name
-  if (artistPrefixes.some(prefix => normalizedName.startsWith(prefix))) {
-    return true;
-  }
-
-  // Check against our database of valid mononyms
-  const validMononyms = getValidMononyms();
-  return validMononyms.has(normalizedName);
-}`}</CodeBlock>
-
-But that's just the first layer. When we hit Wikipedia, we need even more sophisticated mononym detection: <Note number={5}>Stage names and mononyms often require additional context from Wikipedia articles to validate properly.</Note>
-
-This two-layer approach helps catch both common and edge cases: The system first checks against known mononyms, then falls back to contextual clues in Wikipedia articles.
-
-### Challenge 3: Wiki Winona
+### Challenge 2: Wiki Winona
 
 APE FACE BIGGEST BOSS BATTLE: WIKIPEDIA!! APE NEED CHECK MANY NAMES FAST BUT WIKIPEDIA SOMETIMES SAY "NO MORE CALLS APE!!" 🦍 <Note number={6}>APE PROCESS OVER one million WIKI CALLS EVERY DAY!! APE NEED BE SMART WITH CACHE AND API LIMITS OR WIKIPEDIA GET ANGRY!!</Note>
 
 APE SOLVE PROBLEM WITH THREE SMART MOVES:
-1. APE CHECK LOCAL DATABASE FIRST (SUPER FAST!!)
+1. APE CHECK [LOCAL DATABASE](https://github.com/DrBiznes/Name-100-Game/blob/main/src/lib/womendatabase.json) FIRST (SUPER FAST!!)
 2. APE USE SMART CACHE SO NO ASK WIKIPEDIA SAME THING TWICE
 3. APE READ WIKIPEDIA PAGE LIKE DETECTIVE!! LOOK FOR SPECIAL WORDS THAT TELL IF PERSON IS WOMAN!!
 
@@ -109,8 +67,7 @@ when APE find new name, APE do special dance:
 APE SYSTEM WORK SO GOOD NOW!! PROCESS THOUSANDS OF NAMES AND NEVER MAKE WIKIPEDIA MAD!! 🦍
 
 Here's the complete verification process:
-layered
-<CodeBlock title="Complete Wikipedia and Gender Verification" language="typescript">{`export async function checkWikipedia(name: string): Promise<boolean> {
+<CodeBlock title="Complete Wikipedia and Gender Verification" language="typescript" collapsed={true}>{`export async function checkWikipedia(name: string): Promise<boolean> {
   // First check local database - we know these are all women
   if (checkLocalDatabase(name)) {
     return true;
@@ -202,6 +159,48 @@ For example, it can handle:
 - Historical figures with period-appropriate descriptions
 - Articles that use pronouns rather than explicit gender markers
 - Stage names and mononyms through context clues
+
+### Challenge 3: Mononym Mary
+
+Managing mysterious mononyms meant mastering multiple methods of name validation. The perplexing problem presented itself when players proposed peculiar patterns - particularly powerful performers like "Cher". <Note number={4}>Mononyms presented a unique challenge, as they break the traditional FirstName LastName pattern but are still valid entries.</Note>
+
+My meticulous matching mechanism initially marked these magnificent monikers as mistakes since they didn't follow the familiar "FirstName LastName" format. The solution? A sophisticated system of staged scanning:
+
+<CodeBlock title="Complete Mononym Validation System" language="typescript" collapsed={true}>{`// From nameValidationService.ts
+// Get list of valid mononyms from database
+function getValidMononyms(): Set<string> {
+  return new Set(
+    names
+      .filter(name => !name.includes(' '))  // Get only single-word names
+      .map(name => normalizeNameForComparison(name))
+  );
+}
+
+// Check if input is likely just a first name
+function isValidSingleName(name: string): boolean {
+  // Split the name and check if it's just one word
+  const nameParts = name.trim().split(/\s+/);
+  if (nameParts.length !== 1) {
+    return true; // If it's more than one word, it's valid
+  }
+
+  // Common name prefixes that might indicate a stage name
+  const artistPrefixes = ['dj', 'mc', 'dr', 'h.e.r'];
+  const normalizedName = normalizeNameForComparison(name);
+  
+  // If the name has any of these prefixes, it's likely a stage name
+  if (artistPrefixes.some(prefix => normalizedName.startsWith(prefix))) {
+    return true;
+  }
+
+  // Check against our database of valid mononyms
+  const validMononyms = getValidMononyms();
+  return validMononyms.has(normalizedName);
+}`}</CodeBlock>
+
+But that's just the first layer. When we hit Wikipedia, we need even more sophisticated mononym detection: <Note number={5}>Stage names and mononyms often require additional context from Wikipedia articles to validate properly.</Note>
+
+This two-layer approach helps catch both common and edge cases: The system first checks against known mononyms, then falls back to contextual clues in Wikipedia articles.
 
 ## MISSING MONONYMS!! 🦍
 

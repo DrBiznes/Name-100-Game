@@ -328,6 +328,8 @@ footer a:hover {
   overflow-wrap: break-word;
   word-wrap: break-word;
   white-space: pre-wrap;
+  background-color: transparent;
+  padding: 0;
 }
 
 .prose pre {
@@ -335,9 +337,9 @@ footer a:hover {
   overflow-x: auto;
   white-space: pre-wrap;
   word-wrap: break-word;
-  background-color: var(--card);
-  border: 1px solid var(--border);
-  padding: 1rem;
+  background-color: transparent;
+  border: none;
+  padding: 0;
   margin: 1.5rem 0;
   border-radius: 0.5rem;
 }
