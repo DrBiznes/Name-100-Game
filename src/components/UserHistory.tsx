@@ -2,7 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Card } from './ui/card';
 import { formatTime, formatSubmissionDate } from '@/lib/utils';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS, leaderboardApi, LeaderboardEntry } from '@/services/api';
 import { User } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
@@ -115,12 +115,24 @@ export function UserHistory() {
   const { id } = useParams();
   const [stats, setStats] = useState<ScoreStats | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const queryClient = useQueryClient();
 
-  // Query for user history - simplified to single request
+  // Query for user history - with caching for individual scores
   const { data: userData, isLoading: isLoadingHistory } = useQuery({
     queryKey: QUERY_KEYS.userHistory(id || ''),
-    queryFn: () => leaderboardApi.getUserHistory(id || ''),
+    queryFn: async () => {
+      const result = await leaderboardApi.getUserHistory(id || '');
+      // Pre-populate the cache with individual scores
+      Object.entries(result.scores).forEach(([scoreId, scoreData]) => {
+        queryClient.setQueryData(
+          QUERY_KEYS.userScore(scoreId),
+          scoreData
+        );
+      });
+      return result;
+    },
     enabled: !!id,
+    staleTime: 10 * 60 * 1000, // 10 minutes to match server cache
   });
 
   // Calculate paginated data

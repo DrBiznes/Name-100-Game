@@ -2,8 +2,8 @@ import { useParams } from 'react-router-dom';
 import { Card } from './ui/card';
 import { NameInput } from './NameInput';
 import { formatTime } from '@/lib/utils';
-import { useQuery } from '@tanstack/react-query';
-import { QUERY_KEYS, leaderboardApi } from '@/services/api';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { QUERY_KEYS, leaderboardApi, LeaderboardEntry, ScoreData } from '@/services/api';
 import { Button } from './ui/button';
 import { toast } from "sonner";
 import { UsernameBadge } from './ui/UsernameBadge';
@@ -138,11 +138,55 @@ function hexToRGB(hex: string) {
 
 export function ScoreView() {
   const { id } = useParams();
+  const queryClient = useQueryClient();
   
-  const { data: userData, isLoading, error } = useQuery({
-    queryKey: QUERY_KEYS.userHistory(id || ''),
-    queryFn: () => leaderboardApi.getUserHistory(id || ''),
+  const { data: userData, isLoading, error } = useQuery<ScoreData, Error>({
+    queryKey: QUERY_KEYS.userScore(id || ''),
+    queryFn: async () => {
+      // First, try to find the complete score in existing user history queries
+      const historyQueries = queryClient.getQueriesData<{ scores: Record<string, ScoreData> }>({ 
+        queryKey: ['userHistory'] 
+      });
+      
+      for (const [, data] of historyQueries) {
+        if (data?.scores?.[id!]) {
+          return data.scores[id!];
+        }
+      }
+
+      // Then check leaderboard caches for partial data
+      const leaderboardModes = ['20', '50', '100'] as const;
+      for (const mode of leaderboardModes) {
+        const leaderboardData = queryClient.getQueryData<{ leaderboard: LeaderboardEntry[] }>(
+          QUERY_KEYS.leaderboard(mode)
+        );
+        const scoreFromLeaderboard = leaderboardData?.leaderboard.find(entry => entry.id === id);
+        if (scoreFromLeaderboard) {
+          // Found in leaderboard, but need to fetch full data
+          const result = await leaderboardApi.getUserHistory(id || '');
+          return result.score;
+        }
+      }
+
+      // Check recent scores cache
+      for (const mode of leaderboardModes) {
+        const recentData = queryClient.getQueryData<LeaderboardEntry[]>(
+          QUERY_KEYS.recentScores(mode)
+        );
+        const scoreFromRecent = recentData?.find(entry => entry.id === id);
+        if (scoreFromRecent) {
+          // Found in recent scores, but need to fetch full data
+          const result = await leaderboardApi.getUserHistory(id || '');
+          return result.score;
+        }
+      }
+      
+      // If not found in any cache, fetch it
+      const result = await leaderboardApi.getUserHistory(id || '');
+      return result.score;
+    },
     enabled: !!id,
+    staleTime: 10 * 60 * 1000, // 10 minutes to match server cache
   });
 
   const handleShare = async () => {
@@ -178,7 +222,7 @@ export function ScoreView() {
           >
             Error: {error instanceof Error ? error.message : 'Failed to load score'}
           </motion.div>
-        ) : !userData?.score ? (
+        ) : !userData ? (
           <motion.div
             key="not-found"
             variants={sharedAnimationVariants}
@@ -200,15 +244,15 @@ export function ScoreView() {
             <div className="flex items-center justify-center gap-2">
               <h2 className="text-2xl font-bold text-center flex items-center gap-2">
                 {(() => {
-                  const rgb = hexToRGB(userData.score.username_color);
+                  const rgb = hexToRGB(userData.username_color);
                   return (
                     <UsernameBadge 
-                      username={userData.score.username}
-                      color={userData.score.username_color}
+                      username={userData.username}
+                      color={userData.username_color}
                       className="text-sm [text-shadow:0_0_10px_rgba(var(--badge-glow-r),var(--badge-glow-g),var(--badge-glow-b),0.3),0_0_20px_rgba(var(--badge-glow-r),var(--badge-glow-g),var(--badge-glow-b),0.2)] [box-shadow:0_0_10px_rgba(var(--badge-glow-r),var(--badge-glow-g),var(--badge-glow-b),0.3),0_0_20px_rgba(var(--badge-glow-r),var(--badge-glow-g),var(--badge-glow-b),0.2)]"
                       style={{ 
-                        borderColor: userData.score.username_color,
-                        color: userData.score.username_color,
+                        borderColor: userData.username_color,
+                        color: userData.username_color,
                         '--badge-glow-r': rgb.r,
                         '--badge-glow-g': rgb.g,
                         '--badge-glow-b': rgb.b,
@@ -216,8 +260,8 @@ export function ScoreView() {
                     />
                   );
                 })()}
-                <span className="text-glow">Named {userData.score.name_count} in{' '}
-                <span className="font-['Chonburi']">{formatTime(userData.score.score)}</span></span>
+                <span className="text-glow">Named {userData.name_count} in{' '}
+                <span className="font-['Chonburi']">{formatTime(userData.score)}</span></span>
               </h2>
               <Button 
                 variant="ghost" 
@@ -233,7 +277,7 @@ export function ScoreView() {
               className="grid grid-cols-2 gap-4"
               variants={gridVariants}
             >
-              {userData.score.completed_names.map((name, index) => (
+              {userData.completed_names.map((name: string, index: number) => (
                 <motion.div
                   key={index}
                   variants={itemVariants}

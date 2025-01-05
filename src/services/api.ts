@@ -44,6 +44,7 @@ const defaultHeaders = {
 export const QUERY_KEYS = {
   leaderboard: (gameMode: string) => ['leaderboard', gameMode],
   userHistory: (id: string) => ['userHistory', id],
+  userScore: (id: string) => ['userScore', id],
   recentScores: (gameMode: string) => ['recentScores', gameMode] as const,
   stats: (gameMode: string) => ['stats', gameMode] as const,
 };
@@ -66,6 +67,13 @@ interface LeaderboardApiResponse {
   leaderboard: LeaderboardEntry[];
   cacheTimestamp: string;
   cacheExpiresIn: number;
+}
+
+export interface UserHistoryResponse {
+  history: ScoreHistoryEntry[];
+  score: ScoreData;
+  total: number;
+  scores: { [key: string]: ScoreData };  // Cache of individual scores
 }
 
 export const leaderboardApi = {
@@ -95,11 +103,7 @@ export const leaderboardApi = {
     }
   },
 
-  async getUserHistory(id: string): Promise<{
-    history: ScoreHistoryEntry[];
-    score: ScoreData;
-    total: number;
-  }> {
+  async getUserHistory(id: string): Promise<UserHistoryResponse> {
     const response = await fetch(
       `${API_URL}/scores/${id}?include_history=true&history_limit=100`
     );
@@ -109,10 +113,28 @@ export const leaderboardApi = {
       throw new Error(data.error || 'Failed to fetch history');
     }
 
+    // Create a map of all scores for quick lookup
+    const scores = {
+      [data.score.id]: data.score,
+      ...data.history.reduce((acc: { [key: string]: ScoreData }, entry: ScoreHistoryEntry) => {
+        acc[entry.id] = {
+          id: entry.id.toString(),
+          username: entry.username,
+          username_color: entry.username_color,
+          score: entry.score,
+          submission_date: entry.submission_date,
+          name_count: entry.name_count,
+          completed_names: [], // We'll only have this for the main score
+        };
+        return acc;
+      }, {}),
+    };
+
     return {
       history: data.history,
       score: data.score,
       total: data.history.length,
+      scores,
     };
   },
 

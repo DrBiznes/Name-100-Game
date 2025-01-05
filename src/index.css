@@ -41,6 +41,17 @@
   }
 }
 
+/* Selection styles */
+::selection {
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+::-moz-selection {
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
 /* Base styles */
 body {
   margin: 0;
