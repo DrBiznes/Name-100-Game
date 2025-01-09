@@ -24,7 +24,7 @@ Sorry an ape keeps taking my keyboard. Anyways, to solve these problems, I devel
 
 ### Challenge 1: Verification Vanessa
 
-Validating various versions of voluminous names ventured through three vital layers: <Note number={2}>Each layer of verification adds both accuracy and complexity, requiring careful balance between speed and correctness.</Note>
+Validating various versions of voluminous names ventured through three vital layers<Note number={2}>Each layer of verification adds both accuracy and complexity, requiring careful balance between speed and correctness.</Note>
 
 The names needed novel solutions - we're talking millions of magnificent monikers!!! The solution? A multi-layered verification system that gets progressively more precise (and computationally powerful) as needed.
 
@@ -45,7 +45,7 @@ function normalizeNameForComparison(name: string): string {
     .trim();                          // Remove leading/trailing whitespace
 }`}</CodeBlock>
 
-This normalization is crucial - it handles everything from diacritics to hyphenated names. <Note number={3}>I use this ish all over the project so I should've probably made it better</Note>
+This normalization is crucial - it handles everything from diacritics to hyphenated names<Note number={3}>I use this ish all over the project so I should've probably made it better</Note>
 
 ### Challenge 2: Wiki Winona
 
@@ -160,7 +160,7 @@ For example, it can handle:
 
 ### Challenge 3: Mononym Mary
 
-Managing mysterious mononyms meant mastering multiple methods of name validation. The perplexing problem presented itself when players proposed peculiar patterns - particularly powerful performers like "Cher". <Note number={4}>Mononyms presented a unique challenge, as they break the traditional FirstName LastName pattern but are still valid entries.</Note>
+Managing mysterious mononyms meant mastering multiple methods of name validation. The perplexing problem presented itself when players proposed peculiar patterns - particularly powerful performers like "Cher"<Note number={4}>Mononyms presented a unique challenge, as they break the traditional FirstName LastName pattern but are still valid entries.</Note>
 
 My meticulous matching mechanism initially marked these magnificent monikers as mistakes since they didn't follow the familiar "FirstName LastName" format. The solution? A sophisticated system of staged scanning:
 
@@ -196,7 +196,7 @@ function isValidSingleName(name: string): boolean {
   return validMononyms.has(normalizedName);
 }`}</CodeBlock>
 
-But that's just the first layer. When we hit Wikipedia, we need even more sophisticated mononym detection: <Note number={5}>Stage names and mononyms often require additional context from Wikipedia articles to validate properly.</Note>
+But that's just the first layer. When we hit Wikipedia, we need even more sophisticated mononym detection<Note number={5}>Stage names and mononyms often require additional context from Wikipedia articles to validate properly.</Note>
 
 This two-layer approach helps catch both common and edge cases: The system first checks against known mononyms, then falls back to contextual clues in Wikipedia articles.
 
