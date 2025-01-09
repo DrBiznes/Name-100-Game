@@ -1,6 +1,6 @@
 # Name 100 Women Challenge
 
-Try to beat NL prove you love women
+Prove you love women
 
 ## Acknowledgements
 
