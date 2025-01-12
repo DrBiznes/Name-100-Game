@@ -64,7 +64,9 @@ export async function checkWikipedia(name: string): Promise<boolean> {
   }
 
   try {
-    const normalizedName = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, ' ');
+    const normalizedName = name.toLowerCase().normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/-/g, ' ');
 
     const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch="${encodeURIComponent(name)}"&format=json&origin=*`;
     const searchResponse = await fetch(searchUrl);
@@ -75,7 +77,10 @@ export async function checkWikipedia(name: string): Promise<boolean> {
     }
 
     for (let result of searchData.query.search) {
-      const normalizedTitle = result.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, ' ');
+      const normalizedTitle = result.title.toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/-/g, ' ');
       
       if (!normalizedTitle.includes(normalizedName)) {
         continue;
@@ -89,7 +94,7 @@ export async function checkWikipedia(name: string): Promise<boolean> {
       const page = contentData.query.pages[pageId];
       const intro = page.extract || '';
 
-      // Additional check for articles about mononyms/stage names
+      // Handle mononyms/stage names first
       if (name.trim().split(/\s+/).length === 1) {
         const mononymIndicators = [
           'stage name', 'mononym', 'professional name', 'known professionally',
@@ -105,16 +110,68 @@ export async function checkWikipedia(name: string): Promise<boolean> {
         }
       }
 
-      const plainText = intro.replace(/<[^>]*>/g, '');
+      const plainText = intro.replace(/<[^>]*>/g, '').toLowerCase();
+      
+      // Split into sentences for more precise analysis
+      const sentences = plainText.split(/[.!?]+/);
+      
+      // Check first few sentences for fiction indicators
+      const fictionIndicators = [
+        'fictional', 'character', 'tv series', 'television series',
+        'novel', 'book series', 'comic', 'manga', 'anime', 'video game',
+        'movie character', 'film character', 'cartoon', 'sitcom', 'drama series'
+      ];
+      
+      // Check first three sentences for fiction indicators
+      const firstFewSentences = sentences.slice(0, 3).join(' ');
+      const isFictional = fictionIndicators.some(indicator => 
+        firstFewSentences.includes(indicator)
+      );
+      
+      if (isFictional) {
+        return false;
+      }
+
+      // Check for male indicators
+      const malePronouns = ['he', 'his', 'him', 'himself'];
+      const maleIndicators = [
+        'male', 'man', 'boy', 'actor', 'businessman', 'chairman',
+        'spokesman', 'congressman', ...malePronouns
+      ];
+
+      // Check first few sentences for gender indicators
+      for (let sentence of sentences.slice(0, 3)) {
+        const words = sentence.split(/\s+/);
+        
+        // Look for the first gendered pronoun or indicator
+        const firstMaleIndicator = words.find((word: string) => maleIndicators.includes(word));
+        const firstFemaleIndicator = words.find((word: string) => 
+          ['she', 'her', 'hers', 'herself', 'woman', 'female', 'girl'].includes(word)
+        );
+        
+        // If we find a male indicator first, reject immediately
+        if (firstMaleIndicator) {
+          return false;
+        }
+        
+        // If we find a female indicator, continue checking the rest
+        if (firstFemaleIndicator) {
+          break;
+        }
+      }
+
+      // After passing male and fiction checks, look for female confirmation
       const femaleIndicators = [
-        'she', 'her', 'hers', 'woman', 'female', 'girl', 'actress',
+        'she', 'her', 'hers', 'herself', 'woman', 'female', 'girl', 'actress',
         'chairwoman', 'congresswoman', 'businesswoman', 'feminist',
         'spokeswoman', 'singer', 'performer'
       ];
-      const words = plainText.toLowerCase().split(/\s+/);
-      const firstFemaleIndicator = words.find((word: string) => femaleIndicators.includes(word));
+      
+      const hasFemaleIndicator = femaleIndicators.some(indicator => 
+        plainText.includes(indicator)
+      );
 
-      if (firstFemaleIndicator) {
+      if (hasFemaleIndicator) {
         return true;
       }
     }

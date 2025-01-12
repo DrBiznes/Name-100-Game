@@ -66,7 +66,7 @@ APE SYSTEM WORK SO GOOD NOW!! PROCESS THOUSANDS OF NAMES AND NEVER MAKE WIKIPEDI
 
 Here's the complete verification process:
 <CodeBlock title="Complete Wikipedia and Gender Verification" language="typescript" collapsed={true}>{`export async function checkWikipedia(name: string): Promise<boolean> {
-  // First check local database - we know these are all women
+  // First check local database
   if (checkLocalDatabase(name)) {
     return true;
   }
@@ -123,19 +123,68 @@ Here's the complete verification process:
         }
       }
 
-      // This is where the gender verification happens
-      const plainText = intro.replace(/<[^>]*>/g, '');
+      const plainText = intro.replace(/<[^>]*>/g, '').toLowerCase();
+      
+      // Split into sentences for more precise analysis
+      const sentences = plainText.split(/[.!?]+/);
+      
+      // Check first few sentences for fiction indicators
+      const fictionIndicators = [
+        'fictional', 'character', 'tv series', 'television series',
+        'novel', 'book series', 'comic', 'manga', 'anime', 'video game',
+        'movie character', 'film character', 'cartoon', 'sitcom', 'drama series'
+      ];
+      
+      // Check first three sentences for fiction indicators
+      const firstFewSentences = sentences.slice(0, 3).join(' ');
+      const isFictional = fictionIndicators.some(indicator => 
+        firstFewSentences.includes(indicator)
+      );
+      
+      if (isFictional) {
+        return false;
+      }
+
+      // Check for male indicators
+      const malePronouns = ['he', 'his', 'him', 'himself'];
+      const maleIndicators = [
+        'male', 'man', 'boy', 'actor', 'businessman', 'chairman',
+        'spokesman', 'congressman', ...malePronouns
+      ];
+
+      // Check first few sentences for gender indicators
+      for (let sentence of sentences.slice(0, 3)) {
+        const words = sentence.split(/\s+/);
+        
+        // Look for the first gendered pronoun or indicator
+        const firstMaleIndicator = words.find((word: string) => maleIndicators.includes(word));
+        const firstFemaleIndicator = words.find((word: string) => 
+          ['she', 'her', 'hers', 'herself', 'woman', 'female', 'girl'].includes(word)
+        );
+        
+        // If we find a male indicator first, reject immediately
+        if (firstMaleIndicator) {
+          return false;
+        }
+        
+        // If we find a female indicator, continue checking the rest
+        if (firstFemaleIndicator) {
+          break;
+        }
+      }
+
+      // After passing male and fiction checks, look for female confirmation
       const femaleIndicators = [
-        'she', 'her', 'hers', 'woman', 'female', 'girl', 'actress',
+        'she', 'her', 'hers', 'herself', 'woman', 'female', 'girl', 'actress',
         'chairwoman', 'congresswoman', 'businesswoman', 'feminist',
         'spokeswoman', 'singer', 'performer'
       ];
-      const words = plainText.toLowerCase().split(/\s+/);
-      const firstFemaleIndicator = words.find((word: string) => 
-        femaleIndicators.includes(word)
+      
+      const hasFemaleIndicator = femaleIndicators.some(indicator => 
+        plainText.includes(indicator)
       );
 
-      if (firstFemaleIndicator) {
+      if (hasFemaleIndicator) {
         return true;
       }
     }

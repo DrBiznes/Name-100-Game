@@ -25,6 +25,10 @@
         "wikipedia": "/wiki/Aphrodite"
       },
       {
+        "name": "Pokimane",
+        "wikipedia": "/wiki/Pokimane"
+      },
+      {
         "name": "Artemis",
         "wikipedia": "/wiki/Artemis"
       },
@@ -367,6 +371,42 @@
       {
         "name": "Tems",
         "wikipedia": "/wiki/Tems_(singer)"
+      },
+      {
+        "name": "Amouranth",
+        "wikipedia": "/wiki/Amouranth"
+      },
+      {
+        "name": "Nihachu",
+        "wikipedia": "/wiki/Nihachu"
+      },
+      {
+        "name": "Valkyrae",
+        "wikipedia": "/wiki/Valkyrae"
+      },
+      {
+        "name": "Fuslie",
+        "wikipedia": "/wiki/Fuslie"
+      },
+      {
+        "name": "Hafu",
+        "wikipedia": "/wiki/Hafu"
+      },
+      {
+        "name": "Jinny",
+        "wikipedia": "/wiki/Jinny_(streamer)"
+      },
+      {
+        "name": "Kaceytron",
+        "wikipedia": "/wiki/Kaceytron"
+      },
+      {
+        "name": "Kyedae",
+        "wikipedia": "/wiki/Kyedae"
+      },
+      {
+        "name": "QTCinderella",
+        "wikipedia": "/wiki/QTCinderella"
       }
     ]
   }
