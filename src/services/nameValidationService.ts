@@ -116,11 +116,7 @@ export async function checkWikipedia(name: string): Promise<boolean> {
       const sentences = plainText.split(/[.!?]+/);
       
       // Check first few sentences for fiction indicators
-      const fictionIndicators = [
-        'fictional', 'character', 'tv series', 'television series',
-        'novel', 'book series', 'comic', 'manga', 'anime', 'video game',
-        'movie character', 'film character', 'cartoon', 'sitcom', 'drama series'
-      ];
+      const fictionIndicators = ['fictional'];  // Simplified to only check for "fictional"
       
       // Check first three sentences for fiction indicators
       const firstFewSentences = sentences.slice(0, 3).join(' ');
