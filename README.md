@@ -1,6 +1,6 @@
 # Name 100 Women Challenge
 
-Prove you love women
+Prove you listen to women
 
 ## Acknowledgements
 
