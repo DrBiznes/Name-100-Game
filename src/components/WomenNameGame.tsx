@@ -16,8 +16,9 @@ import {
 import { GameCompletionDialog } from './GameCompletionDialog';
 import ConfettiExplosion from 'react-confetti-explosion';
 import { toast } from "sonner";
-import { leaderboardApi } from '@/services/api';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import { useFingerprint } from '@/hooks/useFingerprint';
 
 const GAME_COUNTS = [20, 50, 100] as const;
 type GameCount = typeof GAME_COUNTS[number];
@@ -33,7 +34,9 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const hiddenInputRef = useRef<HTMLInputElement>(null);
-  
+
+  const { fingerprint } = useFingerprint();
+
   const {
     isGameActive,
     elapsedTime,
@@ -46,21 +49,8 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
     handleInputChange,
   } = useGameState({ targetCount: completedGameCount || targetCount, onGameStateChange });
 
-  const queryClient = useQueryClient();
-  
-  // Add mutation for score submission
-  const submitScoreMutation = useMutation({
-    mutationFn: leaderboardApi.submitScore,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
-    },
-    onError: (error) => {
-      const errorMessage = error instanceof Error ? error.message : "Failed to submit score";
-      toast.error(errorMessage, {
-        description: "Please try again or contact support if the problem persists."
-      });
-    }
-  });
+  // Convex mutation for score submission
+  const submitScore = useMutation(api.scores.submitScore);
 
   const confettiProps = {
     force: 0.8,
@@ -81,12 +71,12 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
   const startGame = () => {
     setCompletedGameCount(null);
     originalStartGame();
-    
+
     // Focus hidden input first (forces mobile keyboard)
     if (hiddenInputRef.current) {
       hiddenInputRef.current.focus();
     }
-    
+
     // Then focus the actual input with a slight delay
     setTimeout(() => {
       const firstInput = inputRefs.current[0];
@@ -120,7 +110,7 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
     if ((e.key === 'Tab' && !e.shiftKey) || e.key === 'Enter') {
       e.preventDefault();
       const currentValue = inputs[index].value.trim();
-      
+
       if (currentValue && inputs[index].status !== 'pending') {
         const isValid = await checkName(currentValue, index);
 
@@ -136,24 +126,38 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
     }
   };
 
-  const handleSubmitScore = async (username: string, token: string) => {
+  const handleSubmitScore = async (username: string): Promise<string> => {
     if (username.length !== 3) {
       toast.error("Username must be exactly 3 letters");
-      return Promise.reject();
+      throw new Error("Invalid username");
     }
 
     if (!completedGameCount) {
       toast.error("No completed game found");
-      return Promise.reject();
+      throw new Error("No completed game");
     }
 
-    return submitScoreMutation.mutateAsync({
-      username: username.toUpperCase(),
-      completion_time: elapsedTime,
-      completed_names: names.map(n => n.name),
-      game_mode: completedGameCount.toString(),
-      cf_turnstile_response: token
-    });
+    if (!fingerprint) {
+      toast.error("Please wait while we verify your session");
+      throw new Error("Fingerprint not ready");
+    }
+
+    try {
+      const scoreId = await submitScore({
+        username: username.toUpperCase(),
+        completionTime: elapsedTime,
+        completedNames: names.map(n => n.name),
+        gameMode: completedGameCount,
+        fingerprint,
+      });
+      return scoreId;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to submit score";
+      toast.error(errorMessage, {
+        description: "Please try again or contact support if the problem persists."
+      });
+      throw error;
+    }
   };
 
   return (
@@ -166,7 +170,7 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
         aria-hidden="true"
         readOnly
       />
-      
+
       {showConfetti && (
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -174,7 +178,7 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
           </div>
         </div>
       )}
-      
+
       {/* Game Header */}
       <div className="flex flex-col gap-4 mb-4">
         <div className="flex items-center gap-2 justify-center">
@@ -201,17 +205,17 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
           </Select>
           <span className="text-xl md:text-2xl font-bold font-['Chonburi']">Women</span>
         </div>
-        
+
         <div className="flex items-center gap-4" ref={timerRef}>
           <GameTimer elapsedTime={elapsedTime} />
-          <Progress 
-            value={(names.length / (completedGameCount || targetCount)) * 100} 
-            className="w-full" 
+          <Progress
+            value={(names.length / (completedGameCount || targetCount)) * 100}
+            className="w-full"
           />
           <span className="font-mono text-lg whitespace-nowrap">{names.length}/{completedGameCount || targetCount}</span>
         </div>
 
-        <Button 
+        <Button
           onClick={startGame}
           disabled={isLoading || isGameActive}
           variant="default"
@@ -252,7 +256,7 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
 
       {completedGameCount && names.length === completedGameCount && !showCompletionDialog && (
         <div className="mt-4 flex justify-center">
-          <Button 
+          <Button
             onClick={() => setShowCompletionDialog(true)}
             variant="default"
             className="w-full md:w-auto mx-auto"
@@ -270,4 +274,4 @@ export function WomenNameGame({ onGameStateChange, timerRef }: WomenNameGameProp
       />
     </Card>
   );
-} 
+}

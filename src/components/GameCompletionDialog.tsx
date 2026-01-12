@@ -11,14 +11,13 @@ import { Button } from "./ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "./ui/input-otp";
 import { formatTime } from "@/lib/utils";
 import { toast } from "sonner";
-import { Turnstile } from '@marsidev/react-turnstile'
 import { useNavigate } from 'react-router-dom';
 
 interface GameCompletionDialogProps {
   isOpen: boolean;
   onClose: () => void;
   elapsedTime: number;
-  onSubmitScore: (username: string, token: string) => Promise<number>;
+  onSubmitScore: (username: string) => Promise<string>;
 }
 
 export function GameCompletionDialog({
@@ -28,24 +27,23 @@ export function GameCompletionDialog({
   onSubmitScore,
 }: GameCompletionDialogProps) {
   const [username, setUsername] = React.useState("");
-  const [token, setToken] = React.useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
-    if (username.length !== 3 || !token || isSubmitting) {
+    if (username.length !== 3 || isSubmitting) {
       return;
     }
-    
+
     const allowedChars = /^[a-zA-Z!$?&()#@+=\/]+$/;
     if (!username.match(allowedChars)) {
       toast.error("Username can only contain letters and special characters: !$?&()#@+=/");
       return;
     }
-    
+
     try {
       setIsSubmitting(true);
-      const scoreId = await onSubmitScore(username, token);
+      const scoreId = await onSubmitScore(username);
       navigate(`/scores/${scoreId}`);
     } catch (error) {
       // Error handling is done in the mutation
@@ -62,7 +60,7 @@ export function GameCompletionDialog({
             You completed the game in {formatTime(elapsedTime)}!
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="grid gap-4 py-4">
           <div className="flex flex-col gap-4 items-center">
             <p className="text-sm text-muted-foreground font-['Alegreya']">
@@ -86,23 +84,12 @@ export function GameCompletionDialog({
               Your score will only be visible on the leaderboard after submission.
             </p>
           </div>
-          
-          <div className="flex justify-center">
-            <Turnstile
-              siteKey="0x4AAAAAAA3Gr1pLBEs2-ACh"
-              onSuccess={setToken}
-              onError={() => {
-                toast.error("Verification failed - please try again");
-                setToken(null);
-              }}
-            />
-          </div>
         </div>
 
         <DialogFooter>
-          <Button 
-            variant="outline" 
-            onClick={onClose} 
+          <Button
+            variant="outline"
+            onClick={onClose}
             disabled={isSubmitting}
             className="font-['Alegreya']"
           >
@@ -110,7 +97,7 @@ export function GameCompletionDialog({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={username.length !== 3 || !token || isSubmitting}
+            disabled={username.length !== 3 || isSubmitting}
             className="font-['Alegreya']"
           >
             {isSubmitting ? "Submitting..." : "Submit Score"}
@@ -119,4 +106,4 @@ export function GameCompletionDialog({
       </DialogContent>
     </Dialog>
   );
-} 
+}

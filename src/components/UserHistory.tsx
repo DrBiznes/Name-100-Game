@@ -2,21 +2,13 @@ import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Card } from './ui/card';
 import { formatTime, formatSubmissionDate } from '@/lib/utils';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { QUERY_KEYS, leaderboardApi, LeaderboardEntry } from '@/services/api';
 import { User } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { Skeleton } from './ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
-
-interface ScoreHistoryEntry {
-  id: number;
-  username: string;
-  score: number;
-  submission_date: string;
-  name_count: number;
-  username_color: string;
-}
+import { useQuery } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import { Id } from '../../convex/_generated/dataModel';
 
 interface ScoreStats {
   averageTime: number;
@@ -29,6 +21,15 @@ interface ScoreStats {
   percentiles: {
     [key: number]: number;
   };
+}
+
+interface LeaderboardEntry {
+  id: string;
+  username: string;
+  usernameColor: string;
+  score: number;
+  submissionDate: number;
+  nameCount: number;
 }
 
 function calculatePercentile(score: number, leaderboardData: LeaderboardEntry[]): number {
@@ -80,7 +81,7 @@ function UserHistorySkeleton() {
           </div>
         </div>
         {Array.from({ length: 3 }).map((_, i) => (
-          <div 
+          <div
             key={i}
             className={`block ${i % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'} mb-1`}
           >
@@ -111,29 +112,46 @@ const textVariants = {
   })
 };
 
+interface HistoryEntry {
+  id: Id<"scores">;
+  username: string;
+  usernameColor: string;
+  score: number;
+  submissionDate: number;
+  nameCount: number;
+  completedNames: string[];
+}
+
 export function UserHistory() {
   const { id } = useParams();
   const [stats, setStats] = useState<ScoreStats | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const queryClient = useQueryClient();
 
-  // Query for user history - with caching for individual scores
-  const { data: userData, isLoading: isLoadingHistory } = useQuery({
-    queryKey: QUERY_KEYS.userHistory(id || ''),
-    queryFn: async () => {
-      const result = await leaderboardApi.getUserHistory(id || '');
-      // Pre-populate the cache with individual scores
-      Object.entries(result.scores).forEach(([scoreId, scoreData]) => {
-        queryClient.setQueryData(
-          QUERY_KEYS.userScore(scoreId),
-          scoreData
-        );
-      });
-      return result;
-    },
-    enabled: !!id,
-    staleTime: 10 * 60 * 1000, // 10 minutes to match server cache
-  });
+  const scoreId = id as Id<"scores"> | undefined;
+
+  // Query for user history
+  const userData = useQuery(
+    api.scores.getUserHistory,
+    scoreId ? { scoreId, limit: 100 } : "skip"
+  );
+
+  // Queries for leaderboard data (for percentile calculation)
+  const leaderboard20 = useQuery(
+    api.leaderboard.getLeaderboard,
+    userData?.score ? { gameMode: 20 } : "skip"
+  );
+
+  const leaderboard50 = useQuery(
+    api.leaderboard.getLeaderboard,
+    userData?.score ? { gameMode: 50 } : "skip"
+  );
+
+  const leaderboard100 = useQuery(
+    api.leaderboard.getLeaderboard,
+    userData?.score ? { gameMode: 100 } : "skip"
+  );
+
+  const isLoadingHistory = scoreId !== undefined && userData === undefined;
 
   // Calculate paginated data
   const paginatedHistory = userData?.history?.slice(
@@ -143,25 +161,6 @@ export function UserHistory() {
 
   // Update pagination navigation
   const totalPages = Math.ceil((userData?.history?.length || 0) / ITEMS_PER_PAGE);
-
-  // Queries for leaderboard data
-  const { data: leaderboard20 } = useQuery({
-    queryKey: QUERY_KEYS.leaderboard('20'),
-    queryFn: () => leaderboardApi.getLeaderboard('20'),
-    enabled: !!userData?.score,
-  });
-
-  const { data: leaderboard50 } = useQuery({
-    queryKey: QUERY_KEYS.leaderboard('50'),
-    queryFn: () => leaderboardApi.getLeaderboard('50'),
-    enabled: !!userData?.score,
-  });
-
-  const { data: leaderboard100 } = useQuery({
-    queryKey: QUERY_KEYS.leaderboard('100'),
-    queryFn: () => leaderboardApi.getLeaderboard('100'),
-    enabled: !!userData?.score,
-  });
 
   useEffect(() => {
     if (!userData?.history) return;
@@ -176,12 +175,12 @@ export function UserHistory() {
     };
 
     let totalTime = 0;
-    userData.history.forEach((entry: ScoreHistoryEntry) => {
+    userData.history.forEach((entry: HistoryEntry) => {
       totalTime += entry.score;
       statCalc.bestTime = Math.min(statCalc.bestTime, entry.score);
       statCalc.worstTime = Math.max(statCalc.worstTime, entry.score);
-      statCalc.gameModeCounts[entry.name_count] = 
-        (statCalc.gameModeCounts[entry.name_count] || 0) + 1;
+      statCalc.gameModeCounts[entry.nameCount] =
+        (statCalc.gameModeCounts[entry.nameCount] || 0) + 1;
     });
 
     statCalc.averageTime = Math.round(totalTime / userData.history.length);
@@ -189,29 +188,28 @@ export function UserHistory() {
     // Calculate percentiles for each game mode
     if (leaderboard20) {
       const bestScore20 = userData.history
-        .filter(entry => entry.name_count === 20)
-        .reduce((min, entry) => Math.min(min, entry.score), Infinity);
+        .filter((entry: HistoryEntry) => entry.nameCount === 20)
+        .reduce((min: number, entry: HistoryEntry) => Math.min(min, entry.score), Infinity);
       if (bestScore20 !== Infinity) {
-        statCalc.percentiles[20] = calculatePercentile(bestScore20, leaderboard20.leaderboard);
+        statCalc.percentiles[20] = calculatePercentile(bestScore20, leaderboard20 as LeaderboardEntry[]);
       }
     }
 
-    // Repeat for other game modes...
     if (leaderboard50) {
       const bestScore50 = userData.history
-        .filter(entry => entry.name_count === 50)
-        .reduce((min, entry) => Math.min(min, entry.score), Infinity);
+        .filter((entry: HistoryEntry) => entry.nameCount === 50)
+        .reduce((min: number, entry: HistoryEntry) => Math.min(min, entry.score), Infinity);
       if (bestScore50 !== Infinity) {
-        statCalc.percentiles[50] = calculatePercentile(bestScore50, leaderboard50.leaderboard);
+        statCalc.percentiles[50] = calculatePercentile(bestScore50, leaderboard50 as LeaderboardEntry[]);
       }
     }
 
     if (leaderboard100) {
       const bestScore100 = userData.history
-        .filter(entry => entry.name_count === 100)
-        .reduce((min, entry) => Math.min(min, entry.score), Infinity);
+        .filter((entry: HistoryEntry) => entry.nameCount === 100)
+        .reduce((min: number, entry: HistoryEntry) => Math.min(min, entry.score), Infinity);
       if (bestScore100 !== Infinity) {
-        statCalc.percentiles[100] = calculatePercentile(bestScore100, leaderboard100.leaderboard);
+        statCalc.percentiles[100] = calculatePercentile(bestScore100, leaderboard100 as LeaderboardEntry[]);
       }
     }
 
@@ -231,16 +229,16 @@ export function UserHistory() {
       {userData?.score && (
         <Helmet>
           <title>Name100Women - {userData.score.username}'s Profile</title>
-          <meta 
-            name="description" 
-            content={`View ${userData.score.username}'s game history and stats - ${stats?.totalGames || 0} games played with best time of ${stats ? formatTime(stats.bestTime) : 'N/A'}`} 
+          <meta
+            name="description"
+            content={`View ${userData.score.username}'s game history and stats - ${stats?.totalGames || 0} games played with best time of ${stats ? formatTime(stats.bestTime) : 'N/A'}`}
           />
         </Helmet>
       )}
 
       <Card className="p-4 md:p-6 border-0 shadow-none bg-transparent">
         {userData?.score && (
-          <motion.div 
+          <motion.div
             className="mb-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -251,15 +249,15 @@ export function UserHistory() {
               <span>Submitted by</span>
             </div>
             <h2 className="text-3xl font-bold mb-2">
-              <span style={{ color: userData.score.username_color }}>
+              <span style={{ color: userData.score.usernameColor }}>
                 {userData.score.username}
               </span>
             </h2>
             <time className="text-sm text-muted-foreground">
-              Joined {formatSubmissionDate(userData.history.reduce((earliest, entry) => 
-                new Date(entry.submission_date) < new Date(earliest) ? entry.submission_date : earliest,
-                userData.history[0].submission_date
-              ))}
+              Joined {formatSubmissionDate(new Date(userData.history.reduce((earliest: number, entry: HistoryEntry) =>
+                entry.submissionDate < earliest ? entry.submissionDate : earliest,
+                userData.history[0].submissionDate
+              )).toISOString())}
             </time>
           </motion.div>
         )}
@@ -267,7 +265,7 @@ export function UserHistory() {
         {stats && (
           <div className="mb-4">
             <AnimatePresence mode="wait">
-              <motion.div 
+              <motion.div
                 className="text-base text-muted-foreground space-y-4"
                 initial="hidden"
                 animate="visible"
@@ -280,7 +278,7 @@ export function UserHistory() {
                 >
                   This player has completed <span className="font-bold text-foreground">{stats.totalGames} games</span>.
                   {userData?.score && (
-                    <> This attempt submitted on <span className="font-bold text-foreground">{formatSubmissionDate(userData.score.submission_date)}</span> took them <span className="font-mono font-bold text-foreground">{formatTime(userData.score.score)}</span> to name {userData.score.name_count} women.</>
+                    <> This attempt submitted on <span className="font-bold text-foreground">{formatSubmissionDate(new Date(userData.score.submissionDate).toISOString())}</span> took them <span className="font-mono font-bold text-foreground">{formatTime(userData.score.score)}</span> to name {userData.score.nameCount} women.</>
                   )}
                 </motion.p>
 
@@ -320,7 +318,7 @@ export function UserHistory() {
           </div>
         )}
 
-        <motion.div 
+        <motion.div
           className="space-y-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -332,7 +330,7 @@ export function UserHistory() {
               Recent Games
             </h3>
             <div className="flex items-center gap-1 text-sm">
-              <button 
+              <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
                 className="p-1 hover:bg-muted/50 rounded disabled:opacity-50"
@@ -342,7 +340,7 @@ export function UserHistory() {
               <span className="px-2">
                 {currentPage} / {totalPages}
               </span>
-              <button 
+              <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
                 className="p-1 hover:bg-muted/50 rounded disabled:opacity-50"
@@ -351,17 +349,17 @@ export function UserHistory() {
               </button>
             </div>
           </div>
-          {paginatedHistory?.map((entry, index) => (
-            <Link 
-              key={entry.id}
+          {paginatedHistory?.map((entry: HistoryEntry, index: number) => (
+            <Link
+              key={String(entry.id)}
               to={`/scores/${entry.id}`}
               className={`block hover:bg-muted transition-colors ${index % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'}`}
             >
               <div className="flex items-center justify-between py-2 px-3 rounded-lg">
                 <div className="flex flex-col gap-0.5">
-                  <span className="font-medium leading-tight">Name {entry.name_count}</span>
+                  <span className="font-medium leading-tight">Name {entry.nameCount}</span>
                   <span className="text-sm text-muted-foreground leading-tight">
-                    {formatSubmissionDate(entry.submission_date)}
+                    {formatSubmissionDate(new Date(entry.submissionDate).toISOString())}
                   </span>
                 </div>
                 <span className="font-mono text-lg font-medium">
@@ -374,4 +372,4 @@ export function UserHistory() {
       </Card>
     </>
   );
-} 
+}

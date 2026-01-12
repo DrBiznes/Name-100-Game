@@ -1,16 +1,15 @@
-import { useQuery } from '@tanstack/react-query';
 import { Card } from './ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { useState } from 'react';
 import { NameList } from '@/components/NameList';
-import { QUERY_KEYS, statsApi, type StatsResponse } from '@/services/api';
 import { Helmet } from 'react-helmet-async';
 import { Separator } from './ui/separator';
-import { RefreshTimer } from './ui/refresh-timer';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from './ui/hover-card';
 import { Skeleton } from './ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
 import nameDatabase from '@/lib/womendatabase.json';
+import { useQuery } from 'convex/react';
+import { api } from '../../convex/_generated/api';
 
 // Helper function to normalize names for comparison (same as nameValidationService.ts)
 function normalizeNameForComparison(name: string): string {
@@ -42,11 +41,11 @@ const capitalizeNameParts = (name: string) => {
 // Helper function to find proper name from database
 const findProperName = (name: string): string => {
   const normalizedInputName = normalizeNameForComparison(name);
-  
-  const databaseMatch = nameDatabase.names.find(dbName => 
+
+  const databaseMatch = nameDatabase.names.find(dbName =>
     normalizeNameForComparison(dbName) === normalizedInputName
   );
-  
+
   return databaseMatch || capitalizeNameParts(name);
 };
 
@@ -98,26 +97,12 @@ const textVariants = {
 export function Stats() {
   const [selectedMode, setSelectedMode] = useState<string>('all');
 
-  const { data: statsData, isLoading } = useQuery<StatsResponse>({
-    queryKey: QUERY_KEYS.stats(selectedMode),
-    queryFn: () => statsApi.getStats(selectedMode),
-    staleTime: 12 * 60 * 60 * 1000, // 12 hours - matches server cache
-    gcTime: 12 * 60 * 60 * 1000, // 12 hours - align with server cache
-    refetchInterval: (query) => {
-      if (!query.state.data) return false;
-      
-      // Calculate time until cache expires
-      const cacheTimestamp = new Date(query.state.data.cacheTimestamp).getTime();
-      const expiresAt = cacheTimestamp + (query.state.data.cacheExpiresIn * 1000);
-      const now = Date.now();
-      
-      return Math.max(expiresAt - now, 0);
-    },
-    // Only refetch when cache expires
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-  });
+  const statsData = useQuery(
+    api.stats.getStats,
+    selectedMode === 'all' ? {} : { gameMode: parseInt(selectedMode) }
+  );
+
+  const isLoading = statsData === undefined;
 
   const renderStatsParagraph = () => {
     if (!statsData) return null;
@@ -130,14 +115,14 @@ export function Stats() {
     return (
       <div className="prose mb-8">
         <AnimatePresence mode="wait">
-          <motion.div 
+          <motion.div
             className="text-base leading-relaxed text-muted-foreground space-y-4"
             initial="hidden"
             animate="visible"
             exit="hidden"
           >
-            <motion.p 
-              custom={0} 
+            <motion.p
+              custom={0}
               variants={textVariants}
               className="space-y-1"
             >
@@ -150,7 +135,7 @@ export function Stats() {
                 {statsData.totalNames.toLocaleString()}
               </span>{' '}
               unique women.
-              
+
               {selectedMode !== 'all' && (
                 <span>
                   {' '}These stats are filtered for Name {selectedMode} mode.
@@ -158,8 +143,8 @@ export function Stats() {
               )}
             </motion.p>
 
-            <motion.p 
-              custom={1} 
+            <motion.p
+              custom={1}
               variants={textVariants}
               className="space-y-1"
             >
@@ -174,8 +159,8 @@ export function Stats() {
             </motion.p>
 
             {commonMisspellings.length > 0 && (
-              <motion.p 
-                custom={2} 
+              <motion.p
+                custom={2}
                 variants={textVariants}
                 className="space-y-1"
               >
@@ -200,9 +185,9 @@ export function Stats() {
     <>
       <Helmet>
         <title>Name100Women - Statistics {selectedMode !== 'all' ? `(Name ${selectedMode})` : ''}</title>
-        <meta 
-          name="description" 
-          content={`Statistics for Name100Women game${selectedMode !== 'all' ? ` in Name ${selectedMode} mode` : ''} - View most named women and common variations.`} 
+        <meta
+          name="description"
+          content={`Statistics for Name100Women game${selectedMode !== 'all' ? ` in Name ${selectedMode} mode` : ''} - View most named women and common variations.`}
         />
       </Helmet>
 
@@ -234,7 +219,7 @@ export function Stats() {
                 <HoverCardTrigger asChild>
                   <span className="material-icons text-muted-foreground hover:text-header cursor-help transition-colors -mt-3">info</span>
                 </HoverCardTrigger>
-                <HoverCardContent 
+                <HoverCardContent
                   className="w-80 bg-card text-card-foreground border-border shadow-lg"
                   sideOffset={8}
                 >
@@ -242,21 +227,15 @@ export function Stats() {
                     <div className="flex gap-2 items-center">
                       <span className="material-icons text-header">info</span>
                       <p className="text-sm font-['Alegreya'] text-card-foreground">
-                        Statistics are updated every 12 hours
+                        Statistics are updated in real-time
                       </p>
                     </div>
-                    {statsData && (
-                      <RefreshTimer
-                        cacheTimestamp={statsData.cacheTimestamp}
-                        cacheExpiresIn={statsData.cacheExpiresIn}
-                      />
-                    )}
                   </div>
                 </HoverCardContent>
               </HoverCard>
             </div>
           </div>
-          
+
           <div className="mb-6">
             <Separator className="my-2" />
           </div>
@@ -270,13 +249,13 @@ export function Stats() {
           )}
         </Card>
       </div>
-      
+
       <div className="lg:col-span-2">
-        <NameList 
-          stats={statsData?.stats || []} 
+        <NameList
+          stats={statsData?.stats || []}
           isLoading={isLoading}
         />
       </div>
     </>
   );
-} 
+}

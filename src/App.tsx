@@ -14,6 +14,9 @@ import { Stats } from './components/Stats';
 import { About } from './components/About';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { motion } from 'framer-motion';
+import { ConvexProvider, ConvexReactClient } from "convex/react";
+
+const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -40,7 +43,7 @@ function AppContent() {
         <meta name="description" content="Name100Women - The Official Name 100 Women Challenge" />
         <link rel="icon" type="image/png" href="./name100.png" />
       </Helmet>
-      <Toaster 
+      <Toaster
         theme="dark"
         position="bottom-right"
         toastOptions={{
@@ -81,8 +84,8 @@ function AppContent() {
                       <Rules />
                     </div>
                     <div className="lg:col-span-1">
-                      <WomenNameGame 
-                        onGameStateChange={setGameState} 
+                      <WomenNameGame
+                        onGameStateChange={setGameState}
                         timerRef={timerRef}
                       />
                     </div>
@@ -118,7 +121,7 @@ function AppContent() {
             </div>
           )}
         </main>
-        <motion.footer 
+        <motion.footer
           layout
           className="py-6 mt-auto bg-background"
           transition={{
@@ -130,9 +133,9 @@ function AppContent() {
               <motion.h3 layout className="text-lg font-semibold mb-3">Built With</motion.h3>
               <motion.ul layout className="space-y-2 mb-6 list-none p-0 m-0">
                 <li>
-                  <a 
-                    href="https://ui.shadcn.com/" 
-                    target="_blank" 
+                  <a
+                    href="https://ui.shadcn.com/"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="text-foreground hover:text-primary transition-colors"
                   >
@@ -140,9 +143,9 @@ function AppContent() {
                   </a>
                 </li>
                 <li>
-                  <a 
-                    href="https://fonts.google.com/" 
-                    target="_blank" 
+                  <a
+                    href="https://fonts.google.com/"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="text-foreground hover:text-primary transition-colors"
                   >
@@ -150,9 +153,9 @@ function AppContent() {
                   </a>
                 </li>
                 <li>
-                  <a 
-                    href="https://www.npmjs.com/package/react-confetti-explosion" 
-                    target="_blank" 
+                  <a
+                    href="https://www.npmjs.com/package/react-confetti-explosion"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="text-foreground hover:text-primary transition-colors"
                   >
@@ -162,18 +165,18 @@ function AppContent() {
               </motion.ul>
               <motion.div layout className="text-foreground text-sm">
                 © {new Date().getFullYear()}{' '}
-                <a 
-                  href="https://www.jamino.me" 
-                  target="_blank" 
+                <a
+                  href="https://www.jamino.me"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-foreground hover:text-primary transition-colors"
                 >
                   Jamino
                 </a>
                 . Released under the{' '}
-                <a 
-                  href="https://github.com/DrBiznes/Name-100-Game/tree/main?tab=MIT-1-ov-file" 
-                  target="_blank" 
+                <a
+                  href="https://github.com/DrBiznes/Name-100-Game/tree/main?tab=MIT-1-ov-file"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-foreground hover:text-primary transition-colors underline"
                 >
@@ -183,7 +186,7 @@ function AppContent() {
             </motion.div>
           </motion.div>
         </motion.footer>
-        <FloatingTimer 
+        <FloatingTimer
           elapsedTime={gameState.elapsedTime}
           isGameActive={gameState.isActive}
           timerRef={timerRef}
@@ -195,13 +198,15 @@ function AppContent() {
 
 function App() {
   return (
-    <HelmetProvider>
-      <QueryClientProvider client={queryClient}>
-        <HashRouter>
-          <AppContent />
-        </HashRouter>
-      </QueryClientProvider>
-    </HelmetProvider>
+    <ConvexProvider client={convex}>
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <HashRouter>
+            <AppContent />
+          </HashRouter>
+        </QueryClientProvider>
+      </HelmetProvider>
+    </ConvexProvider>
   );
 }
 

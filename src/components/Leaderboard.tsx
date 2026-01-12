@@ -1,9 +1,6 @@
 import { useState } from 'react';
-import { Button } from './ui/button';
 import { formatTime, formatSubmissionDate } from '@/lib/utils';
-import { QUERY_KEYS, leaderboardApi, LeaderboardEntry } from '@/services/api';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from "sonner";
 import { Separator } from './ui/separator';
 import { DataTable } from './ui/data-table';
@@ -11,24 +8,28 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from './ui/hover-card';
 import { UsernameBadge } from './ui/UsernameBadge';
-import { RefreshTimer } from './ui/refresh-timer';
 import { Skeleton } from './ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import { Id } from '../../convex/_generated/dataModel';
 
 const ITEMS_PER_PAGE = 10;
 
-interface LeaderboardResponse {
-  data: LeaderboardEntry[];
-  totalPages: number;
-  cacheTimestamp: string;
-  cacheExpiresIn: number;
+interface LeaderboardEntry {
+  id: Id<"scores">;
+  username: string;
+  usernameColor: string;
+  score: number;
+  submissionDate: number;
+  nameCount: number;
 }
 
 const tableAnimationVariants = {
-  initial: { 
+  initial: {
     opacity: 0,
   },
-  animate: { 
+  animate: {
     opacity: 1,
     transition: {
       duration: 0.3,
@@ -36,7 +37,7 @@ const tableAnimationVariants = {
       staggerChildren: 0.05
     }
   },
-  exit: { 
+  exit: {
     opacity: 0,
     transition: {
       duration: 0.15,
@@ -47,8 +48,8 @@ const tableAnimationVariants = {
 
 const rowVariants = {
   initial: { opacity: 0, x: -10 },
-  animate: { 
-    opacity: 1, 
+  animate: {
+    opacity: 1,
     x: 0,
     transition: {
       duration: 0.2,
@@ -79,9 +80,8 @@ function LeaderboardSkeleton() {
           <motion.div
             key={i}
             variants={rowVariants}
-            className={`flex items-center space-x-4 p-4 ${
-              i % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'
-            }`}
+            className={`flex items-center space-x-4 p-4 ${i % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'
+              }`}
           >
             <Skeleton className="h-4 w-8 bg-muted" /> {/* Rank */}
             <Skeleton className="h-4 w-40 bg-muted" /> {/* Username */}
@@ -95,31 +95,29 @@ function LeaderboardSkeleton() {
 }
 
 // Separate table component to prevent full remounts
-function LeaderboardTable({ 
-  data, 
-  isLoading, 
-  error, 
-  currentPage, 
-  onPageChange 
-}: { 
-  data: LeaderboardResponse | undefined;
+function LeaderboardTable({
+  data,
+  isLoading,
+  currentPage,
+  onPageChange
+}: {
+  data: LeaderboardEntry[] | undefined;
   isLoading: boolean;
-  error: unknown;
   currentPage: number;
   onPageChange: (page: number) => void;
 }) {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
-  const handleRowClick = async (row: LeaderboardEntry) => {
-    // Prefetch the score data
-    await queryClient.prefetchQuery({
-      queryKey: ['score', row.id],
-      queryFn: () => leaderboardApi.getUserHistory(row.id, true),
-    });
+  const handleRowClick = (row: LeaderboardEntry) => {
     navigate(`/scores/${row.id}`);
   };
-  
+
+  const totalPages = Math.ceil((data?.length || 0) / ITEMS_PER_PAGE);
+  const paginatedData = data?.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  ) || [];
+
   const columns: ColumnDef<LeaderboardEntry>[] = [
     {
       accessorKey: "rank",
@@ -134,9 +132,9 @@ function LeaderboardTable({
       accessorKey: "username",
       header: "Username",
       cell: ({ row: { original } }) => (
-        <UsernameBadge 
+        <UsernameBadge
           username={original.username}
-          color={original.username_color}
+          color={original.usernameColor}
         />
       ),
     },
@@ -146,9 +144,9 @@ function LeaderboardTable({
       cell: ({ row: { original } }) => formatTime(Number(original.score)),
     },
     {
-      accessorKey: "submission_date",
+      accessorKey: "submissionDate",
       header: "Date",
-      cell: ({ row: { original } }) => formatSubmissionDate(original.submission_date),
+      cell: ({ row: { original } }) => formatSubmissionDate(new Date(original.submissionDate).toISOString()),
     },
   ];
 
@@ -156,16 +154,16 @@ function LeaderboardTable({
     return <LeaderboardSkeleton />;
   }
 
-  if (error) {
+  if (!data) {
     return (
-      <motion.div 
+      <motion.div
         variants={tableAnimationVariants}
         initial="initial"
         animate="animate"
         exit="exit"
         className="text-center text-red-500 py-8 font-['Alegreya']"
       >
-        {error instanceof Error ? error.message : 'An error occurred'}
+        Failed to load leaderboard
       </motion.div>
     );
   }
@@ -179,15 +177,14 @@ function LeaderboardTable({
     >
       <DataTable
         columns={columns}
-        data={data?.data || []}
-        pageCount={data?.totalPages || 1}
+        data={paginatedData}
+        pageCount={totalPages}
         currentPage={currentPage}
         onPageChange={onPageChange}
         onRowClick={handleRowClick}
         rowProps={(_, index) => ({
-          className: `cursor-pointer border-border transition-colors ${
-            index % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'
-          } hover:bg-accent hover:bg-opacity-20 hover:text-accent-foreground`
+          className: `cursor-pointer border-border transition-colors ${index % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'
+            } hover:bg-accent hover:bg-opacity-20 hover:text-accent-foreground`
         })}
       />
     </motion.div>
@@ -195,57 +192,21 @@ function LeaderboardTable({
 }
 
 export function Leaderboard() {
-  const [selectedMode, setSelectedMode] = useState<'20' | '50' | '100' | null>(null);
+  const [selectedMode, setSelectedMode] = useState<'20' | '50' | '100'>('20');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: leaderboardData, isLoading, error } = useQuery({
-    queryKey: [...QUERY_KEYS.leaderboard(selectedMode || ''), currentPage],
-    queryFn: async (): Promise<LeaderboardResponse> => {
-      if (!selectedMode) return { 
-        data: [], 
-        totalPages: 0,
-        cacheTimestamp: new Date().toISOString(),
-        cacheExpiresIn: 0
-      };
-      
-      try {
-        const response = await leaderboardApi.getLeaderboard(selectedMode);
-        const sortedData = [...response.leaderboard].sort((a, b) => a.score - b.score);
-        const totalPages = Math.ceil(sortedData.length / ITEMS_PER_PAGE);
-        const paginatedData = sortedData.slice(
-          (currentPage - 1) * ITEMS_PER_PAGE,
-          currentPage * ITEMS_PER_PAGE
-        );
-        
-        return { 
-          data: paginatedData, 
-          totalPages,
-          cacheTimestamp: response.cacheTimestamp,
-          cacheExpiresIn: response.cacheExpiresIn
-        };
-      } catch (err) {
-        toast.error("Failed to load leaderboard");
-        throw err;
-      }
-    },
-    enabled: !!selectedMode,
-    staleTime: 10 * 60 * 1000, // 10 minutes - matches server cache
-    gcTime: 10 * 60 * 1000, // 10 minutes - align with server cache
-    refetchInterval: (query) => {
-      if (!query.state.data) return false;
-      
-      // Calculate time until cache expires
-      const cacheTimestamp = new Date(query.state.data.cacheTimestamp).getTime();
-      const expiresAt = cacheTimestamp + (query.state.data.cacheExpiresIn * 1000);
-      const now = Date.now();
-      
-      return Math.max(expiresAt - now, 0);
-    },
-    // Only refetch when cache expires
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-  });
+  // Use Convex query
+  const leaderboardData = useQuery(
+    api.leaderboard.getLeaderboard,
+    { gameMode: parseInt(selectedMode) }
+  );
+
+  const isLoading = leaderboardData === undefined;
+
+  // Show error toast if query fails
+  if (leaderboardData === null) {
+    toast.error("Failed to load leaderboard");
+  }
 
   return (
     <div className="text-lg pt-4 font-['Alegreya']">
@@ -258,105 +219,62 @@ export function Leaderboard() {
       </div>
 
       <AnimatePresence mode="wait">
-        {!selectedMode ? (
-          <motion.div
-            key="mode-select"
-            variants={tableAnimationVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit" 
-            className="flex flex-col items-center gap-4 py-8"
-          >
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-48 font-['Alegreya']"
-              onClick={() => setSelectedMode('20')}
+        <motion.div
+          key="leaderboard-content"
+          variants={tableAnimationVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+        >
+          <div className="flex justify-center items-center gap-2 mb-4">
+            <Select
+              value={selectedMode}
+              onValueChange={(value) => {
+                setSelectedMode(value as '20' | '50' | '100');
+                setCurrentPage(1);
+              }}
             >
-              Name 20 Leaderboard
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-48 font-['Alegreya']"
-              onClick={() => setSelectedMode('50')}
-            >
-              Name 50 Leaderboard
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-48 font-['Alegreya']"
-              onClick={() => setSelectedMode('100')}
-            >
-              Name 100 Leaderboard
-            </Button>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="leaderboard-content"
-            variants={tableAnimationVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-          >
-            <div className="flex justify-center items-center gap-2 mb-4">
-              <Select
-                value={selectedMode}
-                onValueChange={(value) => {
-                  setSelectedMode(value as '20' | '50' | '100');
-                  setCurrentPage(1);
-                }}
+              <SelectTrigger className="w-[155px] font-['Alegreya']">
+                <SelectValue>
+                  Name {selectedMode}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="header" disabled className="font-['Alegreya'] font-semibold text-muted-foreground">
+                  Game Mode
+                </SelectItem>
+                <SelectItem value="20" className="font-['Alegreya']">Name 20</SelectItem>
+                <SelectItem value="50" className="font-['Alegreya']">Name 50</SelectItem>
+                <SelectItem value="100" className="font-['Alegreya']">Name 100</SelectItem>
+              </SelectContent>
+            </Select>
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <span className="material-icons text-muted-foreground hover:text-header cursor-help transition-colors">info</span>
+              </HoverCardTrigger>
+              <HoverCardContent
+                className="w-80 bg-card text-card-foreground border-border shadow-lg"
+                sideOffset={8}
               >
-                <SelectTrigger className="w-[155px] font-['Alegreya']">
-                  <SelectValue>
-                    Name {selectedMode}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="header" disabled className="font-['Alegreya'] font-semibold text-muted-foreground">
-                    Game Mode
-                  </SelectItem>
-                  <SelectItem value="20" className="font-['Alegreya']">Name 20</SelectItem>
-                  <SelectItem value="50" className="font-['Alegreya']">Name 50</SelectItem>
-                  <SelectItem value="100" className="font-['Alegreya']">Name 100</SelectItem>
-                </SelectContent>
-              </Select>
-              <HoverCard>
-                <HoverCardTrigger asChild>
-                  <span className="material-icons text-muted-foreground hover:text-header cursor-help transition-colors">info</span>
-                </HoverCardTrigger>
-                <HoverCardContent 
-                  className="w-80 bg-card text-card-foreground border-border shadow-lg"
-                  sideOffset={8}
-                >
-                  <div className="space-y-2">
-                    <div className="flex gap-2 items-center">
-                      <span className="material-icons text-header">info</span>
-                      <p className="text-sm font-['Alegreya'] text-card-foreground">
-                        Click anywhere on a row to view the detailed score
-                      </p>
-                    </div>
-                    {leaderboardData && (
-                      <RefreshTimer
-                        cacheTimestamp={leaderboardData.cacheTimestamp}
-                        cacheExpiresIn={leaderboardData.cacheExpiresIn}
-                      />
-                    )}
+                <div className="space-y-2">
+                  <div className="flex gap-2 items-center">
+                    <span className="material-icons text-header">info</span>
+                    <p className="text-sm font-['Alegreya'] text-card-foreground">
+                      Click anywhere on a row to view the detailed score
+                    </p>
                   </div>
-                </HoverCardContent>
-              </HoverCard>
-            </div>
-            <LeaderboardTable
-              data={leaderboardData}
-              isLoading={isLoading}
-              error={error}
-              currentPage={currentPage}
-              onPageChange={setCurrentPage}
-            />
-          </motion.div>
-        )}
+                </div>
+              </HoverCardContent>
+            </HoverCard>
+          </div>
+          <LeaderboardTable
+            data={leaderboardData ?? undefined}
+            isLoading={isLoading}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+          />
+        </motion.div>
       </AnimatePresence>
     </div>
   );
-} 
+}

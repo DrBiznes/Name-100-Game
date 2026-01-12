@@ -2,20 +2,21 @@ import { useParams } from 'react-router-dom';
 import { Card } from './ui/card';
 import { NameInput } from './NameInput';
 import { formatTime } from '@/lib/utils';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { QUERY_KEYS, leaderboardApi, ScoreData, UserHistoryResponse } from '@/services/api';
 import { Button } from './ui/button';
 import { toast } from "sonner";
 import { UsernameBadge } from './ui/UsernameBadge';
 import { Skeleton } from './ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import { Id } from '../../convex/_generated/dataModel';
 
 const sharedAnimationVariants = {
-  initial: { 
+  initial: {
     opacity: 0,
     y: 20,
   },
-  animate: { 
+  animate: {
     opacity: 1,
     y: 0,
     transition: {
@@ -23,7 +24,7 @@ const sharedAnimationVariants = {
       ease: "easeOut"
     }
   },
-  exit: { 
+  exit: {
     opacity: 0,
     y: -20,
     transition: {
@@ -35,14 +36,14 @@ const sharedAnimationVariants = {
 
 const gridVariants = {
   initial: { opacity: 0 },
-  animate: { 
+  animate: {
     opacity: 1,
     transition: {
       staggerChildren: 0.03,
       delayChildren: 0.1
     }
   },
-  exit: { 
+  exit: {
     opacity: 0,
     transition: {
       staggerChildren: 0.02,
@@ -53,16 +54,16 @@ const gridVariants = {
 
 const itemVariants = {
   initial: { opacity: 0, scale: 0.8 },
-  animate: { 
-    opacity: 1, 
+  animate: {
+    opacity: 1,
     scale: 1,
     transition: {
       duration: 0.2,
       ease: "easeOut"
     }
   },
-  exit: { 
-    opacity: 0, 
+  exit: {
+    opacity: 0,
     scale: 0.8,
     transition: {
       duration: 0.2,
@@ -73,7 +74,7 @@ const itemVariants = {
 
 function ScoreViewSkeleton() {
   return (
-    <motion.div 
+    <motion.div
       className="space-y-6"
       variants={sharedAnimationVariants}
       initial="initial"
@@ -90,8 +91,8 @@ function ScoreViewSkeleton() {
             <span className="font-['Chonburi'] font-mono opacity-50">0:00</span>
           </span>
         </h2>
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           size="icon"
           disabled
           className="rounded-full bg-transparent border-0 shadow-none opacity-50 -mt-3"
@@ -101,7 +102,7 @@ function ScoreViewSkeleton() {
       </div>
 
       {/* Name Grid Skeleton */}
-      <motion.div 
+      <motion.div
         className="grid grid-cols-2 gap-4"
         variants={gridVariants}
       >
@@ -127,61 +128,27 @@ function ScoreViewSkeleton() {
 function hexToRGB(hex: string) {
   // Remove the hash if present
   hex = hex.replace('#', '');
-  
+
   // Parse the hex values
   const r = parseInt(hex.substring(0, 2), 16);
   const g = parseInt(hex.substring(2, 4), 16);
   const b = parseInt(hex.substring(4, 6), 16);
-  
+
   return { r, g, b };
 }
 
 export function ScoreView() {
   const { id } = useParams();
-  const queryClient = useQueryClient();
-  
-  const { data: userData, isLoading, error } = useQuery<ScoreData, Error>({
-    queryKey: ['score', id],
-    queryFn: async () => {
-      if (!id) throw new Error('No score ID provided');
 
-      // First, try to find the complete score in existing user history queries
-      const historyQueries = queryClient.getQueriesData<UserHistoryResponse>({ 
-        queryKey: ['userHistory'] 
-      });
-      
-      for (const [, data] of historyQueries) {
-        if (data?.scores?.[id] && data.scores[id].completed_names?.length > 0) {
-          return data.scores[id];
-        }
-      }
+  // Parse the ID as a Convex ID
+  const scoreId = id as Id<"scores"> | undefined;
 
-      // If we don't have the full data, we need to fetch it
-      // Always include history to get completed_names
-      const result = await leaderboardApi.getUserHistory(id, true);
-      
-      // Update all caches with the full data
-      queryClient.setQueryData(['score', id], result.score);
-      
-      // Also update the user history cache if it exists
-      const userHistoryQueryKey = QUERY_KEYS.userHistory(id);
-      const existingHistory = queryClient.getQueryData<UserHistoryResponse>(userHistoryQueryKey);
-      if (existingHistory) {
-        queryClient.setQueryData<UserHistoryResponse>(userHistoryQueryKey, {
-          ...existingHistory,
-          scores: {
-            ...existingHistory.scores,
-            [id]: result.score
-          }
-        });
-      }
+  const scoreData = useQuery(
+    api.scores.getById,
+    scoreId ? { id: scoreId } : "skip"
+  );
 
-      return result.score;
-    },
-    enabled: !!id,
-    staleTime: 10 * 60 * 1000, // 10 minutes to match server cache
-    retry: 1, // Only retry once if we fail to get the data
-  });
+  const isLoading = scoreId !== undefined && scoreData === undefined;
 
   const handleShare = async () => {
     try {
@@ -206,17 +173,7 @@ export function ScoreView() {
       <AnimatePresence mode="wait">
         {isLoading ? (
           <ScoreViewSkeleton key="skeleton" />
-        ) : error ? (
-          <motion.div
-            key="error"
-            variants={sharedAnimationVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-          >
-            Error: {error instanceof Error ? error.message : 'Failed to load score'}
-          </motion.div>
-        ) : !userData || !userData.completed_names ? (
+        ) : !scoreData || !scoreData.completedNames ? (
           <motion.div
             key="not-found"
             variants={sharedAnimationVariants}
@@ -238,15 +195,15 @@ export function ScoreView() {
             <div className="flex items-center justify-center gap-2">
               <h2 className="text-2xl font-bold text-center flex items-center gap-2">
                 {(() => {
-                  const rgb = hexToRGB(userData.username_color);
+                  const rgb = hexToRGB(scoreData.usernameColor);
                   return (
-                    <UsernameBadge 
-                      username={userData.username}
-                      color={userData.username_color}
+                    <UsernameBadge
+                      username={scoreData.username}
+                      color={scoreData.usernameColor}
                       className="text-sm [text-shadow:0_0_10px_rgba(var(--badge-glow-r),var(--badge-glow-g),var(--badge-glow-b),0.3),0_0_20px_rgba(var(--badge-glow-r),var(--badge-glow-g),var(--badge-glow-b),0.2)] [box-shadow:0_0_10px_rgba(var(--badge-glow-r),var(--badge-glow-g),var(--badge-glow-b),0.3),0_0_20px_rgba(var(--badge-glow-r),var(--badge-glow-g),var(--badge-glow-b),0.2)]"
-                      style={{ 
-                        borderColor: userData.username_color,
-                        color: userData.username_color,
+                      style={{
+                        borderColor: scoreData.usernameColor,
+                        color: scoreData.usernameColor,
                         '--badge-glow-r': rgb.r,
                         '--badge-glow-g': rgb.g,
                         '--badge-glow-b': rgb.b,
@@ -254,11 +211,11 @@ export function ScoreView() {
                     />
                   );
                 })()}
-                <span className="text-glow">Named {userData.name_count} in{' '}
-                <span className="font-['Chonburi']">{formatTime(userData.score)}</span></span>
+                <span className="text-glow">Named {scoreData.nameCount} in{' '}
+                  <span className="font-['Chonburi']">{formatTime(scoreData.score)}</span></span>
               </h2>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="icon"
                 onClick={handleShare}
                 className="rounded-full bg-transparent hover:bg-accent/10 border-0 shadow-none -mt-3"
@@ -267,11 +224,11 @@ export function ScoreView() {
               </Button>
             </div>
 
-            <motion.div 
+            <motion.div
               className="grid grid-cols-2 gap-4"
               variants={gridVariants}
             >
-              {userData.completed_names.map((name: string, index: number) => (
+              {scoreData.completedNames.map((name: string, index: number) => (
                 <motion.div
                   key={index}
                   variants={itemVariants}
@@ -284,9 +241,9 @@ export function ScoreView() {
                     }}
                     index={index}
                     isGameActive={false}
-                    inputRef={() => {}}
-                    onInputChange={() => {}}
-                    onKeyDown={() => {}}
+                    inputRef={() => { }}
+                    onInputChange={() => { }}
+                    onKeyDown={() => { }}
                   />
                 </motion.div>
               ))}
@@ -296,4 +253,4 @@ export function ScoreView() {
       </AnimatePresence>
     </Card>
   );
-} 
+}
