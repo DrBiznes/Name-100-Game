@@ -21,16 +21,12 @@ export const getStats = query({
             throw new Error("Invalid game mode. Must be 20, 50, or 100");
         }
 
-        // Get all scores (optionally filtered by game mode)
-        let scoresQuery = ctx.db.query("scores");
-
-        if (args.gameMode !== undefined) {
-            scoresQuery = scoresQuery.withIndex("by_nameCount", (q) =>
-                q.eq("nameCount", args.gameMode!)
-            );
-        }
-
-        const scores = await scoresQuery.collect();
+        // Get scores filtered by game mode if provided, otherwise get all
+        const scores = await (args.gameMode !== undefined
+            ? ctx.db.query("scores")
+                .withIndex("by_nameCount", (q) => q.eq("nameCount", args.gameMode!))
+                .collect()
+            : ctx.db.query("scores").collect());
 
         // Create a map to store normalized name counts
         const nameCountMap = new Map<

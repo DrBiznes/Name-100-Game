@@ -2,7 +2,6 @@ import { useState, useRef } from 'react';
 import { Card } from './ui/card';
 import { Input } from './ui/input';
 import { NameCard } from './NameCard';
-import { type NameStats } from '@/services/api';
 import { Separator } from './ui/separator';
 import { DataTable } from './ui/data-table';
 import { ColumnDef } from '@tanstack/react-table';
@@ -10,8 +9,14 @@ import nameDatabase from '@/lib/womendatabase.json';
 import { Skeleton } from './ui/skeleton';
 import { motion } from 'framer-motion';
 
+export interface NameStat {
+  name: string;
+  count: number;
+  variants: string[];
+}
+
 interface NameListProps {
-  stats: NameStats[];
+  stats: NameStat[];
   isLoading: boolean;
 }
 
@@ -47,11 +52,11 @@ const capitalizeNameParts = (name: string) => {
 // Helper function to find proper name from database
 const findProperName = (name: string): string => {
   const normalizedInputName = normalizeNameForComparison(name);
-  
-  const databaseMatch = nameDatabase.names.find(dbName => 
+
+  const databaseMatch = nameDatabase.names.find(dbName =>
     normalizeNameForComparison(dbName) === normalizedInputName
   );
-  
+
   return databaseMatch || capitalizeNameParts(name);
 };
 
@@ -72,9 +77,8 @@ function NameListSkeleton() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2, delay: i * 0.05 }}
-            className={`flex items-center space-x-8 p-4 ${
-              i % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'
-            }`}
+            className={`flex items-center space-x-8 p-4 ${i % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'
+              }`}
           >
             <Skeleton className="h-4 w-36 bg-muted" /> {/* Name */}
             <Skeleton className="h-4 w-20 bg-muted" /> {/* Frequency */}
@@ -92,9 +96,9 @@ export function NameList({ stats, isLoading }: NameListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const selectedNameRef = useRef<HTMLTableRowElement>(null);
 
-  const filteredStats = stats.filter(stat => 
+  const filteredStats = stats.filter(stat =>
     stat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    stat.variants.some(v => v.toLowerCase().includes(searchTerm.toLowerCase()))
+    stat.variants.some((v: string) => v.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const totalPages = Math.ceil(filteredStats.length / ITEMS_PER_PAGE);
@@ -103,7 +107,7 @@ export function NameList({ stats, isLoading }: NameListProps) {
     currentPage * ITEMS_PER_PAGE
   );
 
-  const columns: ColumnDef<NameStats>[] = [
+  const columns: ColumnDef<NameStat>[] = [
     {
       accessorKey: "name",
       header: "Name",
@@ -129,9 +133,9 @@ export function NameList({ stats, isLoading }: NameListProps) {
       header: "Misspellings",
       cell: ({ row }) => (
         <div className="text-muted-foreground">
-          {row.original.variants.length > 1 
-            ? row.original.variants.slice(0, 2).join(', ') + 
-              (row.original.variants.length > 2 ? '...' : '')
+          {row.original.variants.length > 1
+            ? row.original.variants.slice(0, 2).join(', ') +
+            (row.original.variants.length > 2 ? '...' : '')
             : '-'
           }
         </div>
@@ -175,19 +179,17 @@ export function NameList({ stats, isLoading }: NameListProps) {
             pageCount={totalPages}
             currentPage={currentPage}
             onPageChange={setCurrentPage}
-            onRowClick={(row: NameStats) => {
+            onRowClick={(row: NameStat) => {
               setSelectedName(row.name);
               if (selectedNameRef.current) {
                 selectedNameRef.current.click();
               }
             }}
-            rowProps={(row: NameStats, index: number) => ({
+            rowProps={(row: NameStat, index: number) => ({
               ref: selectedName === row.name ? selectedNameRef : undefined,
-              className: `cursor-pointer border-border transition-colors ${
-                index % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'
-              } hover:bg-accent hover:bg-opacity-20 hover:text-accent-foreground ${
-                selectedName === row.name ? 'bg-accent/20' : ''
-              }`
+              className: `cursor-pointer border-border transition-colors ${index % 2 === 0 ? 'bg-[var(--table-row-light)]' : 'bg-[var(--table-row-dark)]'
+                } hover:bg-accent hover:bg-opacity-20 hover:text-accent-foreground ${selectedName === row.name ? 'bg-accent/20' : ''
+                }`
             })}
           />
 
